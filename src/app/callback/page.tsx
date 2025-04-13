@@ -16,6 +16,7 @@ export default function Callback() {
                 });
                 if (!res.ok) {
                     alert('authentication failed A');
+                    return "";
                 }
 
                 const data: { token: string } = await res.json();
@@ -24,7 +25,7 @@ export default function Callback() {
             };
 
             getAccessToken(session).then((token) => {
-                if (!token) {
+                if (token == null) {
                     alert('authentication failed B');
                     return;
                 }
