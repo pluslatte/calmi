@@ -1,27 +1,16 @@
 'use client';
 
 import { Button, Textarea } from "@mantine/core";
-import { APIClient } from "misskey-js/api.js";
 import { useState } from "react";
+import { useApiClient } from "../MisskeyApiClientContext";
 
 export default function Dashboard() {
     const [note, setNote] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const misskeyApiClient = useApiClient();
 
     const handleCreateNote = async () => {
-        const token = localStorage.getItem('misskey_token');
-
-        if (!token) {
-            alert('you are not logged-in');
-            return;
-        }
-
         setIsLoading(true);
-
-        const misskeyApiClient = new APIClient({
-            origin: 'https://virtualkemomimi.net',
-            credential: token,
-        });
 
         misskeyApiClient.request('notes/create', {
             visibility: "home",

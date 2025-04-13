@@ -14,7 +14,7 @@ export default function Login() {
         const misskeyHost = 'https://virtualkemomimi.net';
         const appName = 'calmi';
         const callbackUrl = 'http://localhost:3000/callback';
-        const permissions = 'read:notes,write:notes';
+        const permissions = 'read:account,write:notes,read:channels,read:notifications,write:reactions';
 
         const authUrl = `${misskeyHost}/miauth/${sessionId}?name=${appName}&callback=${callbackUrl}&permission=${permissions}`;
 
