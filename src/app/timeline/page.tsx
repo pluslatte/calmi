@@ -10,11 +10,19 @@ export default function Timeline() {
     const misskeyApiClient = useApiClient();
 
     useEffect(() => {
-        const timeline = new TimelineFeed('global', misskeyApiClient, () => { console.log('callback'); setNotes(timeline.notes); console.log(notes.length); });
+        const timeline = new TimelineFeed('global', misskeyApiClient);
 
+        const callback = () => {
+            console.log('callback');
+            setNotes(timeline.notes.value);
+            console.log(notes.length);
+        }
+
+        timeline.notes.subscribe(callback);
         timeline.initFeed();
 
         return () => {
+            timeline.notes.unsubscribe(callback);
             timeline.stream?.close();
         };
     }, []);

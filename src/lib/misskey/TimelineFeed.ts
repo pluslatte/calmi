@@ -3,28 +3,17 @@
 import { api, note, Stream } from "misskey-js";
 import { Note } from "misskey-js/entities.js";
 import { Connection } from "misskey-js/streaming.js";
+import { Observable } from "../Observable";
 
 export class TimelineFeed {
-    private _notes: Note[] = [];
-    onNotesChange: () => void;
+    notes: Observable<Note[]>;
     misskeyApiClient: api.APIClient;
     stream: Stream;
     doAutoUpdateFeed = false;
     initLoad = false;
 
-    get notes(): Note[] {
-        return this._notes;
-    }
-
-    set notes(newValue: Note[]) {
-        if (this._notes !== newValue) {
-            this._notes = newValue;
-            this.onNotesChange();
-        }
-    }
-
-    constructor(private timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient, onNotesChange: () => void) {
-        this.onNotesChange = onNotesChange;
+    constructor(private timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
+        this.notes = new Observable<Note[]>([]);
         this.misskeyApiClient = misskeyApiClient;
         if (misskeyApiClient.credential == null) {
             throw Error('misskeyApiClient for TimelineFeed must have credential');
@@ -34,7 +23,7 @@ export class TimelineFeed {
 
     initFeed() {
         console.log('initFeed');
-        this.notes = [];
+        this.notes.value = [];
         this.initLoad = true;
         this.loadMore();
         this.setChannel();
@@ -42,11 +31,11 @@ export class TimelineFeed {
 
     addNote(note: Note) {
         console.log(`addNote: ${note.id}`);
-        const newNotes = [note, ...this.notes];
-        this.notes = newNotes;
+        const newNotes = [note, ...this.notes.value];
+        this.notes.value = newNotes;
         this.stream.send('subNote', { id: note.id });
-        if (this.notes.length > 50) {
-            const oldNote = this.notes.pop();
+        if (this.notes.value.length > 50) {
+            const oldNote = this.notes.value.pop();
             if (oldNote) {
                 this.stream.send('unsubNote', { id: oldNote.id });
             }
@@ -87,7 +76,7 @@ export class TimelineFeed {
     }
 
     loadMore() {
-        const lastNoteId = this.notes[this.notes.length - 1]?.id;
+        const lastNoteId = this.notes.value[this.notes.value.length - 1]?.id;
         const limit = 20;
 
         switch (this.timelineType) {
