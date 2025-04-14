@@ -28,9 +28,9 @@ export default function MisskeyNote({ note }: { note: Note }) {
                             {note.user.host ? "@" + note.user.host : ''}
                         </Text>
                     </Flex>
-                    <div style={{ flexShrink: 0 }}>
+                    <Box style={{ flexShrink: 0 }}>
                         <AutoRefreshTimestamp iso={note.createdAt} />
-                    </div>
+                    </Box>
                 </Flex>
                 <Text>{note.text}</Text>
             </Box>
