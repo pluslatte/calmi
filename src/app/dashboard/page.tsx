@@ -33,11 +33,9 @@ export default function Dashboard() {
                     </Button>
                 </Grid.Col>
                 <Grid.Col span="auto">
-                    <ScrollArea.Autosize mah="98vh">
-                        <Box pr="md">
-                            <MisskeyTimelineContainer />
-                        </Box>
-                    </ScrollArea.Autosize>
+                    <Box h="98vh">
+                        <MisskeyTimelineContainer />
+                    </Box>
                 </Grid.Col>
             </Grid>
         </Container>
