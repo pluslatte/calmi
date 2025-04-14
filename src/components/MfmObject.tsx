@@ -50,13 +50,13 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
             case "unicodeEmoji":
                 return (
                     <Text span>{node.props.emoji}</Text>
-                )
+                );
             case "mention":
                 return (
                     <Text span c="blue">
                         {`@${node.props.username}`}
                     </Text>
-                )
+                );
             case "hashtag":
                 return (
                     <Text span c="blue">
@@ -78,7 +78,7 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                             </React.Fragment>
                         ))}
                     </Anchor>
-                )
+                );
             case "quote":
                 return (
                     <Blockquote>
@@ -98,7 +98,7 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                     <React.Fragment key={index}>
                         {nodeComponent(child)}
                     </React.Fragment>
-                ))
+                ));
             case "blockCode":
             case "mathBlock":
             case "center":

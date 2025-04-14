@@ -8,7 +8,7 @@ import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Divider } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 
-export default function Timeline() {
+export default function MisskeyTimeline() {
     const [notes, setNotes] = useState<Note[]>([]);
     const misskeyApiClient = useMisskeyApiClient();
 
@@ -22,10 +22,10 @@ export default function Timeline() {
         timeline.notes.subscribe(callback);
         timeline.initFeed();
 
-        return () => {
+        return (() => {
             timeline.notes.unsubscribe(callback);
             timeline.stream?.close();
-        };
+        });
     }, []);
 
     return (
