@@ -1,5 +1,3 @@
-'use client'
-
 import { Text } from "@mantine/core";
 import { formatDistanceStrict, parseISO } from "date-fns";
 import { useEffect, useState } from "react";

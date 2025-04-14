@@ -4,29 +4,10 @@ import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import { Anchor, Blockquote, Code, Text } from "@mantine/core";
 import * as mfm from 'mfm-js';
 import React, { ReactElement } from "react";
+import EmojiNode from "./EmojiNode";
 
 export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[]; assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
     const misskeyApiClient = useMisskeyApiClient();
-
-    const getEmojiData = async (emojiCode: string, host: string | null): Promise<{ url: string; alt: string }> => {
-        if (assets.emojis) {
-            const url = assets.emojis[emojiCode];
-            if (url) {
-                return { url: url, alt: emojiCode };
-            }
-        }
-        if (!host) {
-            // if host is local
-            const got = await misskeyApiClient.request('emoji', { name: emojiCode });
-            return { url: got.url, alt: got.name };
-        }
-        // if host is remote
-        const got = await fetch(`https://${host}/api/emoji?name=${emojiCode}`, {
-            method: 'GET'
-        });
-        const json: { url: string; name: string; } = await got.json();
-        return { url: json.url, alt: json.name };
-    }
 
     const nodeComponent = (node: mfm.MfmNode): ReactElement | ReactElement[] => {
         switch (node.type) {
@@ -64,9 +45,7 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                 );
             case "emojiCode":
                 return (
-                    <Text span>
-                        {`:${node.props.name}`}
-                    </Text>
+                    <EmojiNode name={node.props.name} assets={assets} />
                 );
             case "unicodeEmoji":
                 return (
@@ -138,5 +117,5 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
         <React.Fragment key={index}>
             {nodeComponent(node)}
         </React.Fragment>
-    )))
+    )));
 }

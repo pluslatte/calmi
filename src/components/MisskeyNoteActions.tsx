@@ -1,5 +1,3 @@
-'use client';
-
 import { Group, Box, ActionIcon, useMantineColorScheme } from "@mantine/core";
 import { IconArrowBackUp, IconRepeat, IconHeart, IconDots } from "@tabler/icons-react";
 
