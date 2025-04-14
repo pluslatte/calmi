@@ -1,7 +1,9 @@
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
-import { Avatar, Box, Container, Flex, Grid, Group, Text } from "@mantine/core";
+import { Avatar, Box, Flex, Text } from "@mantine/core";
 import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
+import MfmObject from "./MfmObject";
+import * as mfm from 'mfm-js';
 
 export default function MisskeyNote({ note }: { note: Note }) {
     const misskeyApiClient = useMisskeyApiClient();
@@ -32,7 +34,7 @@ export default function MisskeyNote({ note }: { note: Note }) {
                         <AutoRefreshTimestamp iso={note.createdAt} />
                     </Box>
                 </Flex>
-                <Text>{note.text}</Text>
+                {note.text ? <MfmObject mfmNodes={mfm.parse(note.text)} assets={{ host: note.user.host, emojis: note.user.emojis }} /> : <></>}
             </Box>
         </Flex>
     );
