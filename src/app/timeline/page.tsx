@@ -17,9 +17,7 @@ export default function Timeline() {
         const timeline = new TimelineFeed('global', misskeyApiClient);
 
         const callback = () => {
-            console.log('callback');
             setNotes(timeline.notes.value);
-            console.log(notes.length);
         }
 
         timeline.notes.subscribe(callback);

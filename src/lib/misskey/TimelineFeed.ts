@@ -30,7 +30,6 @@ export class TimelineFeed {
     }
 
     addNote(note: Note) {
-        console.log(`addNote: ${note.id}`);
         const newNotes = [note, ...this.notes.value];
         this.notes.value = newNotes;
         this.stream.send('subNote', { id: note.id });
