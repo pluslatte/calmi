@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Container, Grid, Textarea } from "@mantine/core";
+import { Box, Button, Container, Grid, ScrollArea, Textarea } from "@mantine/core";
 import { useState } from "react";
 import { useMisskeyApiClient } from "../MisskeyApiClientContext";
 import Timeline from "@/components/MisskeyTimeline";
@@ -23,7 +23,7 @@ export default function Dashboard() {
     }
 
     return (
-        <Container>
+        <Container p="4">
             <Grid>
                 <Grid.Col span="content">
                     <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
@@ -32,7 +32,11 @@ export default function Dashboard() {
                     </Button>
                 </Grid.Col>
                 <Grid.Col span="auto">
-                    <Timeline />
+                    <ScrollArea.Autosize mah="98vh">
+                        <Box pr="md">
+                            <Timeline />
+                        </Box>
+                    </ScrollArea.Autosize>
                 </Grid.Col>
             </Grid>
         </Container>
