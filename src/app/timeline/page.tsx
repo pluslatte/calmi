@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TimelineFeed } from '@/lib/misskey/TimelineFeed';
 import { Note } from "misskey-js/entities.js";
 import { useMisskeyApiClient } from "../MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
-import { ActionIcon, Box, Container, Divider, Grid, Group, useMantineColorScheme, useMantineTheme } from "@mantine/core";
-import { IconArrowBackUp, IconDots, IconHeart, IconMessageReply, IconMoodSmile, IconRepeat } from "@tabler/icons-react";
+import { Box, Container, Divider } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 
 export default function Timeline() {
@@ -30,7 +29,7 @@ export default function Timeline() {
     }, []);
 
     return (
-        <Container>
+        <React.Fragment>
             {notes.map(note => (
                 <Box key={note.id}>
                     <MisskeyNote note={note} />
@@ -38,6 +37,6 @@ export default function Timeline() {
                     <Divider my="sm" />
                 </Box>
             ))}
-        </Container>
+        </React.Fragment>
     );
 }

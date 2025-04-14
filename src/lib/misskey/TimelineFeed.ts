@@ -40,6 +40,19 @@ export class TimelineFeed {
             }
         }
     }
+
+    addNoteRev(note: Note) {
+        const newNotes = [...this.notes.value, note];
+        this.notes.value = newNotes;
+        this.stream.send('subNote', { id: note.id });
+        if (this.notes.value.length > 50) {
+            const oldNote = this.notes.value.pop();
+            if (oldNote) {
+                this.stream.send('unsubNote', { id: oldNote.id });
+            }
+        }
+    }
+
     setChannel() {
         let channel: Connection<{
             params: {
@@ -83,41 +96,77 @@ export class TimelineFeed {
                 this.misskeyApiClient.request('notes/timeline', {
                     limit,
                     untilId: lastNoteId,
-                }).then((notes) => {
-                    notes.forEach((note) => {
-                        this.addNote(note);
-                    })
-                });
+                }).then(
+                    this.initLoad ?
+                        (notes) => {
+                            notes.forEach((note) => {
+                                this.addNoteRev(note);
+                            })
+                        }
+                        :
+                        (notes) => {
+                            notes.forEach((note) => {
+                                this.addNote(note);
+                            })
+                        }
+                );
                 break;
             case 'social':
                 this.misskeyApiClient.request('notes/hybrid-timeline', {
                     limit,
                     untilId: lastNoteId,
-                }).then((notes) => {
-                    notes.forEach((note) => {
-                        this.addNote(note);
-                    })
-                });
+                }).then(
+                    this.initLoad ?
+                        (notes) => {
+                            notes.forEach((note) => {
+                                this.addNoteRev(note);
+                            })
+                        }
+                        :
+                        (notes) => {
+                            notes.forEach((note) => {
+                                this.addNote(note);
+                            })
+                        }
+                );
                 break;
             case 'local':
                 this.misskeyApiClient.request('notes/local-timeline', {
                     limit,
                     untilId: lastNoteId,
-                }).then((notes) => {
-                    notes.forEach((note) => {
-                        this.addNote(note);
-                    })
-                });
+                }).then(
+                    this.initLoad ?
+                        (notes) => {
+                            notes.forEach((note) => {
+                                this.addNoteRev(note);
+                            })
+                        }
+                        :
+                        (notes) => {
+                            notes.forEach((note) => {
+                                this.addNote(note);
+                            })
+                        }
+                );
                 break;
             case 'global':
                 this.misskeyApiClient.request('notes/global-timeline', {
                     limit,
                     untilId: lastNoteId,
-                }).then((notes) => {
-                    notes.forEach((note) => {
-                        this.addNote(note);
-                    })
-                });
+                }).then(
+                    this.initLoad ?
+                        (notes) => {
+                            notes.forEach((note) => {
+                                this.addNoteRev(note);
+                            })
+                        }
+                        :
+                        (notes) => {
+                            notes.forEach((note) => {
+                                this.addNote(note);
+                            })
+                        }
+                );
                 break;
         }
 
