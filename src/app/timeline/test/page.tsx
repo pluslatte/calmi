@@ -12,7 +12,7 @@ export default function Test() {
 
     useEffect(() => {
         misskeyApiClient.request('notes/show', {
-            noteId: 'a6j845r6eg'
+            noteId: 'a6helkshsr'
         }).then((note) => { setNote(note) });
     }, [])
 

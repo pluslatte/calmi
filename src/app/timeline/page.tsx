@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { TimelineFeed } from '@/lib/misskey/TimelineFeed';
 import { Note } from "misskey-js/entities.js";
 import { useMisskeyApiClient } from "../MisskeyApiClientContext";
+import MisskeyNote from "@/components/MisskeyNote";
 
 export default function Timeline() {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -31,8 +32,7 @@ export default function Timeline() {
         <div>
             {notes.map(note => (
                 <div key={note.id}>
-                    <p>{note.user.name}</p>
-                    <p>{note.text}</p>
+                    <MisskeyNote note={note} />
                 </div>
             ))}
         </div>
