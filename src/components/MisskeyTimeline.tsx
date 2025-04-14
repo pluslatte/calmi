@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { TimelineFeed } from '@/lib/misskey/TimelineFeed';
 import { Note } from "misskey-js/entities.js";
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
@@ -8,7 +8,7 @@ import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Divider } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 
-export default function MisskeyTimeline() {
+function MisskeyTimelineImpl() {
     const [notes, setNotes] = useState<Note[]>([]);
     const misskeyApiClient = useMisskeyApiClient();
 
@@ -40,3 +40,6 @@ export default function MisskeyTimeline() {
         </React.Fragment>
     );
 }
+
+const MisskeyTimeline = memo(MisskeyTimelineImpl);
+export default MisskeyTimeline;
