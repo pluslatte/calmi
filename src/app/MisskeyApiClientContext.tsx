@@ -5,7 +5,7 @@ import React, { createContext, useContext } from "react";
 
 export const MisskeyApiClientContext = createContext<api.APIClient | null>(null);
 
-export function useApiClient(): api.APIClient {
+export function useMisskeyApiClient(): api.APIClient {
     const context = useContext(MisskeyApiClientContext);
 
     if (!context) {

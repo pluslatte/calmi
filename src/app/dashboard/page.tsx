@@ -2,12 +2,12 @@
 
 import { Button, Textarea } from "@mantine/core";
 import { useState } from "react";
-import { useApiClient } from "../MisskeyApiClientContext";
+import { useMisskeyApiClient } from "../MisskeyApiClientContext";
 
 export default function Dashboard() {
     const [note, setNote] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const misskeyApiClient = useApiClient();
+    const misskeyApiClient = useMisskeyApiClient();
 
     const handleCreateNote = async () => {
         setIsLoading(true);

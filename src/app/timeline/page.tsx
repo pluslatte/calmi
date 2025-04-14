@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { TimelineFeed } from '@/lib/misskey/TimelineFeed';
 import { Note } from "misskey-js/entities.js";
-import { useApiClient } from "../MisskeyApiClientContext";
+import { useMisskeyApiClient } from "../MisskeyApiClientContext";
 
 export default function Timeline() {
     const [notes, setNotes] = useState<Note[]>([]);
-    const misskeyApiClient = useApiClient();
+    const misskeyApiClient = useMisskeyApiClient();
 
     useEffect(() => {
         const timeline = new TimelineFeed('global', misskeyApiClient);
