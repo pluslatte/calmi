@@ -1,6 +1,6 @@
 'use client';
 
-import { api, note, Stream } from "misskey-js";
+import { api, Stream } from "misskey-js";
 import { Note } from "misskey-js/entities.js";
 import { Connection } from "misskey-js/streaming.js";
 import { Observable } from "../Observable";
