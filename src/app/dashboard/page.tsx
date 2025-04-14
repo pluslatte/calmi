@@ -4,6 +4,7 @@ import { Box, Button, Container, Grid, ScrollArea, Textarea } from "@mantine/cor
 import { useState } from "react";
 import { useMisskeyApiClient } from "../MisskeyApiClientContext";
 import MisskeyTimeline from "@/components/MisskeyTimeline";
+import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
 
 export default function Dashboard() {
     const [note, setNote] = useState('');
@@ -34,7 +35,7 @@ export default function Dashboard() {
                 <Grid.Col span="auto">
                     <ScrollArea.Autosize mah="98vh">
                         <Box pr="md">
-                            <MisskeyTimeline />
+                            <MisskeyTimelineContainer />
                         </Box>
                     </ScrollArea.Autosize>
                 </Grid.Col>

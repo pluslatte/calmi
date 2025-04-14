@@ -8,12 +8,14 @@ import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Divider } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 
-function MisskeyTimelineImpl() {
+export type TimelineType = 'home' | 'social' | 'local' | 'global';
+
+const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType }: { timelineType: TimelineType }) {
     const [notes, setNotes] = useState<Note[]>([]);
     const misskeyApiClient = useMisskeyApiClient();
 
     useEffect(() => {
-        const timeline = new TimelineFeed('global', misskeyApiClient);
+        const timeline = new TimelineFeed(timelineType, misskeyApiClient);
 
         const callback = () => {
             setNotes(timeline.notes.value);
@@ -26,7 +28,7 @@ function MisskeyTimelineImpl() {
             timeline.notes.unsubscribe(callback);
             timeline.stream?.close();
         });
-    }, []);
+    }, [timelineType]);
 
     return (
         <React.Fragment>
@@ -39,7 +41,5 @@ function MisskeyTimelineImpl() {
             ))}
         </React.Fragment>
     );
-}
-
-const MisskeyTimeline = memo(MisskeyTimelineImpl);
+});
 export default MisskeyTimeline;
