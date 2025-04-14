@@ -5,6 +5,7 @@ import { TimelineFeed } from '@/lib/misskey/TimelineFeed';
 import { Note } from "misskey-js/entities.js";
 import { useMisskeyApiClient } from "../MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
+import { Container } from "@mantine/core";
 
 export default function Timeline() {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -29,12 +30,12 @@ export default function Timeline() {
     }, []);
 
     return (
-        <div>
+        <Container>
             {notes.map(note => (
                 <div key={note.id}>
                     <MisskeyNote note={note} />
                 </div>
             ))}
-        </div>
+        </Container>
     );
 }
