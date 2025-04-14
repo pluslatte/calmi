@@ -5,7 +5,8 @@ import { TimelineFeed } from '@/lib/misskey/TimelineFeed';
 import { Note } from "misskey-js/entities.js";
 import { useMisskeyApiClient } from "../MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
-import { Box, Container, Divider } from "@mantine/core";
+import { ActionIcon, Box, Container, Divider, Grid, Group } from "@mantine/core";
+import { IconArrowBackUp, IconHeart, IconMessageReply, IconMoodSmile, IconRepeat } from "@tabler/icons-react";
 
 export default function Timeline() {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -34,6 +35,18 @@ export default function Timeline() {
             {notes.map(note => (
                 <Box key={note.id}>
                     <MisskeyNote note={note} />
+                    <Group gap="xl">
+                        <Box w="32px" />
+                        <ActionIcon variant="subtle" aria-label="reply">
+                            <IconArrowBackUp size="70%" />
+                        </ActionIcon>
+                        <ActionIcon variant="subtle" aria-label="renote">
+                            <IconRepeat size="70%" />
+                        </ActionIcon>
+                        <ActionIcon variant="subtle" aria-label="reaction">
+                            <IconHeart size="70%" />
+                        </ActionIcon>
+                    </Group>
                     <Divider my="sm" />
                 </Box>
             ))}
