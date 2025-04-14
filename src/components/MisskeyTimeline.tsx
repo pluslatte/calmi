@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { TimelineFeed } from '@/lib/misskey/TimelineFeed';
 import { Note } from "misskey-js/entities.js";
-import { useMisskeyApiClient } from "../MisskeyApiClientContext";
+import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
-import { Box, Container, Divider } from "@mantine/core";
+import { Box, Divider } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 
 export default function Timeline() {
