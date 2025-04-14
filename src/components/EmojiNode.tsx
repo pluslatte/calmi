@@ -46,7 +46,7 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
         <img
             src={emojiData.url}
             alt={emojiData.alt}
-            style={{ width: "1em", height: "1em", verticalAlign: "middle" }}
+            style={{ height: "1em", verticalAlign: "middle" }}
         />
     );
 }
