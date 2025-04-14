@@ -1,5 +1,5 @@
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
-import { Image, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 export default function EmojiNode({ name, assets }: { name: string, assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
