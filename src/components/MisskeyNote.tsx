@@ -4,8 +4,10 @@ import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
 import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
+import { memo } from "react";
 
-export default function MisskeyNote({ note }: { note: Note }) {
+
+const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
     const misskeyApiClient = useMisskeyApiClient();
 
     return (
@@ -38,4 +40,5 @@ export default function MisskeyNote({ note }: { note: Note }) {
             </Box>
         </Flex>
     );
-}
+});
+export default MisskeyNote;
