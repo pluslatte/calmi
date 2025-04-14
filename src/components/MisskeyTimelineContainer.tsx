@@ -9,7 +9,11 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer() {
 
     return (
         <Flex direction="column" h="100%">
-            <Tabs value={timelineType} onChange={(value) => setTimelineType(value as TimelineType)}>
+            <Tabs
+                value={timelineType}
+                variant="default"
+                onChange={(value) => setTimelineType(value as TimelineType)}
+            >
                 <Tabs.List justify="center" px="md" pt="xs">
                     <Tooltip label="Home">
                         <Tabs.Tab value="home" leftSection={<IconHome size={18} />}></Tabs.Tab>
