@@ -13,6 +13,7 @@
     "@mantine/hooks": "^7.17.4",
     "@mantine/notifications": "^7.17.4",
     "@tabler/icons-react": "^3.31.0",
+    "date-fns": "^4.1.0",
     "misskey-js": "^2025.4.0",
     "next": "15.3.0",
     "react": "^19.0.0",
