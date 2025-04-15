@@ -11,6 +11,9 @@ export function useTimelineData(timelineType: TimelineType, apiClient: api.APICl
 
     const streamRef = useRef<TimelineStream | null>(null);
 
+    // APIクライアントが変更されたときだけ初期化するように修正
+    const apiClientRef = useRef(apiClient);
+
     // 初期データ読み込み関数
     const loadInitial = async () => {
         if (!apiClient || !apiClient.credential) return;
