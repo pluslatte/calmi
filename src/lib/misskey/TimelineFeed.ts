@@ -55,7 +55,7 @@ export class TimelineFeed {
 
     addNoteRev(note: Note) {
         if (this.notes.value.some(n => n.id === note.id)) {
-            console.warn("duplicate note id");
+            console.warn("duplicate note id: " + note.id);
             return;
         }
 
@@ -113,6 +113,8 @@ export class TimelineFeed {
         const len = this.notes.value.length;
         const lastNoteId = this.notes.value[len - 1]?.id;
         const limit = 20;
+
+        console.log(`loadmore! len: ${len} lastNoteId: ${lastNoteId}`);
 
         switch (this.timelineType) {
             case 'home':
@@ -202,18 +204,22 @@ export class TimelineFeed {
 
     flushBufferedNotes() {
         if (this.newNotesBuffer.length > 0) {
-            // Merge the buffer.
-            this.notes.value = [...this.newNotesBuffer, ...this.notes.value];
-            this.newNotesBuffer.forEach(n => this.stream.send('subNote', { id: n.id }));
-            this.newNotesBuffer = [];
+            // Unsubscribe old notes.
+            this.notes.value.forEach(n => {
+                console.log("unsubscribe note: " + n.id);
+                this.stream.send('unsubNote', { id: n.id });
+            });
 
-            // Cutoff old notes.
-            while (this.notes.value.length > 50) {
-                const removed = this.notes.value.pop();
-                if (removed) {
-                    this.stream.send('unsubNote', { id: removed.id });
-                }
+            // Replace this.notes.value with the buffer.
+            this.notes.value = [...this.newNotesBuffer];
+            this.newNotesBuffer.forEach(n => this.stream.send('subNote', { id: n.id }));
+            if (this.newNotesBuffer.length < 10) {
+                // If it was not enough to fill the feed, load more.
+                // TODO: 上へ戻る が押されたとき、一瞬ノートが消えて loadmore が誘発されてダブっているのを直す（対策してあるので影響はないが、汚い）
+                this.loadMore();
             }
+
+            this.newNotesBuffer = [];
         }
     }
 
