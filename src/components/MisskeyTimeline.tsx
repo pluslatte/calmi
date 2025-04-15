@@ -11,11 +11,16 @@ import { IconArrowUp } from "@tabler/icons-react";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
-const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollAreaRef, }: { timelineType: TimelineType; scrollAreaRef: React.RefObject<HTMLDivElement | null>; }) {
+const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollAreaRef, containerRef }: {
+    timelineType: TimelineType;
+    scrollAreaRef: React.RefObject<HTMLDivElement | null>;
+    containerRef: React.RefObject<HTMLDivElement | null>;
+}) {
     const [notes, setNotes] = useState<Note[]>([]);
     const [loadingMore, setLoadingMore] = useState(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
     const timelineRef = useRef<TimelineFeed>(null);
+    const [rightOffset, setRightOffset] = useState<number | null>(null);
     const [showScrollToTop, setShowScrollToTop] = useState(false);
     const misskeyApiClient = useMisskeyApiClient();
     const isReturningToTop = useRef(false);
@@ -109,8 +114,21 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         };
     }, [loadingMore])
 
+    useEffect(() => {
+        const updateOffset = () => {
+            if (!containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const offset = window.innerWidth - rect.right;
+            setRightOffset(offset + 16);
+        };
+
+        updateOffset();
+        window.addEventListener('resize', updateOffset);
+        return () => window.removeEventListener('resize', updateOffset);
+    }, [containerRef])
+
     return (
-        <React.Fragment>
+        <Box pos="relative">
             {notes.map(note => (
                 <Box key={note.id}>
                     <MisskeyNote note={note} />
@@ -119,21 +137,31 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
                 </Box>
             ))}
             <div ref={sentinelRef} style={{ height: 1 }} />
-            <Affix position={{ top: 20, left: "50%" }}>
-                <Transition mounted={showScrollToTop} transition="slide-up" duration={200} timingFunction="ease">
-                    {(styles) => (
-                        <Button
-                            leftSection={<IconArrowUp size={16} />}
-                            style={styles}
-                            onClick={handleScrollToTop}
-                            variant="light"
-                        >
-                            上へ戻る
-                        </Button>
-                    )}
-                </Transition>
-            </Affix>
-        </React.Fragment>
+
+            {rightOffset !== null && (
+                <Box
+                    style={{
+                        position: 'fixed',
+                        bottom: 24,
+                        right: rightOffset,
+                        zIndex: 1000,
+                    }}
+                >
+                    <Transition mounted={showScrollToTop} transition="slide-up" duration={200} timingFunction="ease">
+                        {(styles) => (
+                            <Button
+                                leftSection={<IconArrowUp size={16} />}
+                                style={styles}
+                                onClick={handleScrollToTop}
+                                variant="light"
+                            >
+                                上へ戻る
+                            </Button>
+                        )}
+                    </Transition>
+                </Box>
+            )}
+        </Box>
     );
 });
 export default MisskeyTimeline;
