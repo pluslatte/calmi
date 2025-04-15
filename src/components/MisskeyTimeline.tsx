@@ -13,16 +13,11 @@ export type TimelineType = 'home' | 'social' | 'local' | 'global';
 const MisskeyTimeline = memo(function MisskeyTimeline({
     timelineType,
     scrollAreaRef,
-    containerRef,
-    onRegisterFunctions
+    containerRef
 }: {
     timelineType: TimelineType;
     scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     containerRef: React.RefObject<HTMLDivElement | null>;
-    onRegisterFunctions?: (
-        disableBufferingAndFlush: () => void,
-        setAutoUpdateFeed: (enable: boolean) => void
-    ) => void;
 }) {
     const { service } = useMisskeyService();
     if (!service) {
@@ -53,12 +48,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         setAutoUpdateFeed(true);
         console.log("sctoll to top completed, auto update re-enabled");
     });
-
-    useEffect(() => {
-        if (onRegisterFunctions) {
-            onRegisterFunctions(disableBufferingAndFlush, setAutoUpdateFeed);
-        }
-    }, [disableBufferingAndFlush, setAutoUpdateFeed, onRegisterFunctions]);
 
     useEffect(() => {
         if (!scrollAreaRef.current) return;
