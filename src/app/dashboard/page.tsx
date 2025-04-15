@@ -1,9 +1,8 @@
 'use client';
 
-import { Box, Button, Container, Grid, ScrollArea, Textarea } from "@mantine/core";
+import { Box, Button, Container, Grid, Textarea } from "@mantine/core";
 import { useState } from "react";
 import { useMisskeyApiClient } from "../MisskeyApiClientContext";
-import MisskeyTimeline from "@/components/MisskeyTimeline";
 import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
 
 export default function Dashboard() {
