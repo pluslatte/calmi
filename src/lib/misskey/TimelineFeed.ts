@@ -30,6 +30,11 @@ export class TimelineFeed {
     }
 
     addNote(note: Note) {
+        if (this.notes.value.some(n => n.id === note.id)) {
+            console.warn("duplicate note id");
+            return;
+        }
+
         const newNotes = [note, ...this.notes.value];
         this.notes.value = newNotes;
         this.stream.send('subNote', { id: note.id });
@@ -42,6 +47,11 @@ export class TimelineFeed {
     }
 
     addNoteRev(note: Note) {
+        if (this.notes.value.some(n => n.id === note.id)) {
+            console.warn("duplicate note id");
+            return;
+        }
+
         const newNotes = [...this.notes.value, note];
         this.notes.value = newNotes;
         this.stream.send('subNote', { id: note.id });
@@ -88,7 +98,8 @@ export class TimelineFeed {
     }
 
     loadMore() {
-        const lastNoteId = this.notes.value[this.notes.value.length - 1]?.id;
+        const len = this.notes.value.length;
+        const lastNoteId = this.notes.value[len - 1]?.id;
         const limit = 20;
 
         switch (this.timelineType) {
