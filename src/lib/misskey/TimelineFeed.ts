@@ -25,7 +25,6 @@ export class TimelineFeed {
         console.log('initFeed');
         this.notes.value = [];
         this.initLoad = true;
-        this.loadMore();
         this.setChannel();
     }
 
@@ -56,7 +55,7 @@ export class TimelineFeed {
         this.notes.value = newNotes;
         this.stream.send('subNote', { id: note.id });
         if (this.notes.value.length > 50) {
-            const oldNote = this.notes.value.pop();
+            const oldNote = this.notes.value.shift();
             if (oldNote) {
                 this.stream.send('unsubNote', { id: oldNote.id });
             }
@@ -117,7 +116,7 @@ export class TimelineFeed {
                         :
                         (notes) => {
                             notes.forEach((note) => {
-                                this.addNote(note);
+                                this.addNoteRev(note);
                             })
                         }
                 );
@@ -136,7 +135,7 @@ export class TimelineFeed {
                         :
                         (notes) => {
                             notes.forEach((note) => {
-                                this.addNote(note);
+                                this.addNoteRev(note);
                             })
                         }
                 );
@@ -155,7 +154,7 @@ export class TimelineFeed {
                         :
                         (notes) => {
                             notes.forEach((note) => {
-                                this.addNote(note);
+                                this.addNoteRev(note);
                             })
                         }
                 );
@@ -174,7 +173,7 @@ export class TimelineFeed {
                         :
                         (notes) => {
                             notes.forEach((note) => {
-                                this.addNote(note);
+                                this.addNoteRev(note);
                             })
                         }
                 );
