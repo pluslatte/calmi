@@ -39,8 +39,23 @@ export function useTimeline(timelineType: TimelineType, apiClient: api.APIClient
         disableBuffering();
         const bufferedNotes = flushBuffer();
 
-        // バッファ内のノートを表示
-        setDisplayNotes([...bufferedNotes]);
+        // バッファ内のノートを表示ノートに統合
+        setDisplayNotes(prev => {
+            // バッファ内のノートとdataNotesを重複なしで結合
+            const combinedNotes = [...bufferedNotes];
+
+            // 既存の表示ノートで、バッファに含まれていないものを追加
+            dataNotes.forEach(note => {
+                if (!combinedNotes.some(n => n.id === note.id)) {
+                    combinedNotes.push(note);
+                }
+            });
+
+            // 作成日時でソート
+            return combinedNotes.sort((a, b) => {
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+        });
     }, [disableBuffering, flushBuffer, dataNotes]);
 
     // 自動更新の制御関数

@@ -7,6 +7,7 @@ import { TimelineStream } from '@/lib/misskey/stream/TimelineStream';
 export function useTimelineData(timelineType: TimelineType, apiClient: api.APIClient) {
     const [notes, setNotes] = useState<Note[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
 
     const streamRef = useRef<TimelineStream | null>(null);
 
@@ -38,6 +39,8 @@ export function useTimelineData(timelineType: TimelineType, apiClient: api.APICl
             initialNotes.forEach(note => {
                 streamRef.current?.subscribeToNote(note.id);
             });
+
+            setHasMore(initialNotes.length >= 20);
         } catch (error) {
             console.error('Failed to load initial timeline', error);
         } finally {
@@ -47,10 +50,7 @@ export function useTimelineData(timelineType: TimelineType, apiClient: api.APICl
 
     // さらに読み込み関数
     const loadMore = async () => {
-        if (isLoading || !apiClient) return;
-        if (notes.length === 0) {
-            console.warn('loadMore called but notes.length was 0');
-        }
+        if (isLoading || !hasMore || notes.length === 0 || !apiClient) return;
 
         setIsLoading(true);
         try {
@@ -94,6 +94,9 @@ export function useTimelineData(timelineType: TimelineType, apiClient: api.APICl
 
             if (moreNotes.length > 0) {
                 setNotes((prevNotes) => [...prevNotes, ...moreNotes]);
+                setHasMore(moreNotes.length >= 20);
+            } else {
+                setHasMore(false);
             }
         } catch (error) {
             console.error('Failed to load more notes', error);
@@ -145,6 +148,7 @@ export function useTimelineData(timelineType: TimelineType, apiClient: api.APICl
     return {
         notes,
         isLoading,
+        hasMore,
         loadMore,
         refresh: loadInitial
     };
