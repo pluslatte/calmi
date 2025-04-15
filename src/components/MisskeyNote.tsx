@@ -1,14 +1,14 @@
+import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import { Avatar, Box, Flex, Text } from "@mantine/core";
 import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
 import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
 import { memo } from "react";
-import { useMisskeyService } from "@/contexts/MisskeyContext";
 
 
 const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
-    const { service } = useMisskeyService();
+    const misskeyApiClient = useMisskeyApiClient();
 
     return (
         <Flex align="start" gap="sm" wrap="nowrap">
