@@ -4,7 +4,11 @@ import MisskeyTimeline, { TimelineType } from "@/components/MisskeyTimeline";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer } from "@tabler/icons-react";
 
 
-const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
+    containerRef
+}: {
+    containerRef: React.RefObject<HTMLDivElement | null>
+}) {
     const [timelineType, setTimelineType] = useState<TimelineType>('home');
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 

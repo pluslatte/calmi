@@ -1,13 +1,14 @@
 'use client';
 
-import React, { memo, useEffect, useRef, useState } from 'react';
-import { TimelineFeed } from '@/lib/misskey/TimelineFeed';
-import { Note } from "misskey-js/entities.js";
+import React, { memo, useEffect } from 'react';
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp } from "@tabler/icons-react";
+import { useTimelineFeed } from "@/hooks/useTimelineFeed";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
@@ -16,116 +17,48 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
-    const [notes, setNotes] = useState<Note[]>([]);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const sentinelRef = useRef<HTMLDivElement>(null);
-    const timelineRef = useRef<TimelineFeed>(null);
-    const [rightOffset, setRightOffset] = useState<number | null>(null);
-    const [showScrollToTop, setShowScrollToTop] = useState(false);
     const misskeyApiClient = useMisskeyApiClient();
-    const isReturningToTop = useRef(false);
-    const handleScrollToTop = () => {
+
+    const {
+        notes,
+        loadMore,
+        enableBuffering,
+        disableBufferingAndFlush,
+        setAutoUpdateFeed
+    } = useTimelineFeed(timelineType, misskeyApiClient);
+
+    const { sentinelRef } = useInfiniteScroll(loadMore);
+
+    const {
+        showScrollToTop,
+        rightOffset,
+        handleScrollToTop
+    } = useScrollToTop(scrollAreaRef, containerRef, () => {
+        disableBufferingAndFlush();
+        setAutoUpdateFeed(true);
+        console.log("scroll to top completed, auto update re-enabled");
+    });
+
+    useEffect(() => {
         if (!scrollAreaRef.current) return;
 
-        isReturningToTop.current = true;
+        const handleScroll = () => {
+            const scrollEl = scrollAreaRef.current;
+            if (!scrollEl) return;
 
-        scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+            const top = scrollEl.scrollTop;
+            const nearTop = top < 200;
 
-        setTimeout(() => {
-            const timeline = timelineRef.current;
-            if (!timeline) return;
-
-            timeline.disableBufferingAndFlush();
-            timeline.doAutoUpdateFeed = true;
-            isReturningToTop.current = false;
-
-            console.log("scroll to top completed, auto update re-enabled");
-        }, 500);
-    };
-
-    useEffect(() => {
-        const timeline = new TimelineFeed(timelineType, misskeyApiClient);
-        timelineRef.current = timeline;
-
-        const updateNotes = () => { setNotes(timeline.notes.value); }
-        timeline.notes.subscribe(updateNotes);
-
-        timeline.initFeed();
-
-        return (() => {
-            timeline.notes.unsubscribe(updateNotes);
-            timeline.stream?.close();
-        });
-    }, [timelineType]);
-
-    useEffect(() => {
-        // workaround
-        const timeout = setTimeout(() => {
-            console.log("scrollAreaRef.current", scrollAreaRef.current);
-
-            const handleScroll = () => {
-                if (isReturningToTop.current) return;
-
-                const scrollEl = scrollAreaRef.current;
-                if (!scrollEl) return;
-
-                const top = scrollEl.scrollTop;
-                setShowScrollToTop(top > 100);
-
-                const nearTop = top < 200;
-
-                if (!nearTop && timelineRef.current?.doAutoUpdateFeed) {
-                    timelineRef.current.doAutoUpdateFeed = false;
-                    timelineRef.current.enableBuffering();
-                    console.log("auto update disabled & buffering enabled");
-                }
-            };
-
-            scrollAreaRef.current?.addEventListener('scroll', handleScroll);
-            cleanup = () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
-        }, 0);
-
-        let cleanup: () => void;
-
-        return () => {
-            clearTimeout(timeout);
-            cleanup?.();
-        }
-    }, [])
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            async (entries) => {
-                if (entries[0].isIntersecting && !loadingMore) {
-                    setLoadingMore(true);
-                    timelineRef.current?.loadMore();
-                    setLoadingMore(false);
-                }
-            },
-            { rootMargin: '100px' }
-        );
-
-        if (sentinelRef.current) {
-            observer.observe(sentinelRef.current);
-        }
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [loadingMore])
-
-    useEffect(() => {
-        const updateOffset = () => {
-            if (!containerRef.current) return;
-            const rect = containerRef.current.getBoundingClientRect();
-            const offset = window.innerWidth - rect.right;
-            setRightOffset(offset + 16);
+            if (!nearTop && notes.length > 0) {
+                setAutoUpdateFeed(false);
+                enableBuffering();
+                console.log("auto update disabled & buffering enabled");
+            }
         };
 
-        updateOffset();
-        window.addEventListener('resize', updateOffset);
-        return () => window.removeEventListener('resize', updateOffset);
-    }, [containerRef])
+        scrollAreaRef.current.addEventListener('scroll', handleScroll);
+        return () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
+    }, [scrollAreaRef, notes.length, enableBuffering, setAutoUpdateFeed]);
 
     return (
         <Box pos="relative">
