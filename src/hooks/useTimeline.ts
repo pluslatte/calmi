@@ -31,10 +31,6 @@ export function useTimeline(timelineType: TimelineType, apiClient: api.APIClient
     useEffect(() => {
         if (!isBuffering) {
             setDisplayNotes(dataNotes);
-        } else {
-            dataNotes.forEach((note) => {
-                addToBuffer(note);
-            })
         }
     }, [dataNotes, isBuffering]);
 
