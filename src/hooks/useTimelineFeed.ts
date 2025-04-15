@@ -18,7 +18,7 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
 
         return (() => {
             timeline.notes.unsubscribe(updateNotes);
-            timeline.stream?.close();
+            timeline.cleanup(); // Call the new cleanup method
         });
     }, [timelineType, misskeyApiClient])
 

@@ -1,14 +1,15 @@
 'use client';
 
-import { api, Stream } from "misskey-js";
+import { api } from "misskey-js";
 import { Note } from "misskey-js/entities.js";
-import { Connection } from "misskey-js/streaming.js";
 import { Observable } from "../Observable";
+import { MisskeyStream } from "./MisskeyStream";
 
 export class TimelineFeed {
     notes: Observable<Note[]>;
     misskeyApiClient: api.APIClient;
-    stream: Stream;
+    private misskeyStream: MisskeyStream;
+
     doAutoUpdateFeed = false;
     initLoad = false;
     newNotesBuffer: Note[] = [];
@@ -17,17 +18,33 @@ export class TimelineFeed {
     constructor(private timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
         this.notes = new Observable<Note[]>([]);
         this.misskeyApiClient = misskeyApiClient;
+
         if (misskeyApiClient.credential == null) {
             throw Error('misskeyApiClient for TimelineFeed must have credential');
         }
-        this.stream = new Stream(misskeyApiClient.origin, { token: misskeyApiClient.credential })
+
+        this.misskeyStream = new MisskeyStream(
+            misskeyApiClient,
+            timelineType,
+            this.handleNewNote.bind(this)
+        );
+    }
+
+    private handleNewNote(note: Note): void {
+        if (this.bufferEnabled) {
+            console.log('bufferEnabled ' + note.id);
+            this.newNotesBuffer.unshift(note);
+        } else if (this.doAutoUpdateFeed) {
+            console.log('bufferDisabled ' + note.id);
+            this.addNote(note);
+        }
     }
 
     initFeed() {
         console.log('initFeed');
         this.notes.value = [];
         this.initLoad = true;
-        this.setChannel();
+        this.misskeyStream.connect();
     }
 
     reloadLatest() {
@@ -44,11 +61,12 @@ export class TimelineFeed {
 
         const newNotes = [note, ...this.notes.value];
         this.notes.value = newNotes;
-        this.stream.send('subNote', { id: note.id });
+        this.misskeyStream.subscribeToNote(note.id);
+
         if (this.notes.value.length > 50) {
             const oldNote = this.notes.value.pop();
             if (oldNote) {
-                this.stream.send('unsubNote', { id: oldNote.id });
+                this.misskeyStream.unsubscribeFromNote(oldNote.id);
             }
         }
     }
@@ -61,52 +79,14 @@ export class TimelineFeed {
 
         const newNotes = [...this.notes.value, note];
         this.notes.value = newNotes;
-        this.stream.send('subNote', { id: note.id });
+        this.misskeyStream.subscribeToNote(note.id);
+
         if (this.notes.value.length > 50) {
             const oldNote = this.notes.value.shift();
             if (oldNote) {
-                this.stream.send('unsubNote', { id: oldNote.id });
+                this.misskeyStream.unsubscribeFromNote(oldNote.id);
             }
         }
-    }
-
-    setChannel() {
-        let channel: Connection<{
-            params: {
-                withRenotes?: boolean;
-                withFiles?: boolean;
-            };
-            events: {
-                note: (payload: Note) => void;
-            };
-            receives: null;
-        }>;
-
-        switch (this.timelineType) {
-            case 'home':
-                channel = this.stream.useChannel('homeTimeline');
-                break;
-            case 'social':
-                channel = this.stream.useChannel('hybridTimeline');
-                break;
-            case 'local':
-                channel = this.stream.useChannel('localTimeline');
-                break;
-            case 'global':
-                channel = this.stream.useChannel('globalTimeline');
-                break;
-        }
-
-        channel.on('note', (note: Note) => {
-            console.log('channel: new note: ' + note.id);
-            if (this.bufferEnabled) {
-                console.log('bufferEnabled ' + note.id);
-                this.newNotesBuffer.unshift(note);
-            } else if (this.doAutoUpdateFeed) {
-                console.log('bufferDisabled ' + note.id);
-                this.addNote(note);
-            }
-        });
     }
 
     loadMore() {
@@ -207,12 +187,13 @@ export class TimelineFeed {
             // Unsubscribe old notes.
             this.notes.value.forEach(n => {
                 console.log("unsubscribe note: " + n.id);
-                this.stream.send('unsubNote', { id: n.id });
+                this.misskeyStream.unsubscribeFromNote(n.id);
             });
 
             // Replace this.notes.value with the buffer.
             this.notes.value = [...this.newNotesBuffer];
-            this.newNotesBuffer.forEach(n => this.stream.send('subNote', { id: n.id }));
+            this.newNotesBuffer.forEach(n => this.misskeyStream.subscribeToNote(n.id));
+
             if (this.newNotesBuffer.length < 10) {
                 // If it was not enough to fill the feed, load more.
                 // TODO: 上へ戻る が押されたとき、一瞬ノートが消えて loadmore が誘発されてダブっているのを直す（対策してあるので影響はないが、汚い）
@@ -230,5 +211,10 @@ export class TimelineFeed {
     disableBufferingAndFlush() {
         this.bufferEnabled = false;
         this.flushBufferedNotes();
+    }
+
+    // Clean up resources when timeline is no longer needed
+    cleanup() {
+        this.misskeyStream.disconnect();
     }
 }
