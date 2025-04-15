@@ -9,10 +9,17 @@ import { IconArrowUp } from "@tabler/icons-react";
 import { useTimelineFeed } from "@/hooks/useTimelineFeed";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import { useTimeline } from "@/hooks/useTimeline";
+import { TimelineList } from "./timeline/TimelineList";
+import { ScrollToTopButton } from "./timeline/ScrollToTopButton";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
-const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollAreaRef, containerRef }: {
+const MisskeyTimeline = memo(function MisskeyTimeline({
+    timelineType,
+    scrollAreaRef,
+    containerRef
+}: {
     timelineType: TimelineType;
     scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     containerRef: React.RefObject<HTMLDivElement | null>;
@@ -21,13 +28,12 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
 
     const {
         notes,
+        isLoading,
         loadMore,
         enableBuffering,
         disableBufferingAndFlush,
         setAutoUpdateFeed
-    } = useTimelineFeed(timelineType, misskeyApiClient);
-
-    const { sentinelRef } = useInfiniteScroll(loadMore);
+    } = useTimeline(timelineType, misskeyApiClient)
 
     const {
         showScrollToTop,
@@ -36,7 +42,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     } = useScrollToTop(scrollAreaRef, containerRef, () => {
         disableBufferingAndFlush();
         setAutoUpdateFeed(true);
-        console.log("scroll to top completed, auto update re-enabled");
+        console.log("sctoll to top completed, auto update re-enabled");
     });
 
     useEffect(() => {
@@ -62,38 +68,16 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
 
     return (
         <Box pos="relative">
-            {notes.map(note => (
-                <Box key={note.id}>
-                    <MisskeyNote note={note} />
-                    <MisskeyNoteActions />
-                    <Divider my="sm" />
-                </Box>
-            ))}
-            <div ref={sentinelRef} style={{ height: 1 }} />
-
-            {rightOffset !== null && (
-                <Box
-                    style={{
-                        position: 'fixed',
-                        bottom: 24,
-                        right: rightOffset,
-                        zIndex: 1000,
-                    }}
-                >
-                    <Transition mounted={showScrollToTop} transition="slide-up" duration={200} timingFunction="ease">
-                        {(styles) => (
-                            <Button
-                                leftSection={<IconArrowUp size={16} />}
-                                style={styles}
-                                onClick={handleScrollToTop}
-                                variant="light"
-                            >
-                                上へ戻る
-                            </Button>
-                        )}
-                    </Transition>
-                </Box>
-            )}
+            <TimelineList
+                notes={notes}
+                onLoadMore={loadMore}
+                isLoading={isLoading}
+            />
+            <ScrollToTopButton
+                show={showScrollToTop}
+                rightOffset={rightOffset}
+                onClick={handleScrollToTop}
+            />
         </Box>
     );
 });
