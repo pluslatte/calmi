@@ -5,9 +5,11 @@ import '@mantine/core/styles.css';
 import { ColorSchemeScript } from '@mantine/core';
 import ThemeProvider from "@/theme-provider";
 import { useEffect, useState } from "react";
+import { MisskeyProvider } from "@/contexts/MisskeyContext";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);

@@ -1,13 +1,13 @@
 'use client'
 
-import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import { Anchor, Blockquote, Code, Text } from "@mantine/core";
 import * as mfm from 'mfm-js';
 import React, { ReactElement } from "react";
 import EmojiNode from "./EmojiNode";
+import { useMisskeyService } from "@/contexts/MisskeyContext";
 
 export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[]; assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
-    const misskeyApiClient = useMisskeyApiClient();
+    const { service } = useMisskeyService();
 
     const nodeComponent = (node: mfm.MfmNode): ReactElement | ReactElement[] => {
         switch (node.type) {

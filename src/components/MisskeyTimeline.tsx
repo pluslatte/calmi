@@ -1,17 +1,12 @@
 'use client';
 
 import React, { memo, useEffect } from 'react';
-import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
-import MisskeyNote from "@/components/MisskeyNote";
-import { Box, Button, Divider, Transition } from "@mantine/core";
-import MisskeyNoteActions from "@/components/MisskeyNoteActions";
-import { IconArrowUp } from "@tabler/icons-react";
-import { useTimelineFeed } from "@/hooks/useTimelineFeed";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { Box, Center, Loader } from "@mantine/core";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
 import { useTimeline } from "@/hooks/useTimeline";
 import { TimelineList } from "./timeline/TimelineList";
 import { ScrollToTopButton } from "./timeline/ScrollToTopButton";
+import { useMisskeyService } from "@/contexts/MisskeyContext";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
@@ -24,7 +19,16 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
-    const misskeyApiClient = useMisskeyApiClient();
+    const { service } = useMisskeyService();
+    if (!service) {
+        return (
+            <Center p="xl">
+                <Loader />
+            </Center>
+        );
+    }
+
+    const apiClient = service.getApiClient();
 
     const {
         notes,
@@ -33,7 +37,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         enableBuffering,
         disableBufferingAndFlush,
         setAutoUpdateFeed
-    } = useTimeline(timelineType, misskeyApiClient)
+    } = useTimeline(timelineType, apiClient)
 
     const {
         showScrollToTop,
