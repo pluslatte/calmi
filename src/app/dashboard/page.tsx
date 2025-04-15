@@ -29,7 +29,7 @@ export default function Dashboard() {
                 <Grid.Col span="content">
                     <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
                     <Button onClick={handleCreateNote} loading={isLoading}>
-                        Note
+                        ノート
                     </Button>
                 </Grid.Col>
                 <Grid.Col span="auto">

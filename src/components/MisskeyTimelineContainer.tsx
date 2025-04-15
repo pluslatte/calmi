@@ -16,16 +16,16 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer() {
                 onChange={(value) => setTimelineType(value as TimelineType)}
             >
                 <Tabs.List justify="center" px="md" pt="xs">
-                    <Tooltip label="Home">
+                    <Tooltip label="ホーム">
                         <Tabs.Tab value="home" leftSection={<IconHome size={18} />}></Tabs.Tab>
                     </Tooltip>
-                    <Tooltip label="Social">
+                    <Tooltip label="ソーシャル">
                         <Tabs.Tab value="social" leftSection={<IconHomePlus size={18} />}></Tabs.Tab>
                     </Tooltip>
-                    <Tooltip label="Local">
+                    <Tooltip label="ローカル">
                         <Tabs.Tab value="local" leftSection={<IconServer size={18} />}></Tabs.Tab>
                     </Tooltip>
-                    <Tooltip label="Global">
+                    <Tooltip label="グローバル">
                         <Tabs.Tab value="global" leftSection={<IconGalaxy size={18} />}></Tabs.Tab>
                     </Tooltip>
                 </Tabs.List>
