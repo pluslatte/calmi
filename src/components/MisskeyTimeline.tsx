@@ -18,9 +18,24 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     const timelineRef = useRef<TimelineFeed>(null);
     const [showScrollToTop, setShowScrollToTop] = useState(false);
     const misskeyApiClient = useMisskeyApiClient();
+    const isReturningToTop = useRef(false);
     const handleScrollToTop = () => {
-        scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        timelineRef.current?.reloadLatest();
+        if (!scrollAreaRef.current) return;
+
+        isReturningToTop.current = true;
+
+        scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+
+        setTimeout(() => {
+            const timeline = timelineRef.current;
+            if (!timeline) return;
+
+            timeline.disableBufferingAndFlush();
+            timeline.doAutoUpdateFeed = true;
+            isReturningToTop.current = false;
+
+            console.log("scroll to top completed, auto update re-enabled");
+        }, 500);
     };
 
     useEffect(() => {
@@ -44,8 +59,20 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
             console.log("scrollAreaRef.current", scrollAreaRef.current);
 
             const handleScroll = () => {
-                if (scrollAreaRef.current) {
-                    setShowScrollToTop(scrollAreaRef.current.scrollTop > 100);
+                if (isReturningToTop.current) return;
+
+                const scrollEl = scrollAreaRef.current;
+                if (!scrollEl) return;
+
+                const top = scrollEl.scrollTop;
+                setShowScrollToTop(top > 100);
+
+                const nearTop = top < 200;
+
+                if (!nearTop && timelineRef.current?.doAutoUpdateFeed) {
+                    timelineRef.current.doAutoUpdateFeed = false;
+                    timelineRef.current.enableBuffering();
+                    console.log("auto update disabled & buffering enabled");
                 }
             };
 

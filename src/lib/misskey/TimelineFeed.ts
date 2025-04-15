@@ -11,6 +11,8 @@ export class TimelineFeed {
     stream: Stream;
     doAutoUpdateFeed = false;
     initLoad = false;
+    newNotesBuffer: Note[] = [];
+    bufferEnabled = false;
 
     constructor(private timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
         this.notes = new Observable<Note[]>([]);
@@ -96,7 +98,12 @@ export class TimelineFeed {
         }
 
         channel.on('note', (note: Note) => {
-            if (this.doAutoUpdateFeed) {
+            console.log('channel: new note: ' + note.id);
+            if (this.bufferEnabled) {
+                console.log('bufferEnabled ' + note.id);
+                this.newNotesBuffer.unshift(note);
+            } else if (this.doAutoUpdateFeed) {
+                console.log('bufferDisabled ' + note.id);
                 this.addNote(note);
             }
         });
@@ -191,5 +198,31 @@ export class TimelineFeed {
             this.doAutoUpdateFeed = true;
             this.initLoad = false;
         }
+    }
+
+    flushBufferedNotes() {
+        if (this.newNotesBuffer.length > 0) {
+            // Merge the buffer.
+            this.notes.value = [...this.newNotesBuffer, ...this.notes.value];
+            this.newNotesBuffer.forEach(n => this.stream.send('subNote', { id: n.id }));
+            this.newNotesBuffer = [];
+
+            // Cutoff old notes.
+            while (this.notes.value.length > 50) {
+                const removed = this.notes.value.pop();
+                if (removed) {
+                    this.stream.send('unsubNote', { id: removed.id });
+                }
+            }
+        }
+    }
+
+    enableBuffering() {
+        this.bufferEnabled = true;
+    }
+
+    disableBufferingAndFlush() {
+        this.bufferEnabled = false;
+        this.flushBufferedNotes();
     }
 }
