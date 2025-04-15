@@ -28,6 +28,12 @@ export class TimelineFeed {
         this.setChannel();
     }
 
+    reloadLatest() {
+        this.notes.value = [];
+        this.doAutoUpdateFeed = false;
+        this.initLoad = true;
+    }
+
     addNote(note: Note) {
         if (this.notes.value.some(n => n.id === note.id)) {
             console.warn("duplicate note id");

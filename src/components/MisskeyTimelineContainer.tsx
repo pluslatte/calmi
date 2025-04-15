@@ -1,11 +1,12 @@
 import { Box, Flex, ScrollArea, Tabs, Tooltip } from "@mantine/core";
-import React, { memo, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 import MisskeyTimeline, { TimelineType } from "@/components/MisskeyTimeline";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer } from "@tabler/icons-react";
 
 
 const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer() {
     const [timelineType, setTimelineType] = useState<TimelineType>('home');
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     return (
         <Flex direction="column" h="100%">
@@ -29,9 +30,9 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer() {
                     </Tooltip>
                 </Tabs.List>
             </Tabs>
-            <ScrollArea flex={1} type="auto">
+            <ScrollArea viewportRef={scrollAreaRef} flex={1} type="auto">
                 <Box mr="sm">
-                    <MisskeyTimeline timelineType={timelineType} />
+                    <MisskeyTimeline timelineType={timelineType} scrollAreaRef={scrollAreaRef} />
                 </Box>
             </ScrollArea>
         </Flex>
