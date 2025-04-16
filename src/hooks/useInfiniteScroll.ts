@@ -27,7 +27,6 @@ export function useInfiniteScroll(loadMore: () => void) {
     }, [loadingMore, loadMore]);
 
     return {
-        sentinelRef,
-        loadingMore
+        sentinelRef
     };
 }
