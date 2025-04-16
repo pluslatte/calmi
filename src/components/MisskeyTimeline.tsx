@@ -60,7 +60,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     }, [scrollAreaRef, notes.length, setAutoUpdateFeed]);
 
     const renderItems = () => {
-        // タイムライン先頭にある場合専用（出番は少ないと思うが一応）
+        // スキップされたノートのグループがタイムライン先頭にある場合専用（出番は少ないと思うが一応）
         const topIndicators = skippedNotesGroups
             .filter(group => group.referenceNoteId === 'timeline-top')
             .map((group, index) => {
@@ -81,6 +81,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
 
             })
 
+        // 各ノートに関連しているスキップされたノートのグループを配置する
         let notesWithIndicators = notes.map((note, index) => {
             const relatedGroups = skippedNotesGroups
                 .filter(group => group.referenceNoteId === note.id);

@@ -6,12 +6,12 @@ import { Observable } from "../Observable";
 import { MisskeyStream } from "./MisskeyStream";
 
 interface SkippedNotesGroup {
-    count: number;
-    timestamp: Date;
-    referenceNoteId: string;
-    skippedNoteIds: string[];
-    loadedNotes: Note[] | null;
-    isLoading: boolean;
+    count: number; // スキップされたノートの数
+    timestamp: Date; // このグループが作られた時間
+    referenceNoteId: string; // このグループがどのノートの前に表示されるか
+    skippedNoteIds: string[]; // スキップされたノートのID配列
+    loadedNotes: Note[] | null; // 読み込まれたノート（まだ読み込んでいなければnull）
+    isLoading: boolean; // 読み込み中かどうか
 }
 
 export class TimelineFeed {
@@ -62,10 +62,12 @@ export class TimelineFeed {
     private addSkippedNote(note: Note): void {
         const now = new Date();
 
+        // グループのリファレンスポイント（どのノートの前に表示するか）
         const referenceNoteId = this.notes.value.length > 0
             ? this.notes.value[0].id
             : 'timeline-top';
 
+        // 前のグループと時間が近く、同じリファレンスノートを持つ場合は同じグループに追加
         if (this.lastSkippedGroupTimestamp &&
             (now.getTime() - this.lastSkippedGroupTimestamp.getTime() < this.skippedGroupThreshold) &&
             this.skippedNotesGroups.length > 0 &&
@@ -75,6 +77,7 @@ export class TimelineFeed {
             lastGroup.timestamp = now;
             lastGroup.skippedNoteIds.push(note.id);
         } else {
+            // そうでなければ新しいグループを作成
             this.skippedNotesGroups.push({
                 count: 1,
                 timestamp: now,
