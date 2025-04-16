@@ -7,50 +7,74 @@ import { MisskeyStream } from "./MisskeyStream";
 
 export class TimelineFeed {
     notes: Observable<Note[]>;
-    misskeyApiClient: api.APIClient;
-    private misskeyStream: MisskeyStream;
+    private readonly misskeyApiClient: api.APIClient;
+    private readonly misskeyStream: MisskeyStream;
+    private newNotesBuffer: Note[] = [];
 
-    doAutoUpdateFeed = false;
-    initLoad = false;
-    newNotesBuffer: Note[] = [];
-    bufferEnabled = false;
+    private _isAutoUpdateEnabled = true;
+    private _isBufferingEnabled = false;
+    private _isInitialLoading = true;
 
-    constructor(private timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
+    private readonly MAX_NOTES = 50;
+    private readonly LOAD_LIMIT = 20;
+    private readonly MIN_BUFFER_SIZE = 10;
+
+    constructor(private timelineType: 'home' | 'social' | 'local' | 'global', apiClient: api.APIClient) {
         this.notes = new Observable<Note[]>([]);
-        this.misskeyApiClient = misskeyApiClient;
+        this.misskeyApiClient = apiClient;
 
-        if (misskeyApiClient.credential == null) {
+        if (!apiClient.credential) {
             throw Error('misskeyApiClient for TimelineFeed must have credential');
         }
 
         this.misskeyStream = new MisskeyStream(
-            misskeyApiClient,
+            apiClient,
             timelineType,
             this.handleNewNote.bind(this)
         );
     }
 
-    private handleNewNote(note: Note): void {
-        if (this.bufferEnabled) {
-            console.log('bufferEnabled ' + note.id);
-            this.newNotesBuffer.unshift(note);
-        } else if (this.doAutoUpdateFeed) {
-            console.log('bufferDisabled ' + note.id);
-            this.addNote(note);
+    get isAutoUpdateEnabled(): boolean {
+        return this._isAutoUpdateEnabled;
+    }
+
+    set isAutoUpdateEnabled(value: boolean) {
+        this._isAutoUpdateEnabled = value;
+        // 自動更新がONになったら、バッファリングを無効化する
+        if (value && this._isBufferingEnabled) {
+            this.disableBufferingAndFlush();
         }
+    }
+
+    get isBufferingEnabled(): boolean {
+        return this._isBufferingEnabled;
+    }
+
+    get isInitialLoading(): boolean {
+        return this._isInitialLoading;
     }
 
     initFeed() {
         console.log('initFeed');
         this.notes.value = [];
-        this.initLoad = true;
+        this._isInitialLoading = true;
         this.misskeyStream.connect();
+    }
+
+    private handleNewNote(note: Note): void {
+        if (this._isBufferingEnabled) {
+            console.log('bufferEnabled ' + note.id);
+            this.newNotesBuffer.unshift(note);
+        } else if (this._isAutoUpdateEnabled) {
+            console.log('bufferDisabled ' + note.id);
+            this.addNote(note);
+        }
     }
 
     reloadLatest() {
         this.notes.value = [];
-        this.doAutoUpdateFeed = false;
-        this.initLoad = true;
+        this._isAutoUpdateEnabled = false;
+        this._isInitialLoading = true;
     }
 
     addNote(note: Note) {
@@ -63,12 +87,7 @@ export class TimelineFeed {
         this.notes.value = newNotes;
         this.misskeyStream.subscribeToNote(note.id);
 
-        if (this.notes.value.length > 50) {
-            const oldNote = this.notes.value.pop();
-            if (oldNote) {
-                this.misskeyStream.unsubscribeFromNote(oldNote.id);
-            }
-        }
+        this.trimNotesIfNeeded();
     }
 
     addNoteRev(note: Note) {
@@ -81,7 +100,24 @@ export class TimelineFeed {
         this.notes.value = newNotes;
         this.misskeyStream.subscribeToNote(note.id);
 
-        if (this.notes.value.length > 50) {
+        this.trimNotesIfNeededRev();
+    }
+
+    // ノート数上限を超えたら下の方のノートは削除
+    private trimNotesIfNeeded(): void {
+        if (this.notes.value.length > this.MAX_NOTES) {
+            // リストに追加するノートが先頭に行く状態なら、末尾のノートを削除
+            const oldNote = this.notes.value.pop();
+            if (oldNote) {
+                this.misskeyStream.unsubscribeFromNote(oldNote.id);
+            }
+        }
+    }
+
+    // ノート数上限を超えたら上の方のノートは削除
+    private trimNotesIfNeededRev(): void {
+        if (this.notes.value.length > this.MAX_NOTES) {
+            // リストに追加するノートが末尾に行く状態なら、先頭のノートを削除
             const oldNote = this.notes.value.shift();
             if (oldNote) {
                 this.misskeyStream.unsubscribeFromNote(oldNote.id);
@@ -91,125 +127,105 @@ export class TimelineFeed {
 
     loadMore() {
         const len = this.notes.value.length;
-        const lastNoteId = this.notes.value[len - 1]?.id;
-        const limit = 20;
+        const lastNoteId = len > 0 ? this.notes.value[len - 1]?.id : undefined;
 
         console.log(`loadmore! len: ${len} lastNoteId: ${lastNoteId}`);
 
-        switch (this.timelineType) {
-            case 'home':
-                this.misskeyApiClient.request('notes/timeline', {
-                    limit,
-                    untilId: lastNoteId,
-                }).then(
-                    this.initLoad ?
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                        :
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                );
-                break;
-            case 'social':
-                this.misskeyApiClient.request('notes/hybrid-timeline', {
-                    limit,
-                    untilId: lastNoteId,
-                }).then(
-                    this.initLoad ?
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                        :
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                );
-                break;
-            case 'local':
-                this.misskeyApiClient.request('notes/local-timeline', {
-                    limit,
-                    untilId: lastNoteId,
-                }).then(
-                    this.initLoad ?
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                        :
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                );
-                break;
-            case 'global':
-                this.misskeyApiClient.request('notes/global-timeline', {
-                    limit,
-                    untilId: lastNoteId,
-                }).then(
-                    this.initLoad ?
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                        :
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                );
-                break;
+        const params: any = {
+            limit: this.LOAD_LIMIT
+        };
+
+        if (lastNoteId) {
+            params.untilId = lastNoteId;
         }
 
+        switch (this.timelineType) {
+            case 'home':
+                this.misskeyApiClient.request('notes/timeline', params)
+                    .then((notes: Note[]) => {
+                        notes.forEach(note => this.addNoteRev(note));
 
-        if (this.initLoad) {
-            this.doAutoUpdateFeed = true;
-            this.initLoad = false;
+                        if (this._isInitialLoading) {
+                            this._isAutoUpdateEnabled = true;
+                            this._isInitialLoading = false;
+                        }
+                    }).catch(error => {
+                        console.error(`Failed to load ${this.timelineType} timeline:`, error);
+                    });
+                break;
+            case 'social':
+                this.misskeyApiClient.request('notes/hybrid-timeline', params)
+                    .then((notes: Note[]) => {
+                        notes.forEach(note => this.addNoteRev(note));
+
+                        if (this._isInitialLoading) {
+                            this._isAutoUpdateEnabled = true;
+                            this._isInitialLoading = false;
+                        }
+                    }).catch(error => {
+                        console.error(`Failed to load ${this.timelineType} timeline:`, error);
+                    });
+                break;
+            case 'local':
+                this.misskeyApiClient.request('notes/local-timeline', params)
+                    .then((notes: Note[]) => {
+                        notes.forEach(note => this.addNoteRev(note));
+
+                        if (this._isInitialLoading) {
+                            this._isAutoUpdateEnabled = true;
+                            this._isInitialLoading = false;
+                        }
+                    }).catch(error => {
+                        console.error(`Failed to load ${this.timelineType} timeline:`, error);
+                    });
+                break;
+            case 'global':
+                this.misskeyApiClient.request('notes/global-timeline', params)
+                    .then((notes: Note[]) => {
+                        notes.forEach(note => this.addNoteRev(note));
+
+                        if (this._isInitialLoading) {
+                            this._isAutoUpdateEnabled = true;
+                            this._isInitialLoading = false;
+                        }
+                    }).catch(error => {
+                        console.error(`Failed to load ${this.timelineType} timeline:`, error);
+                    });
+                break;
         }
     }
 
-    flushBufferedNotes() {
-        if (this.newNotesBuffer.length > 0) {
-            // Unsubscribe old notes.
-            this.notes.value.forEach(n => {
-                console.log("unsubscribe note: " + n.id);
-                this.misskeyStream.unsubscribeFromNote(n.id);
-            });
+    // バッファされたノートをメインリストへ
+    private flushBufferedNotes(): void {
+        // 現在のノートは全て購読解除
+        this.notes.value.forEach(note => {
+            console.log("unsubscribe note: " + note.id);
+            this.misskeyStream.unsubscribeFromNote(note.id);
+        });
 
-            // Replace this.notes.value with the buffer.
-            this.notes.value = [...this.newNotesBuffer];
-            this.newNotesBuffer.forEach(n => this.misskeyStream.subscribeToNote(n.id));
+        // メインリストを全てバッファで置き換え
+        this.notes.value = [...this.newNotesBuffer];
 
-            if (this.newNotesBuffer.length < 10) {
-                // If it was not enough to fill the feed, load more.
-                // TODO: 上へ戻る が押されたとき、一瞬ノートが消えて loadmore が誘発されてダブっているのを直す（対策してあるので影響はないが、汚い）
-                this.loadMore();
-            }
+        // 新しく入ってきたノートは購読
+        this.newNotesBuffer.forEach(note => {
+            this.misskeyStream.subscribeToNote(note.id);
+        });
 
-            this.newNotesBuffer = [];
+        // バッファが少なかったら、追加でノートをロードする
+        if (this.newNotesBuffer.length < this.MIN_BUFFER_SIZE) {
+            this.loadMore();
         }
+
+        // バッファはクリアする
+        this.newNotesBuffer = [];
     }
 
     enableBuffering() {
-        this.bufferEnabled = true;
+        this._isBufferingEnabled = true;
     }
 
     disableBufferingAndFlush() {
-        this.bufferEnabled = false;
+        this._isBufferingEnabled = false;
         this.flushBufferedNotes();
     }
 

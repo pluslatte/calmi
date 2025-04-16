@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Transition } from "@mantine/core";
@@ -9,6 +9,7 @@ import { IconArrowUp } from "@tabler/icons-react";
 import { useTimelineFeed } from "@/hooks/useTimelineFeed";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import { useTimelineScrollBehavior } from "@/hooks/useTimelineScrollBehavior";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
@@ -19,46 +20,31 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
 }) {
     const misskeyApiClient = useMisskeyApiClient();
 
-    const {
-        notes,
-        loadMore,
-        enableBuffering,
-        disableBufferingAndFlush,
-        setAutoUpdateFeed
-    } = useTimelineFeed(timelineType, misskeyApiClient);
+    const { notes, state, controls } = useTimelineFeed(timelineType, misskeyApiClient);
 
-    const { sentinelRef } = useInfiniteScroll(loadMore);
+    const { sentinelRef } = useInfiniteScroll(controls.loadMore);
 
     const {
         showScrollToTop,
         rightOffset,
         handleScrollToTop
-    } = useScrollToTop(scrollAreaRef, containerRef, () => {
-        disableBufferingAndFlush();
-        setAutoUpdateFeed(true);
-        console.log("scroll to top completed, auto update re-enabled");
-    });
+    } = useScrollToTop(scrollAreaRef, containerRef, controls.handleScrollToTop);
 
-    useEffect(() => {
-        if (!scrollAreaRef.current) return;
+    const handleNearTop = useCallback(() => {
+        controls.setAutoUpdate(true);
+        controls.setBuffering(false);
+    }, [controls]);
 
-        const handleScroll = () => {
-            const scrollEl = scrollAreaRef.current;
-            if (!scrollEl) return;
+    const handleScrollDown = useCallback(() => {
+        controls.setAutoUpdate(false);
+        controls.setBuffering(true);
+    }, [controls]);
 
-            const top = scrollEl.scrollTop;
-            const nearTop = top < 200;
-
-            if (!nearTop && notes.length > 0) {
-                setAutoUpdateFeed(false);
-                enableBuffering();
-                console.log("auto update disabled & buffering enabled");
-            }
-        };
-
-        scrollAreaRef.current.addEventListener('scroll', handleScroll);
-        return () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
-    }, [scrollAreaRef, notes.length, enableBuffering, setAutoUpdateFeed]);
+    useTimelineScrollBehavior(
+        scrollAreaRef,
+        { autoUpdateThreshold: 0, bufferThreshold: 200 },
+        { onNearTop: handleNearTop, onScrollDown: handleScrollDown }
+    );
 
     return (
         <Box pos="relative">
