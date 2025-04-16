@@ -4,19 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 export function useScrollToTop(
     scrollAreaRef: React.RefObject<HTMLDivElement | null>,
     containerRef: React.RefObject<HTMLDivElement | null>,
-    onScrollToTop: () => void
 ) {
     const [showScrollToTop, setShowScrollToTop] = useState(false);
-    const [rightOffset, setRightOffset] = useState<number | null>(null);
-    const isReturningToTop = useRef(false);
+    const [buttonRightOffset, setButtonRightOffset] = useState<number | null>(null);
 
     // スクロール位置の監視
     useEffect(() => {
         if (!scrollAreaRef.current) return;
 
         const handleScroll = () => {
-            if (isReturningToTop.current) return;
-
             const scrollEl = scrollAreaRef.current;
             if (!scrollEl) return;
 
@@ -36,7 +32,7 @@ export function useScrollToTop(
             if (!containerRef.current) return;
             const rect = containerRef.current.getBoundingClientRect();
             const offset = window.innerWidth - rect.right;
-            setRightOffset(offset + 16);
+            setButtonRightOffset(offset + 16);
         };
 
         updateOffset();
@@ -47,19 +43,12 @@ export function useScrollToTop(
     // スクロールトップ機能
     const handleScrollToTop = () => {
         if (!scrollAreaRef.current) return;
-
-        isReturningToTop.current = true;
         scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-
-        setTimeout(() => {
-            onScrollToTop();
-            isReturningToTop.current = false;
-        }, 500);
     };
 
     return {
         showScrollToTop,
-        rightOffset,
+        buttonRightOffset: buttonRightOffset,
         handleScrollToTop
     };
 }

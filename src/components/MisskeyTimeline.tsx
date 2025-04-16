@@ -22,8 +22,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     const {
         notes,
         loadMore,
-        enableBuffering,
-        disableBufferingAndFlush,
         setAutoUpdateFeed
     } = useTimelineFeed(timelineType, misskeyApiClient);
 
@@ -31,13 +29,9 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
 
     const {
         showScrollToTop,
-        rightOffset,
+        buttonRightOffset,
         handleScrollToTop
-    } = useScrollToTop(scrollAreaRef, containerRef, () => {
-        disableBufferingAndFlush();
-        setAutoUpdateFeed(true);
-        console.log("scroll to top completed, auto update re-enabled");
-    });
+    } = useScrollToTop(scrollAreaRef, containerRef);
 
     useEffect(() => {
         if (!scrollAreaRef.current) return;
@@ -51,14 +45,14 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
 
             if (!nearTop && notes.length > 0) {
                 setAutoUpdateFeed(false);
-                enableBuffering();
-                console.log("auto update disabled & buffering enabled");
+            } else if (nearTop) {
+                setAutoUpdateFeed(true);
             }
         };
 
         scrollAreaRef.current.addEventListener('scroll', handleScroll);
         return () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
-    }, [scrollAreaRef, notes.length, enableBuffering, setAutoUpdateFeed]);
+    }, [scrollAreaRef, notes.length, setAutoUpdateFeed]);
 
     return (
         <Box pos="relative">
@@ -71,12 +65,12 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
             ))}
             <div ref={sentinelRef} style={{ height: 1 }} />
 
-            {rightOffset !== null && (
+            {buttonRightOffset !== null && (
                 <Box
                     style={{
                         position: 'fixed',
                         bottom: 24,
-                        right: rightOffset,
+                        right: buttonRightOffset,
                         zIndex: 1000,
                     }}
                 >

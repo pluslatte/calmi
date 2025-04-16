@@ -17,16 +17,10 @@ export class TimelineFeed {
 
     set autoUpdateEnabled(value: boolean) {
         this._autoUpdateEnabled = value;
-
-        if (value && this.bufferEnabled) {
-            this.disableBufferingAndFlush();
-        }
         console.log(`Auto update ${value ? 'enabled' : 'disabled'}`);
     }
 
     initLoad = false;
-    newNotesBuffer: Note[] = [];
-    bufferEnabled = false;
 
     constructor(private timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
         this.notes = new Observable<Note[]>([]);
@@ -44,14 +38,11 @@ export class TimelineFeed {
     }
 
     private handleNewNote(note: Note): void {
-        if (this.bufferEnabled) {
-            console.log('bufferEnabled ' + note.id);
-            this.newNotesBuffer.unshift(note);
-        } else if (this._autoUpdateEnabled) {
+        if (this._autoUpdateEnabled) {
             console.log('auto-adding note' + note.id);
             this.addNote(note);
         } else {
-            console.warn('note ignored: auto-update off');
+            console.log('note ignored: auto-update off');
         }
     }
 
@@ -64,6 +55,7 @@ export class TimelineFeed {
     }
 
     reloadLatest() {
+        console.log('reloadLatest')
         this.notes.value = [];
         this._autoUpdateEnabled = false;
         this.initLoad = true;
@@ -118,18 +110,11 @@ export class TimelineFeed {
                     limit,
                     untilId: lastNoteId,
                 }).then(
-                    this.initLoad ?
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                        :
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
+                    (notes) => {
+                        notes.forEach((note) => {
+                            this.addNoteRev(note);
+                        })
+                    }
                 );
                 break;
             case 'social':
@@ -137,18 +122,11 @@ export class TimelineFeed {
                     limit,
                     untilId: lastNoteId,
                 }).then(
-                    this.initLoad ?
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                        :
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
+                    (notes) => {
+                        notes.forEach((note) => {
+                            this.addNoteRev(note);
+                        })
+                    }
                 );
                 break;
             case 'local':
@@ -156,18 +134,11 @@ export class TimelineFeed {
                     limit,
                     untilId: lastNoteId,
                 }).then(
-                    this.initLoad ?
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                        :
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
+                    (notes) => {
+                        notes.forEach((note) => {
+                            this.addNoteRev(note);
+                        })
+                    }
                 );
                 break;
             case 'global':
@@ -175,18 +146,11 @@ export class TimelineFeed {
                     limit,
                     untilId: lastNoteId,
                 }).then(
-                    this.initLoad ?
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
-                        :
-                        (notes) => {
-                            notes.forEach((note) => {
-                                this.addNoteRev(note);
-                            })
-                        }
+                    (notes) => {
+                        notes.forEach((note) => {
+                            this.addNoteRev(note);
+                        })
+                    }
                 );
                 break;
         }
@@ -195,38 +159,6 @@ export class TimelineFeed {
         if (this.initLoad) {
             this._autoUpdateEnabled = true;
             this.initLoad = false;
-        }
-    }
-
-    flushBufferedNotes() {
-        // Unsubscribe old notes.
-        this.notes.value.forEach(n => {
-            console.log("unsubscribe note: " + n.id);
-            this.misskeyStream.unsubscribeFromNote(n.id);
-        });
-
-        // Replace this.notes.value with the buffer.
-        this.notes.value = [...this.newNotesBuffer];
-        this.newNotesBuffer.forEach(n => this.misskeyStream.subscribeToNote(n.id));
-
-        this.newNotesBuffer = [];
-    }
-
-    enableBuffering() {
-        if (!this.bufferEnabled) {
-            this.bufferEnabled = true;
-
-            if (this._autoUpdateEnabled) {
-                this._autoUpdateEnabled = false;
-                console.log("Auto update disabled due to buffering");
-            }
-        }
-    }
-
-    disableBufferingAndFlush() {
-        if (this.bufferEnabled) {
-            this.bufferEnabled = false;
-            this.flushBufferedNotes();
         }
     }
 

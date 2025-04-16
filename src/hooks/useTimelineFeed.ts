@@ -26,26 +26,15 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         timelineRef.current?.loadMore();
     };
 
-    const enableBuffering = () => {
-        timelineRef.current?.enableBuffering();
-    };
-
-    const disableBufferingAndFlush = () => {
-        timelineRef.current?.disableBufferingAndFlush();
-    };
-
     const setAutoUpdateFeed = (enable: boolean) => {
         if (timelineRef.current) {
-            timelineRef.current.doAutoUpdateFeed = enable;
+            timelineRef.current.autoUpdateEnabled = enable;
         }
     };
 
     return {
         notes,
         loadMore,
-        enableBuffering,
-        disableBufferingAndFlush,
         setAutoUpdateFeed,
-        timeline: timelineRef.current
     };
 }
