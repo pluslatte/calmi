@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
     const [notes, setNotes] = useState<Note[]>([]);
-    const [timelineAutoUpdateState, setTimelineAutoUpdateState] = useState(false);
+    const [timelineAutoUpdateState, setTimelineAutoUpdateState] = useState(true);
     const [skippedNotesGroups, setSkippedNotesGroups] = useState<Array<{ count: number, timestamp: Date, referenceNoteId: string, loadedNotes: Note[] | null, isLoading: boolean }>>([]);
     const [trimmedNotesGroup, setTrimmedNotesGroup] = useState<{ count: number, timestamp: Date, trimmedNoteIds: string[], loadedNotes: Note[] | null, isLoading: boolean } | null>(null);
     const [loadingSkippedNotes, setLoadingSkippedNotes] = useState<boolean>(false);
