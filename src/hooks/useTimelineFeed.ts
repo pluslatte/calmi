@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
     const [notes, setNotes] = useState<Note[]>([]);
     const [timelineAutoUpdateState, setTimelineAutoUpdateState] = useState(false);
-    const [skippedNotesGroups, setSkippedNotesGroups] = useState<Array<{ count: number, timestamp: Date, position: number }>>([]);
+    const [skippedNotesGroups, setSkippedNotesGroups] = useState<Array<{ count: number, timestamp: Date, referenceNoteId: string }>>([]);
     const timelineRef = useRef<TimelineFeed | null>(null);
 
     useEffect(() => {

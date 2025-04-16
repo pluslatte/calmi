@@ -58,33 +58,42 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     }, [scrollAreaRef, notes.length, setAutoUpdateFeed]);
 
     const renderItems = () => {
-        let items: React.JSX.Element[] = [];
-        let notesWithIndicators = [...notes];
+        const topIndicators = skippedNotesGroups
+            .filter(group => group.referenceNoteId === 'timeline-top')
+            .map(group => (
+                <Box key={`skipped-top-${group.timestamp.getTime()}`}>
+                    <SkippedNotesIndicator
+                        count={group.count}
+                        timestamp={group.timestamp}
+                    />
+                </Box>
+            ));
 
-        skippedNotesGroups.forEach(group => {
-            if (group.position < notesWithIndicators.length) {
-                items.push(
-                    <Box key={`skipped-${group.timestamp.getTime()}`}>
+        let notesWithIndicators = notes.map((note, index) => {
+            const relatedIndicators = skippedNotesGroups
+                .filter(group => group.referenceNoteId === note.id)
+                .map(group => (
+                    <Box key={`skipped-${note.id}-${group.timestamp.getTime()}`}>
                         <SkippedNotesIndicator
                             count={group.count}
                             timestamp={group.timestamp}
                         />
                     </Box>
-                );
-            }
+                ));
+
+            return (
+                <React.Fragment key={note.id}>
+                    {relatedIndicators}
+                    <Box>
+                        <MisskeyNote note={note} />
+                        <MisskeyNoteActions />
+                        <Divider my="sm" />
+                    </Box>
+                </React.Fragment>
+            )
         });
 
-        notesWithIndicators.forEach((note, index) => {
-            items.push(
-                <Box key={note.id}>
-                    <MisskeyNote note={note} />
-                    <MisskeyNoteActions />
-                    <Divider my="sm" />
-                </Box>
-            );
-        });
-
-        return items;
+        return [...topIndicators, ...notesWithIndicators];
     }
 
     return (

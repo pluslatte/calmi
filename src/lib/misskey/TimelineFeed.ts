@@ -8,7 +8,7 @@ import { MisskeyStream } from "./MisskeyStream";
 interface SkippedNotesGroup {
     count: number;
     timestamp: Date;
-    position: number;
+    referenceNoteId: string;
 }
 
 export class TimelineFeed {
@@ -58,8 +58,14 @@ export class TimelineFeed {
     private addSkippedNote(note: Note): void {
         const now = new Date();
 
+        const referenceNoteId = this.notes.value.length > 0
+            ? this.notes.value[0].id
+            : 'timeline-top';
+
         if (this.lastSkippedGroupTimestamp &&
-            (now.getTime() - this.lastSkippedGroupTimestamp.getTime() < this.skippedGroupThreshold)) {
+            (now.getTime() - this.lastSkippedGroupTimestamp.getTime() < this.skippedGroupThreshold) &&
+            this.skippedNotesGroups.length > 0 &&
+            this.skippedNotesGroups[this.skippedNotesGroups.length - 1].referenceNoteId === referenceNoteId) {
             const lastGroup = this.skippedNotesGroups[this.skippedNotesGroups.length - 1];
             lastGroup.count += 1;
             lastGroup.timestamp = now;
@@ -69,7 +75,7 @@ export class TimelineFeed {
             this.skippedNotesGroups.push({
                 count: 1,
                 timestamp: now,
-                position: position
+                referenceNoteId: referenceNoteId
             });
         }
 
