@@ -17,7 +17,6 @@ export class TimelineFeed {
 
     set autoUpdateEnabled(value: boolean) {
         this._autoUpdateEnabled = value;
-        console.log(`Auto update ${value ? 'enabled' : 'disabled'}`);
     }
 
     initLoad = false;
