@@ -54,7 +54,7 @@ export function useTimelineFeed(
         setAutoUpdate: (enabled: boolean) => {
             if (!timelineRef.current) return;
 
-            timelineRef.current.isAutoUpdateEnabled = enabled;
+            timelineRef.current.doAutoUpdateFeed = enabled;
             setState(prev => ({ ...prev, isAutoUpdating: enabled }));
         },
 
