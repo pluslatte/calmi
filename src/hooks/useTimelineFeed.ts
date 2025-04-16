@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from "react";
 export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
     const [notes, setNotes] = useState<Note[]>([]);
     const [timelineAutoUpdateState, setTimelineAutoUpdateState] = useState(false);
-    const [skippedNotesGroups, setSkippedNotesGroups] = useState<Array<{ count: number, timestamp: Date, referenceNoteId: string }>>([]);
+    const [skippedNotesGroups, setSkippedNotesGroups] = useState<Array<{ count: number, timestamp: Date, referenceNoteId: string, loadedNotes: Note[] | null, isLoading: boolean }>>([]);
+    const [loadingSkippedNotes, setLoadingSkippedNotes] = useState<boolean>(false);
     const timelineRef = useRef<TimelineFeed | null>(null);
 
     useEffect(() => {
@@ -31,6 +32,21 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         timelineRef.current?.loadMore();
     };
 
+    const loadSkippedNotes = async (groupIndex: number) => {
+        if (!timelineRef.current || loadingSkippedNotes) return null;
+
+        setLoadingSkippedNotes(true);
+        try {
+            const loadedNotes = await timelineRef.current.loadSkippedNotes(groupIndex);
+            setLoadingSkippedNotes(false);
+            return loadedNotes;
+        } catch (error) {
+            console.error('Error loading skipped notes:', error);
+            setLoadingSkippedNotes(false);
+            return null;
+        }
+    };
+
     const setAutoUpdateFeed = (enable: boolean) => {
         if (timelineRef.current) {
             timelineRef.current.autoUpdateEnabled = enable;
@@ -44,5 +60,7 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         setAutoUpdateFeed,
         timelineAutoUpdateState,
         skippedNotesGroups,
+        loadSkippedNotes,
+        loadingSkippedNotes
     };
 }

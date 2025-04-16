@@ -9,6 +9,9 @@ interface SkippedNotesGroup {
     count: number;
     timestamp: Date;
     referenceNoteId: string;
+    skippedNoteIds: string[];
+    loadedNotes: Note[] | null;
+    isLoading: boolean;
 }
 
 export class TimelineFeed {
@@ -18,6 +21,7 @@ export class TimelineFeed {
     skippedNotesGroups: SkippedNotesGroup[] = [];
     lastSkippedGroupTimestamp: Date | null = null;
     skippedGroupThreshold = 30000;
+    maxSkippedNotesToLoad = 10;
 
     private misskeyStream: MisskeyStream;
     private _autoUpdateEnabled: boolean = false;
@@ -69,13 +73,15 @@ export class TimelineFeed {
             const lastGroup = this.skippedNotesGroups[this.skippedNotesGroups.length - 1];
             lastGroup.count += 1;
             lastGroup.timestamp = now;
+            lastGroup.skippedNoteIds.push(note.id);
         } else {
-            const position = 0;
-
             this.skippedNotesGroups.push({
                 count: 1,
                 timestamp: now,
-                referenceNoteId: referenceNoteId
+                referenceNoteId: referenceNoteId,
+                skippedNoteIds: [note.id],
+                loadedNotes: null,
+                isLoading: false
             });
         }
 
@@ -203,6 +209,64 @@ export class TimelineFeed {
         if (this.initLoad) {
             this._autoUpdateEnabled = true;
             this.initLoad = false;
+        }
+    }
+
+    async loadSkippedNotes(groupIndex: number): Promise<Note[] | null> {
+        const group = this.skippedNotesGroups[groupIndex];
+        if (!group || group.isLoading) return null;
+
+        // もう読み込まれているのならそれを返す
+        if (group.loadedNotes) return group.loadedNotes;
+
+        group.isLoading = true;
+        this.notes.value = [...this.notes.value]; // UI を更新するため
+
+        // 読み込むノートIDの数は制限する
+        const noteIdsToLoad = group.skippedNoteIds.slice(0, this.maxSkippedNotesToLoad);
+        const loadedNotes: Note[] = [];
+
+        try {
+            // 1つずつノートを読み込む
+            const promises = noteIdsToLoad.map(async (noteId) => {
+                try {
+                    const note = await this.misskeyApiClient.request('notes/show', {
+                        noteId: noteId
+                    });
+                    if (note) {
+                        return note;
+                    }
+                    return null;
+                } catch (error) {
+                    console.error(`Failed to load note ${noteId}:`, error);
+                    return null;
+                }
+            });
+
+            // すべての Promise を待機
+            const results = await Promise.all(promises);
+
+            // null なノートはフィルタしてはじく
+            const validNotes = results.filter((note): note is Note => note !== null);
+
+            // 読み込まれたノートを記憶
+            group.loadedNotes = validNotes;
+            group.isLoading = false;
+
+            // 読み込んだノート数が実際のスキップ数と異なる場合は表示用のカウントを更新
+            if (group.loadedNotes.length < group.count) {
+                console.log(`Loaded ${group.loadedNotes.length} of ${group.count} skipped notes`);
+            }
+
+            // リストを更新
+            this.notes.value = [...this.notes.value];
+
+            return group.loadedNotes;
+        } catch (error) {
+            console.error('Failed to load skipped notes:', error);
+            group.isLoading = false;
+            this.notes.value = [...this.notes.value]; // UI更新のためのトリガー
+            return null;
         }
     }
 

@@ -3,7 +3,7 @@
 import React, { memo, useEffect } from 'react';
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
-import { Box, Button, Divider, Text, Transition } from "@mantine/core";
+import { Box, Button, Divider, Grid, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp } from "@tabler/icons-react";
 import { useTimelineFeed } from "@/hooks/useTimelineFeed";
@@ -25,7 +25,9 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         loadMore,
         setAutoUpdateFeed,
         timelineAutoUpdateState,
-        skippedNotesGroups
+        skippedNotesGroups,
+        loadSkippedNotes,
+        loadingSkippedNotes
     } = useTimelineFeed(timelineType, misskeyApiClient);
 
     const { sentinelRef } = useInfiniteScroll(loadMore);
@@ -58,28 +60,49 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     }, [scrollAreaRef, notes.length, setAutoUpdateFeed]);
 
     const renderItems = () => {
+        // タイムライン先頭にある場合専用（出番は少ないと思うが一応）
         const topIndicators = skippedNotesGroups
             .filter(group => group.referenceNoteId === 'timeline-top')
-            .map(group => (
-                <Box key={`skipped-top-${group.timestamp.getTime()}`}>
-                    <SkippedNotesIndicator
-                        count={group.count}
-                        timestamp={group.timestamp}
-                    />
-                </Box>
-            ));
-
-        let notesWithIndicators = notes.map((note, index) => {
-            const relatedIndicators = skippedNotesGroups
-                .filter(group => group.referenceNoteId === note.id)
-                .map(group => (
-                    <Box key={`skipped-${note.id}-${group.timestamp.getTime()}`}>
+            .map((group, index) => {
+                const groupIndex = skippedNotesGroups.findIndex(g =>
+                    g.timestamp === group.timestamp && g.referenceNoteId === group.referenceNoteId);
+                return (
+                    <Box key={`skipped-top-${group.timestamp.getTime()}`}>
                         <SkippedNotesIndicator
                             count={group.count}
                             timestamp={group.timestamp}
+                            groupIndex={groupIndex}
+                            loadSkippedNotes={loadSkippedNotes}
+                            loadedNotes={group.loadedNotes}
+                            isLoading={group.isLoading}
                         />
                     </Box>
-                ));
+                )
+
+            })
+
+        let notesWithIndicators = notes.map((note, index) => {
+            const relatedGroups = skippedNotesGroups
+                .filter(group => group.referenceNoteId === note.id);
+
+            const relatedIndicators = relatedGroups
+                .map(group => {
+                    const groupIndex = skippedNotesGroups.findIndex(g =>
+                        g.timestamp === group.timestamp && g.referenceNoteId === group.referenceNoteId);
+
+                    return (
+                        <Box key={`skipped-${note.id}-${group.timestamp.getTime()}`}>
+                            <SkippedNotesIndicator
+                                count={group.count}
+                                timestamp={group.timestamp}
+                                groupIndex={groupIndex}
+                                loadSkippedNotes={loadSkippedNotes}
+                                loadedNotes={group.loadedNotes}
+                                isLoading={group.isLoading}
+                            />
+                        </Box>
+                    );
+                });
 
             return (
                 <React.Fragment key={note.id}>
