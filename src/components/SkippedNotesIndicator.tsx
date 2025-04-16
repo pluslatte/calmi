@@ -1,7 +1,7 @@
 import { Box, Collapse, Divider, Loader, Paper, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { formatDistanceToNow } from "date-fns";
-import { bg, ja } from "date-fns/locale";
+import { ja } from "date-fns/locale";
 import { Note } from "misskey-js/entities.js";
 import { useState } from "react";
 import MisskeyNote from "./MisskeyNote";

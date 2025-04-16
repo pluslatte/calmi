@@ -1,12 +1,13 @@
 import { Text } from "@mantine/core";
 import { formatDistanceStrict, parseISO } from "date-fns";
+import { ja } from "date-fns/locale";
 import { useEffect, useState } from "react";
 
 export default function AutoRefreshTimestamp({ iso }: { iso: string }) {
     const [text, setText] = useState('');
 
     const update = () => {
-        setText(formatDistanceStrict(new Date(), parseISO(iso), { addSuffix: true }));
+        setText(formatDistanceStrict(parseISO(iso), new Date, { addSuffix: true, locale: ja }));
     }
 
     useEffect(() => {
