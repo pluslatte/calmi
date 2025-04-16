@@ -117,7 +117,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
                                     leftSection={<IconArrowUp size={16} />}
                                     style={styles}
                                     onClick={handleScrollToTop}
-                                    variant="light"
+                                    variant="filled"
                                 >
                                     上へ戻る
                                 </Button>

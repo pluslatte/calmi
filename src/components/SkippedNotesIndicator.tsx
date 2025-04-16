@@ -43,7 +43,7 @@ export default function SkippedNotesIndicator({
                 borderTop: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
                 borderRight: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
                 borderBottom: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-                opacity: 0.9, // 少し透明に
+                opacity: 0.7, // 少し透明に
             }}
         >
             <Text size="sm" ta="center" c={textColor}>
