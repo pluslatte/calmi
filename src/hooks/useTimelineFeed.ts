@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
     const [notes, setNotes] = useState<Note[]>([]);
+    const [timelineAutoUpdateState, setTimelineAutoUpdateState] = useState(false);
     const timelineRef = useRef<TimelineFeed | null>(null);
 
     useEffect(() => {
@@ -29,6 +30,7 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
     const setAutoUpdateFeed = (enable: boolean) => {
         if (timelineRef.current) {
             timelineRef.current.autoUpdateEnabled = enable;
+            setTimelineAutoUpdateState(enable);
         }
     };
 
@@ -36,5 +38,6 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         notes,
         loadMore,
         setAutoUpdateFeed,
+        timelineAutoUpdateState,
     };
 }

@@ -3,7 +3,7 @@
 import React, { memo, useEffect } from 'react';
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
-import { Box, Button, Divider, Transition } from "@mantine/core";
+import { Box, Button, Divider, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp } from "@tabler/icons-react";
 import { useTimelineFeed } from "@/hooks/useTimelineFeed";
@@ -22,7 +22,8 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     const {
         notes,
         loadMore,
-        setAutoUpdateFeed
+        setAutoUpdateFeed,
+        timelineAutoUpdateState
     } = useTimelineFeed(timelineType, misskeyApiClient);
 
     const { sentinelRef } = useInfiniteScroll(loadMore);
@@ -66,27 +67,47 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
             <div ref={sentinelRef} style={{ height: 1 }} />
 
             {buttonRightOffset !== null && (
-                <Box
-                    style={{
-                        position: 'fixed',
-                        bottom: 24,
-                        right: buttonRightOffset,
-                        zIndex: 1000,
-                    }}
-                >
-                    <Transition mounted={showScrollToTop} transition="slide-up" duration={200} timingFunction="ease">
-                        {(styles) => (
-                            <Button
-                                leftSection={<IconArrowUp size={16} />}
-                                style={styles}
-                                onClick={handleScrollToTop}
-                                variant="light"
-                            >
-                                上へ戻る
-                            </Button>
-                        )}
-                    </Transition>
-                </Box>
+                <React.Fragment>
+                    <Box
+                        style={{
+                            position: 'fixed',
+                            bottom: 24,
+                            right: buttonRightOffset,
+                            zIndex: 1000,
+                        }}
+                    >
+                        <Transition mounted={showScrollToTop} transition="slide-up" duration={200} timingFunction="ease">
+                            {(styles) => (
+                                <Button
+                                    leftSection={<IconArrowUp size={16} />}
+                                    style={styles}
+                                    onClick={handleScrollToTop}
+                                    variant="light"
+                                >
+                                    上へ戻る
+                                </Button>
+                            )}
+                        </Transition>
+                    </Box>
+                    <Box
+                        style={{
+                            position: 'fixed',
+                            top: 24,
+                            right: buttonRightOffset,
+                            zIndex: 1000,
+                        }}
+                    >
+                        <Transition mounted={!timelineAutoUpdateState} transition="slide-up" duration={200} timingFunction="ease">
+                            {(styles) => (
+                                <Text
+                                    style={styles}
+                                >
+                                    {`自動更新オフ`}
+                                </Text>
+                            )}
+                        </Transition>
+                    </Box>
+                </React.Fragment>
             )}
         </Box>
     );
