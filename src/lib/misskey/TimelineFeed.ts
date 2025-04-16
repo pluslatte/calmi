@@ -9,8 +9,21 @@ export class TimelineFeed {
     notes: Observable<Note[]>;
     misskeyApiClient: api.APIClient;
     private misskeyStream: MisskeyStream;
+    private _autoUpdateEnabled: boolean = false;
 
-    doAutoUpdateFeed = false;
+    get autoUpdateEnabled(): boolean {
+        return this._autoUpdateEnabled;
+    }
+
+    set autoUpdateEnabled(value: boolean) {
+        this._autoUpdateEnabled = value;
+
+        if (value && this.bufferEnabled) {
+            this.disableBufferingAndFlush();
+        }
+        console.log(`Auto update ${value ? 'enabled' : 'disabled'}`);
+    }
+
     initLoad = false;
     newNotesBuffer: Note[] = [];
     bufferEnabled = false;
@@ -34,9 +47,11 @@ export class TimelineFeed {
         if (this.bufferEnabled) {
             console.log('bufferEnabled ' + note.id);
             this.newNotesBuffer.unshift(note);
-        } else if (this.doAutoUpdateFeed) {
-            console.log('bufferDisabled ' + note.id);
+        } else if (this._autoUpdateEnabled) {
+            console.log('auto-adding note' + note.id);
             this.addNote(note);
+        } else {
+            console.warn('note ignored: auto-update off');
         }
     }
 
@@ -44,12 +59,13 @@ export class TimelineFeed {
         console.log('initFeed');
         this.notes.value = [];
         this.initLoad = true;
+        this._autoUpdateEnabled = false;
         this.misskeyStream.connect();
     }
 
     reloadLatest() {
         this.notes.value = [];
-        this.doAutoUpdateFeed = false;
+        this._autoUpdateEnabled = false;
         this.initLoad = true;
     }
 
@@ -177,7 +193,7 @@ export class TimelineFeed {
 
 
         if (this.initLoad) {
-            this.doAutoUpdateFeed = true;
+            this._autoUpdateEnabled = true;
             this.initLoad = false;
         }
     }
@@ -197,12 +213,21 @@ export class TimelineFeed {
     }
 
     enableBuffering() {
-        this.bufferEnabled = true;
+        if (!this.bufferEnabled) {
+            this.bufferEnabled = true;
+
+            if (this._autoUpdateEnabled) {
+                this._autoUpdateEnabled = false;
+                console.log("Auto update disabled due to buffering");
+            }
+        }
     }
 
     disableBufferingAndFlush() {
-        this.bufferEnabled = false;
-        this.flushBufferedNotes();
+        if (this.bufferEnabled) {
+            this.bufferEnabled = false;
+            this.flushBufferedNotes();
+        }
     }
 
     // Clean up resources when timeline is no longer needed
