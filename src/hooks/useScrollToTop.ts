@@ -60,7 +60,6 @@ export function useScrollToTop(
     return {
         showScrollToTop,
         rightOffset,
-        handleScrollToTop,
-        isReturningToTop
+        handleScrollToTop
     };
 }
