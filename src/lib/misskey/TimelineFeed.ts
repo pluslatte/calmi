@@ -14,14 +14,24 @@ interface SkippedNotesGroup {
     isLoading: boolean; // 読み込み中かどうか
 }
 
+interface TrimmedNotesGroup {
+    count: number;
+    timestamp: Date;
+    trimmedNoteIds: string[];
+    loadedNotes: Note[] | null;
+    isLoading: boolean;
+}
+
 export class TimelineFeed {
     notes: Observable<Note[]>;
     misskeyApiClient: api.APIClient;
     initLoad = false;
     skippedNotesGroups: SkippedNotesGroup[] = [];
     lastSkippedGroupTimestamp: Date | null = null;
-    skippedGroupThreshold = 30000;
-    maxSkippedNotesToLoad = 10;
+    skippedGroupThreshold = 60000;
+    maxSkippedNotesToLoad = 20;
+    trimmedNotesGroup: TrimmedNotesGroup | null = null;
+    maxTrimmedNotesToLoad = 20;
 
     private misskeyStream: MisskeyStream;
     private _autoUpdateEnabled: boolean = false;
@@ -97,6 +107,10 @@ export class TimelineFeed {
         return this.skippedNotesGroups;
     }
 
+    getTrimmedNotesGroup(): TrimmedNotesGroup | null {
+        return this.trimmedNotesGroup;
+    }
+
     initFeed() {
         console.log('initFeed');
         this.notes.value = [];
@@ -146,6 +160,21 @@ export class TimelineFeed {
             const oldNote = this.notes.value.shift();
             if (oldNote) {
                 this.misskeyStream.unsubscribeFromNote(oldNote.id);
+
+                // 切り落とされたノートを記録
+                if (!this.trimmedNotesGroup) {
+                    this.trimmedNotesGroup = {
+                        count: 1,
+                        timestamp: new Date(),
+                        trimmedNoteIds: [oldNote.id],
+                        loadedNotes: null,
+                        isLoading: false
+                    };
+                } else {
+                    this.trimmedNotesGroup.count += 1;
+                    this.trimmedNotesGroup.timestamp = new Date();
+                    this.trimmedNotesGroup.trimmedNoteIds.push(oldNote.id);
+                }
             }
         }
     }
@@ -227,7 +256,6 @@ export class TimelineFeed {
 
         // 読み込むノートIDの数は制限する
         const noteIdsToLoad = group.skippedNoteIds.slice(0, this.maxSkippedNotesToLoad);
-        const loadedNotes: Note[] = [];
 
         try {
             // 1つずつノートを読み込む
@@ -269,6 +297,55 @@ export class TimelineFeed {
             console.error('Failed to load skipped notes:', error);
             group.isLoading = false;
             this.notes.value = [...this.notes.value]; // UI更新のためのトリガー
+            return null;
+        }
+    }
+
+    async loadTrimmedNotes(): Promise<Note[] | null> {
+        const group = this.trimmedNotesGroup;
+        if (!group || group.isLoading) return null;
+
+        // すでに読み込まれている場合はそれを返す
+        if (group.loadedNotes) return group.loadedNotes;
+
+        group.isLoading = true;
+        this.notes.value = [...this.notes.value]; // UI更新用
+
+        // 読み込むノートIDの数を制限（最新の10件など）
+        const noteIdsToLoad = group.trimmedNoteIds.slice(0, this.maxTrimmedNotesToLoad);
+
+        try {
+            // ノートを一括で読み込む
+            const promises = noteIdsToLoad.map(async (noteId) => {
+                try {
+                    const note = await this.misskeyApiClient.request('notes/show', {
+                        noteId: noteId
+                    });
+                    return note;
+                } catch (error) {
+                    console.error(`Failed to load note ${noteId}:`, error);
+                    return null;
+                }
+            });
+
+            // すべての Promise を待機
+            const results = await Promise.all(promises);
+
+            // null でないノートだけをフィルタリング
+            const validNotes = results.filter((note): note is Note => note !== null);
+
+            // 読み込まれたノートを保存
+            group.loadedNotes = validNotes;
+            group.isLoading = false;
+
+            // UI更新用
+            this.notes.value = [...this.notes.value];
+
+            return group.loadedNotes;
+        } catch (error) {
+            console.error('Failed to load trimmed notes:', error);
+            group.isLoading = false;
+            this.notes.value = [...this.notes.value];
             return null;
         }
     }

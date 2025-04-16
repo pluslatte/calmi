@@ -10,6 +10,7 @@ import { useTimelineFeed } from "@/hooks/useTimelineFeed";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
+import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
@@ -27,7 +28,10 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         timelineAutoUpdateState,
         skippedNotesGroups,
         loadSkippedNotes,
-        loadingSkippedNotes
+        loadingSkippedNotes,
+        trimmedNotesGroup,
+        loadTrimmedNotes,
+        loadingTrimmedNotes,
     } = useTimelineFeed(timelineType, misskeyApiClient);
 
     const { sentinelRef } = useInfiniteScroll(loadMore);
@@ -60,6 +64,20 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     }, [scrollAreaRef, notes.length, setAutoUpdateFeed]);
 
     const renderItems = () => {
+        // 切り落とされたノートのインジケーターを表示（タイムライン上部に配置）
+        const trimmedIndicator = trimmedNotesGroup && trimmedNotesGroup.count > 0 ? (
+            <Box key="trimmed-notes-indicator">
+                <TrimmedNotesIndicator
+                    count={trimmedNotesGroup.count}
+                    timestamp={trimmedNotesGroup.timestamp}
+                    loadTrimmedNotes={loadTrimmedNotes}
+                    loadedNotes={trimmedNotesGroup.loadedNotes}
+                    isLoading={loadingTrimmedNotes}
+                />
+            </Box>
+        ) : null;
+
+
         // スキップされたノートのグループがタイムライン先頭にある場合専用（出番は少ないと思うが一応）
         const topIndicators = skippedNotesGroups
             .filter(group => group.referenceNoteId === 'timeline-top')
@@ -117,7 +135,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
             )
         });
 
-        return [...topIndicators, ...notesWithIndicators];
+        return [trimmedIndicator, ...topIndicators, ...notesWithIndicators];
     }
 
     return (

@@ -7,7 +7,9 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
     const [notes, setNotes] = useState<Note[]>([]);
     const [timelineAutoUpdateState, setTimelineAutoUpdateState] = useState(false);
     const [skippedNotesGroups, setSkippedNotesGroups] = useState<Array<{ count: number, timestamp: Date, referenceNoteId: string, loadedNotes: Note[] | null, isLoading: boolean }>>([]);
+    const [trimmedNotesGroup, setTrimmedNotesGroup] = useState<{ count: number, timestamp: Date, trimmedNoteIds: string[], loadedNotes: Note[] | null, isLoading: boolean } | null>(null);
     const [loadingSkippedNotes, setLoadingSkippedNotes] = useState<boolean>(false);
+    const [loadingTrimmedNotes, setLoadingTrimmedNotes] = useState<boolean>(false);
     const timelineRef = useRef<TimelineFeed | null>(null);
 
     useEffect(() => {
@@ -17,6 +19,7 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         const updateNotes = () => {
             setNotes(timeline.notes.value);
             setSkippedNotesGroups(timeline.getSkippedNotesGroups());
+            setTrimmedNotesGroup(timeline.getTrimmedNotesGroup());
         };
 
         timeline.notes.subscribe(updateNotes);
@@ -47,6 +50,21 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         }
     };
 
+    const loadTrimmedNotes = async () => {
+        if (!timelineRef.current || loadingTrimmedNotes) return null;
+
+        setLoadingTrimmedNotes(true);
+        try {
+            const loadedNotes = await timelineRef.current.loadTrimmedNotes();
+            setLoadingTrimmedNotes(false);
+            return loadedNotes;
+        } catch (error) {
+            console.error('Error loading trimmed notes:', error);
+            setLoadingTrimmedNotes(false);
+            return null;
+        }
+    };
+
     const setAutoUpdateFeed = (enable: boolean) => {
         if (timelineRef.current) {
             timelineRef.current.autoUpdateEnabled = enable;
@@ -61,6 +79,9 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         timelineAutoUpdateState,
         skippedNotesGroups,
         loadSkippedNotes,
-        loadingSkippedNotes
+        loadingSkippedNotes,
+        trimmedNotesGroup,
+        loadTrimmedNotes,
+        loadingTrimmedNotes,
     };
 }
