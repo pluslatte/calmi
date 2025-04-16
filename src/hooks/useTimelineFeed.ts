@@ -6,15 +6,19 @@ import { useEffect, useRef, useState } from "react";
 export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
     const [notes, setNotes] = useState<Note[]>([]);
     const [timelineAutoUpdateState, setTimelineAutoUpdateState] = useState(false);
+    const [skippedNotesGroups, setSkippedNotesGroups] = useState<Array<{ count: number, timestamp: Date, position: number }>>([]);
     const timelineRef = useRef<TimelineFeed | null>(null);
 
     useEffect(() => {
         const timeline = new TimelineFeed(timelineType, misskeyApiClient);
         timelineRef.current = timeline;
 
-        const updateNotes = () => { setNotes(timeline.notes.value); };
-        timeline.notes.subscribe(updateNotes);
+        const updateNotes = () => {
+            setNotes(timeline.notes.value);
+            setSkippedNotesGroups(timeline.getSkippedNotesGroups());
+        };
 
+        timeline.notes.subscribe(updateNotes);
         timeline.initFeed();
 
         return (() => {
@@ -39,5 +43,6 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         loadMore,
         setAutoUpdateFeed,
         timelineAutoUpdateState,
+        skippedNotesGroups,
     };
 }

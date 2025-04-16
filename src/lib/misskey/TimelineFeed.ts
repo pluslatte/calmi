@@ -5,9 +5,20 @@ import { Note } from "misskey-js/entities.js";
 import { Observable } from "../Observable";
 import { MisskeyStream } from "./MisskeyStream";
 
+interface SkippedNotesGroup {
+    count: number;
+    timestamp: Date;
+    position: number;
+}
+
 export class TimelineFeed {
     notes: Observable<Note[]>;
     misskeyApiClient: api.APIClient;
+    initLoad = false;
+    skippedNotesGroups: SkippedNotesGroup[] = [];
+    lastSkippedGroupTimestamp: Date | null = null;
+    skippedGroupThreshold = 30000;
+
     private misskeyStream: MisskeyStream;
     private _autoUpdateEnabled: boolean = false;
 
@@ -18,8 +29,6 @@ export class TimelineFeed {
     set autoUpdateEnabled(value: boolean) {
         this._autoUpdateEnabled = value;
     }
-
-    initLoad = false;
 
     constructor(private timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
         this.notes = new Observable<Note[]>([]);
@@ -42,7 +51,35 @@ export class TimelineFeed {
             this.addNote(note);
         } else {
             console.log('note ignored: auto-update off');
+            this.addSkippedNote(note);
         }
+    }
+
+    private addSkippedNote(note: Note): void {
+        const now = new Date();
+
+        if (this.lastSkippedGroupTimestamp &&
+            (now.getTime() - this.lastSkippedGroupTimestamp.getTime() < this.skippedGroupThreshold)) {
+            const lastGroup = this.skippedNotesGroups[this.skippedNotesGroups.length - 1];
+            lastGroup.count += 1;
+            lastGroup.timestamp = now;
+        } else {
+            const position = 0;
+
+            this.skippedNotesGroups.push({
+                count: 1,
+                timestamp: now,
+                position: position
+            });
+        }
+
+        this.lastSkippedGroupTimestamp = now;
+
+        this.notes.value = [...this.notes.value];
+    }
+
+    getSkippedNotesGroups(): SkippedNotesGroup[] {
+        return this.skippedNotesGroups;
     }
 
     initFeed() {
@@ -58,6 +95,8 @@ export class TimelineFeed {
         this.notes.value = [];
         this._autoUpdateEnabled = false;
         this.initLoad = true;
+        this.skippedNotesGroups = [];
+        this.lastSkippedGroupTimestamp = null;
     }
 
     addNote(note: Note) {

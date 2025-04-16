@@ -9,6 +9,7 @@ import { IconArrowUp } from "@tabler/icons-react";
 import { useTimelineFeed } from "@/hooks/useTimelineFeed";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import SkippedNotesIndicator from "./SkippedNotesIndicator";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
@@ -23,7 +24,8 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         notes,
         loadMore,
         setAutoUpdateFeed,
-        timelineAutoUpdateState
+        timelineAutoUpdateState,
+        skippedNotesGroups
     } = useTimelineFeed(timelineType, misskeyApiClient);
 
     const { sentinelRef } = useInfiniteScroll(loadMore);
@@ -55,15 +57,39 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         return () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
     }, [scrollAreaRef, notes.length, setAutoUpdateFeed]);
 
-    return (
-        <Box pos="relative">
-            {notes.map(note => (
+    const renderItems = () => {
+        let items: React.JSX.Element[] = [];
+        let notesWithIndicators = [...notes];
+
+        skippedNotesGroups.forEach(group => {
+            if (group.position < notesWithIndicators.length) {
+                items.push(
+                    <Box key={`skipped-${group.timestamp.getTime()}`}>
+                        <SkippedNotesIndicator
+                            count={group.count}
+                            timestamp={group.timestamp}
+                        />
+                    </Box>
+                );
+            }
+        });
+
+        notesWithIndicators.forEach((note, index) => {
+            items.push(
                 <Box key={note.id}>
                     <MisskeyNote note={note} />
                     <MisskeyNoteActions />
                     <Divider my="sm" />
                 </Box>
-            ))}
+            );
+        });
+
+        return items;
+    }
+
+    return (
+        <Box pos="relative">
+            {renderItems()}
             <div ref={sentinelRef} style={{ height: 1 }} />
 
             {buttonRightOffset !== null && (
