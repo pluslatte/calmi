@@ -183,25 +183,17 @@ export class TimelineFeed {
     }
 
     flushBufferedNotes() {
-        if (this.newNotesBuffer.length > 0) {
-            // Unsubscribe old notes.
-            this.notes.value.forEach(n => {
-                console.log("unsubscribe note: " + n.id);
-                this.misskeyStream.unsubscribeFromNote(n.id);
-            });
+        // Unsubscribe old notes.
+        this.notes.value.forEach(n => {
+            console.log("unsubscribe note: " + n.id);
+            this.misskeyStream.unsubscribeFromNote(n.id);
+        });
 
-            // Replace this.notes.value with the buffer.
-            this.notes.value = [...this.newNotesBuffer];
-            this.newNotesBuffer.forEach(n => this.misskeyStream.subscribeToNote(n.id));
+        // Replace this.notes.value with the buffer.
+        this.notes.value = [...this.newNotesBuffer];
+        this.newNotesBuffer.forEach(n => this.misskeyStream.subscribeToNote(n.id));
 
-            if (this.newNotesBuffer.length < 10) {
-                // If it was not enough to fill the feed, load more.
-                // TODO: 上へ戻る が押されたとき、一瞬ノートが消えて loadmore が誘発されてダブっているのを直す（対策してあるので影響はないが、汚い）
-                this.loadMore();
-            }
-
-            this.newNotesBuffer = [];
-        }
+        this.newNotesBuffer = [];
     }
 
     enableBuffering() {
