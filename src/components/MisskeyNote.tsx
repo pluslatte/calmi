@@ -36,7 +36,9 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                         <AutoRefreshTimestamp iso={note.createdAt} />
                     </Box>
                 </Flex>
-                {note.text ? <MfmObject mfmNodes={mfm.parse(note.text)} assets={{ host: note.user.host, emojis: note.user.emojis }} /> : <></>}
+                <Box maw="100%" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                    {note.text ? <MfmObject mfmNodes={mfm.parse(note.text)} assets={{ host: note.user.host, emojis: note.user.emojis }} /> : <></>}
+                </Box>
             </Box>
         </Flex>
     );
