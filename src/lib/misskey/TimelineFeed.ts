@@ -179,7 +179,7 @@ export class TimelineFeed {
         }
     }
 
-    loadMore() {
+    loadMore(): Promise<void> {
         const len = this.notes.value.length;
         const lastNoteId = this.notes.value[len - 1]?.id;
         const limit = 20;
@@ -208,21 +208,24 @@ export class TimelineFeed {
         }
 
         if (promise) {
-            promise.then(
+            return promise.then(
                 (notes) => {
                     notes.forEach((note) => {
                         this.addNoteRev(note);
                     });
+
+                    if (this.initLoad) {
+                        this._autoUpdateEnabled = true;
+                        this.initLoad = false;
+                    }
                 }
             ).catch(error => {
                 console.error('Failed to load more notes:', error);
+                throw error;
             });
         }
 
-        if (this.initLoad) {
-            this._autoUpdateEnabled = true;
-            this.initLoad = false;
-        }
+        return Promise.resolve();
     }
 
     async loadSkippedNotes(groupIndex: number): Promise<Note[] | null> {

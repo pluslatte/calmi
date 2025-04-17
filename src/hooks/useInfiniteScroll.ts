@@ -1,7 +1,7 @@
 // hooks/useInfiniteScroll.ts
 import { useEffect, useRef, useState } from 'react';
 
-export function useInfiniteScroll(loadMore: () => void, timeoutMs: number = 1000) {
+export function useInfiniteScroll(loadMore: () => Promise<any>, timeoutMs: number = 1000) {
     const [loadingMore, setLoadingMore] = useState(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
     const lastLoadTimeRef = useRef<number>(0);

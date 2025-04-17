@@ -42,9 +42,9 @@ export function useTimelineFeed(
         });
     }, [timelineType, apiClient]);
 
-    const loadMore = async () => {
+    const loadMore = async (): Promise<boolean> => {
         console.log('loadMore');
-        if (!timelineRef.current || !apiClient) return;
+        if (!timelineRef.current || !apiClient) return false;
 
         try {
             const len = notes.length;
@@ -62,6 +62,8 @@ export function useTimelineFeed(
                         timelineRef.current?.addNoteRev(note);
                     });
                 }
+
+                return true;
             } else {
                 // 初回読み込み
                 const initialNotes = await timelineRequestFn({
@@ -72,15 +74,19 @@ export function useTimelineFeed(
                     initialNotes.forEach(note => {
                         timelineRef.current?.addNoteRev(note);
                     });
+
+                    if (timelineRef.current.initLoad) {
+                        timelineRef.current.autoUpdateEnabled = true;
+                        timelineRef.current.initLoad = false;
+                    }
                 }
+
+                return true;
             }
 
-            if (timelineRef.current.initLoad) {
-                timelineRef.current.autoUpdateEnabled = true;
-                timelineRef.current.initLoad = false;
-            }
         } catch (error) {
             console.error('Failed to load timeline:', error);
+            throw error;
         }
     };
 
