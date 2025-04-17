@@ -1,9 +1,9 @@
 'use client';
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
-import { Box, Button, Divider, Grid, Text, Transition } from "@mantine/core";
+import { Box, Button, Divider, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp } from "@tabler/icons-react";
 import { useTimelineFeed } from "@/hooks/useTimelineFeed";
@@ -11,6 +11,7 @@ import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
+import TimelineUpdateBoundary from "./TimelineUpdateBoundary";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
@@ -20,6 +21,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
     const misskeyApiClient = useMisskeyApiClient();
+    const lastBoundaryIndexRef = useRef<number | null>(null);
 
     const {
         notes,
@@ -32,6 +34,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         trimmedNotesGroup,
         loadTrimmedNotes,
         loadingTrimmedNotes,
+        lastSwitchToAutoUpdateTime,
     } = useTimelineFeed(timelineType, misskeyApiClient);
 
     const { sentinelRef } = useInfiniteScroll(loadMore);
@@ -62,6 +65,19 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         scrollAreaRef.current.addEventListener('scroll', handleScroll);
         return () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
     }, [scrollAreaRef, notes.length, setAutoUpdateFeed]);
+
+    const findUpdateBoundaryIndex = (): number | null => {
+        if (!lastSwitchToAutoUpdateTime || notes.length === 0) return null;
+
+        for (let i = 0; i < notes.length; i++) {
+            const noteDate = new Date(notes[i].createdAt);
+            if (noteDate < lastSwitchToAutoUpdateTime) {
+                return i;
+            }
+        }
+
+        return null
+    };
 
     const renderItems = () => {
         // 切り落とされたノートのインジケーターを表示（タイムライン上部に配置）
@@ -99,8 +115,23 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
 
             })
 
+        // 自動更新の境界インデックス
+        const boundaryIndex = findUpdateBoundaryIndex();
+        // インデックスの状態を保存
+        if (boundaryIndex !== null) {
+            lastBoundaryIndexRef.current = boundaryIndex;
+        }
+
         // 各ノートに関連しているスキップされたノートのグループを配置する
         let notesWithIndicators = notes.map((note, index) => {
+            const showBoundary = lastBoundaryIndexRef.current === index && lastSwitchToAutoUpdateTime;
+            const boudnary = showBoundary ? (
+                <TimelineUpdateBoundary
+                    key={`boundary-${lastSwitchToAutoUpdateTime.getTime()}`}
+                    timestamp={lastSwitchToAutoUpdateTime}
+                />
+            ) : null;
+
             const relatedGroups = skippedNotesGroups
                 .filter(group => group.referenceNoteId === note.id);
 
@@ -126,6 +157,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
             return (
                 <React.Fragment key={note.id}>
                     {relatedIndicators}
+                    {boudnary}
                     <Box>
                         <MisskeyNote note={note} />
                         <MisskeyNoteActions />

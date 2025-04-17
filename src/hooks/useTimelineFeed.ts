@@ -10,6 +10,7 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
     const [trimmedNotesGroup, setTrimmedNotesGroup] = useState<{ count: number, timestamp: Date, trimmedNoteIds: string[], loadedNotes: Note[] | null, isLoading: boolean } | null>(null);
     const [loadingSkippedNotes, setLoadingSkippedNotes] = useState<boolean>(false);
     const [loadingTrimmedNotes, setLoadingTrimmedNotes] = useState<boolean>(false);
+    const [lastSwitchToAutoUpdateTime, setLastSwitchToAutoUpdateTime] = useState<Date | null>(null);
     const timelineRef = useRef<TimelineFeed | null>(null);
 
     useEffect(() => {
@@ -67,6 +68,11 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
 
     const setAutoUpdateFeed = (enable: boolean) => {
         if (timelineRef.current) {
+            // 自動更新がオフ→オンと切り替わった場合は、その時刻を記録
+            if (enable && !timelineRef.current.autoUpdateEnabled) {
+                setLastSwitchToAutoUpdateTime(new Date());
+            }
+
             timelineRef.current.autoUpdateEnabled = enable;
             setTimelineAutoUpdateState(enable);
         }
@@ -83,5 +89,6 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
         trimmedNotesGroup,
         loadTrimmedNotes,
         loadingTrimmedNotes,
+        lastSwitchToAutoUpdateTime,
     };
 }
