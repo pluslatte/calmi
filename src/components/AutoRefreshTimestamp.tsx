@@ -19,7 +19,15 @@ export default function AutoRefreshTimestamp({ iso }: { iso: string }) {
     }, []);
 
     return (
-        <Text span c="dimmed" size="sm">
+        <Text
+            span
+            c="dimmed"
+            size="xs"
+            style={{
+                whiteSpace: 'nowrap',
+                display: 'block'
+            }}
+        >
             {text}
         </Text>
     )
