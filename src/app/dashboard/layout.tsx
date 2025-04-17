@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { MisskeyApiProvider } from "../MisskeyApiProvider";
 import { Loader, Center, Text, Stack, Button } from "@mantine/core";
 import { IconLogin } from "@tabler/icons-react";
+import { EmojiCacheProvider } from "@/lib/emoji/EmojiCacheProvider";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -83,7 +84,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return (
         <MisskeyApiProvider initialClient={client}>
-            {children}
+            <EmojiCacheProvider>
+                {children}
+            </EmojiCacheProvider>
         </MisskeyApiProvider>
     );
 }

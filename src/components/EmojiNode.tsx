@@ -1,25 +1,39 @@
+import { useEmojiCache } from "@/lib/emoji/EmojiCacheProvider";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
-import { Text } from "@mantine/core";
+import { Text, Tooltip } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 export default function EmojiNode({ name, assets }: { name: string, assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
     const { getEmoji } = useMisskeyApiStore();
+    const { getEmojiUrl, addEmojiToCache } = useEmojiCache();
     const [emojiData, setEmojiData] = useState<{ url: string; alt: string } | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState(0);
 
     const getEmojiData = async (emojiCode: string, host: string | null): Promise<{ url: string; alt: string }> => {
+        // 1. キャッシュをチェック
+        const cachedUrl = getEmojiUrl(host, emojiCode);
+        if (cachedUrl) {
+            return { url: cachedUrl, alt: emojiCode };
+        }
+
+        // 2. ローカルの絵文字セットをチェック
         if (assets.emojis) {
             const url = assets.emojis[emojiCode];
             if (url) {
-                return { url: url, alt: emojiCode };
+                // キャッシュに追加して返す
+                addEmojiToCache(host, emojiCode, url);
+                return { url, alt: emojiCode };
             }
         }
 
+        // 3. ローカルインスタンスの絵文字
         if (!host) {
-            // ローカルインスタンスの絵文字
             try {
                 const got = await getEmoji(emojiCode);
+                // キャッシュに追加して返す
+                addEmojiToCache(null, emojiCode, got.url);
                 return { url: got.url, alt: got.name };
             } catch (err) {
                 console.error('Failed to fetch emoji:', err);
@@ -27,54 +41,24 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
             }
         }
 
-        // リモートインスタンスの絵文字
+        // 4. リモートインスタンスの絵文字はプロキシ経由で取得
         try {
-            const emojiData = await getRemoteEmojiUrl(host, emojiCode);
-            return emojiData;
+            const response = await fetch(`/api/proxy-emoji?host=${encodeURIComponent(host)}&name=${encodeURIComponent(emojiCode)}`);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: '不明なエラー' }));
+                throw new Error(errorData.error || `エラー: ${response.status}`);
+            }
+
+            const data = await response.json();
+            // キャッシュに追加して返す
+            addEmojiToCache(host, emojiCode, data.url);
+            return { url: data.url, alt: data.name || emojiCode };
         } catch (err) {
-            console.error('Failed to fetch remote emoji:', err);
+            console.error(`Failed to fetch remote emoji from ${host}:`, err);
             throw err;
         }
     }
-
-    // リモートインスタンスの種類を判別し、適切なエンドポイントを使用する関数
-    const getRemoteEmojiUrl = async (host: string, emojiCode: string): Promise<{ url: string; alt: string }> => {
-        // まずMisskeyのAPIを試す
-        try {
-            const response = await fetch(`https://${host}/api/emoji?name=${emojiCode}`, {
-                method: 'GET'
-            });
-
-            if (response.ok) {
-                const json = await response.json();
-                return { url: json.url, alt: json.name };
-            }
-        } catch (err) {
-            console.log(`Misskey emoji API failed for ${host}: ${err}`);
-            // エラーを無視して次の方法を試す
-        }
-
-        // Mastodonのカスタム絵文字APIを試す
-        try {
-            const response = await fetch(`https://${host}/api/v1/custom_emojis`, {
-                method: 'GET'
-            });
-
-            if (response.ok) {
-                const emojis = await response.json();
-                const foundEmoji = emojis.find((emoji: any) => emoji.shortcode === emojiCode);
-
-                if (foundEmoji) {
-                    return { url: foundEmoji.url, alt: foundEmoji.shortcode };
-                }
-            }
-        } catch (err) {
-            console.log(`Mastodon emoji API failed for ${host}: ${err}`);
-        }
-
-        // 両方失敗した場合はエラーをスロー
-        throw new Error(`リモート絵文字 ${emojiCode} をインスタンス ${host} から取得できませんでした`);
-    };
 
     useEffect(() => {
         let cancelled = false;
@@ -90,29 +74,70 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
             })
             .catch(err => {
                 if (!cancelled) {
-                    setError(`絵文字を読み込めませんでした: ${err.message}`);
+                    console.error(`Error loading emoji :${name}:`, err);
+                    setError(`${err.message || 'エラー'}`);
                     setLoading(false);
+
+                    // エラー時のフォールバック画像を設定
+                    const fallbackUrl = `https://via.placeholder.com/20x20?text=${encodeURIComponent(name)}`;
+                    setEmojiData({ url: fallbackUrl, alt: name });
                 }
             });
 
         return () => {
             cancelled = true;
         }
-    }, [name, assets.host])
+    }, [name, assets.host, retryCount]);
 
-    if (error) {
-        return <Text span c="red" fs="italic">{`:${name}:`}</Text>
-    }
+    // リトライ機能
+    const handleRetry = () => {
+        setRetryCount(count => count + 1);
+    };
+
+    // 画像読み込みエラー時の処理
+    const handleImageError = () => {
+        const fallbackUrl = `https://via.placeholder.com/20x20?text=${encodeURIComponent(name)}`;
+        setEmojiData(prev => {
+            if (prev && prev.url !== fallbackUrl) {
+                return { ...prev, url: fallbackUrl };
+            }
+            return prev;
+        });
+    };
 
     if (!emojiData || loading) {
-        return <Text span>{`:${name}:`}</Text> // Loading...
+        return <Text span c="dimmed">{`:${name}:`}</Text>; // Loading state
     }
 
     return (
-        <img
-            src={emojiData.url}
-            alt={emojiData.alt}
-            style={{ height: "1em", verticalAlign: "middle" }}
-        />
+        <Tooltip label={`:${name}:`} position="bottom">
+            <span style={{ display: 'inline-block' }}>
+                <img
+                    src={emojiData.url}
+                    alt={emojiData.alt}
+                    style={{
+                        height: "1.2em",
+                        verticalAlign: "middle",
+                        opacity: error ? 0.5 : 1
+                    }}
+                    onClick={error ? handleRetry : undefined}
+                    onError={handleImageError}
+                />
+                {error && (
+                    <Text
+                        span
+                        size="xs"
+                        c="red"
+                        style={{
+                            position: 'absolute',
+                            fontSize: '0.5em',
+                            marginLeft: '-0.5em'
+                        }}
+                    >
+                        !
+                    </Text>
+                )}
+            </span>
+        </Tooltip>
     );
 }
