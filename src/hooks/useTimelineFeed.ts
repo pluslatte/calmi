@@ -1,7 +1,7 @@
 import { TimelineFeed } from "@/lib/misskey/TimelineFeed";
 import { api } from "misskey-js";
 import { Note } from "misskey-js/entities.js";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // タイムライン取得用の関数の型定義
 type TimelineRequestFunction = (params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
@@ -132,6 +132,12 @@ export function useTimelineFeed(
         }
     };
 
+    // タイムラインタイプが変更された時に呼び出す関数
+    const resetTimelineState = useCallback(() => {
+        setLastSwitchToAutoUpdateTime(null);
+        // 必要に応じて他の状態もリセット
+    }, []);
+
     return {
         notes,
         loadMore,
@@ -144,5 +150,6 @@ export function useTimelineFeed(
         loadTrimmedNotes,
         loadingTrimmedNotes,
         lastSwitchToAutoUpdateTime,
+        resetTimelineState,
     };
 }

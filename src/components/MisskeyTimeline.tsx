@@ -54,6 +54,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         loadTrimmedNotes,
         loadingTrimmedNotes,
         lastSwitchToAutoUpdateTime,
+        resetTimelineState,
     } = useTimelineFeed(timelineType, client, getTimelineBasedOnType());
 
     const {
@@ -66,6 +67,16 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         buttonRightOffset,
         handleScrollToTop
     } = useScrollToTop(scrollAreaRef, containerRef);
+
+    // timelineTypeが変わったことを検知するためにuseEffectを追加
+    useEffect(() => {
+        // タイムラインタイプが変わった時に実行される
+        // この時点でlastSwitchToAutoUpdateTimeをリセットする必要がある
+        lastBoundaryIndexRef.current = null; // 境界インデックスもリセット
+
+        // タイムラインフィードの状態もリセットする必要がある可能性があります
+        resetTimelineState();
+    }, [timelineType]);
 
     useEffect(() => {
         if (!scrollAreaRef.current) return;
