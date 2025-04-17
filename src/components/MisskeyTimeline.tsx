@@ -194,10 +194,10 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
                 <React.Fragment key={note.id}>
                     {boudnary}
                     {relatedIndicators}
-                    <Box>
+                    <Box p="xs">
                         <MisskeyNote note={note} />
                         <MisskeyNoteActions />
-                        <Divider my="sm" />
+                        <Divider mt="xs" />
                     </Box>
                 </React.Fragment>
             )

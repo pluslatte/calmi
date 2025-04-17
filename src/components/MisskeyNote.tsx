@@ -1,47 +1,72 @@
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
-import { Avatar, Box, Flex, Text } from "@mantine/core";
+import { Avatar, Box, Flex, Text, Group } from "@mantine/core";
 import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
 import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
 import { memo } from "react";
 
-
 const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
     const misskeyApiClient = useMisskeyApiClient();
 
     return (
-        <Flex align="start" gap="sm" wrap="nowrap">
-            <Avatar src={note.user.avatarUrl} radius={'md'} m="xs" mr={0} />
-            <Box miw={0} mt="4" flex={1}>
-                <Flex justify="space-between" align="center" wrap="nowrap" miw={0}>
-                    <Flex gap="xs" wrap="nowrap" align="center" miw={0} flex={1}>
-                        <Text
-                            fw="bold"
-                            truncate="end"
-                            maw="100%"
-                        >
+        <Flex gap="sm" wrap="nowrap">
+            {/* アバター */}
+            <Avatar
+                src={note.user.avatarUrl}
+                radius="md"
+                size="md"
+                mt={3}
+            />
+
+            {/* ノートの本文エリア */}
+            <Box miw={0} flex={1}>
+                {/* ユーザー情報とタイムスタンプ */}
+                <Flex justify="space-between" align="flex-start" mb={4}>
+                    {/* ユーザー情報（2段表示） */}
+                    <Box>
+                        {/* ユーザー名 */}
+                        <Text fw="bold" size="sm" lineClamp={1}>
                             {note.user.name}
                         </Text>
-                        <Text
-                            fw="normal"
-                            c="dimmed"
-                            truncate="end"
-                            maw="100%"
-                        >
-                            {note.user.username}
-                            {note.user.host ? "@" + note.user.host : ''}
+                        {/* ユーザーID */}
+                        <Text size="xs" c="dimmed" lineClamp={1}>
+                            @{note.user.username}
+                            {note.user.host ? `@${note.user.host}` : ''}
                         </Text>
-                    </Flex>
-                    <Box style={{ flexShrink: 0 }}>
+                    </Box>
+
+                    {/* タイムスタンプ */}
+                    <Box ml="auto">
                         <AutoRefreshTimestamp iso={note.createdAt} />
                     </Box>
                 </Flex>
-                <Box maw="100%" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                    {note.text ? <MfmObject mfmNodes={mfm.parse(note.text)} assets={{ host: note.user.host, emojis: note.user.emojis }} /> : <></>}
+
+                {/* ノート本文 */}
+                <Box
+                    maw="100%"
+                    style={{
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word'
+                    }}
+                >
+                    {note.text ? (
+                        <MfmObject
+                            mfmNodes={mfm.parse(note.text)}
+                            assets={{
+                                host: note.user.host,
+                                emojis: note.user.emojis
+                            }}
+                        />
+                    ) : (
+                        <Text fs="italic" size="sm" c="dimmed">
+                            (本文なし)
+                        </Text>
+                    )}
                 </Box>
             </Box>
         </Flex>
     );
 });
+
 export default MisskeyNote;

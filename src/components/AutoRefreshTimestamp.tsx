@@ -19,7 +19,7 @@ export default function AutoRefreshTimestamp({ iso }: { iso: string }) {
     }, []);
 
     return (
-        <Text span c="dimmed">
+        <Text span c="dimmed" size="sm">
             {text}
         </Text>
     )
