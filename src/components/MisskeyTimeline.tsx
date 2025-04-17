@@ -5,7 +5,7 @@ import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
-import { IconArrowUp } from "@tabler/icons-react";
+import { IconArrowUp, IconRefreshOff } from "@tabler/icons-react";
 import { useTimelineFeed } from "@/hooks/useTimelineFeed";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
@@ -265,11 +265,10 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
                     >
                         <Transition mounted={!timelineAutoUpdateState} transition="slide-up" duration={200} timingFunction="ease">
                             {(styles) => (
-                                <Text
+                                <IconRefreshOff
+                                    size={16}
                                     style={styles}
-                                >
-                                    {`自動更新オフ`}
-                                </Text>
+                                />
                             )}
                         </Transition>
                     </Box>
