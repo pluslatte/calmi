@@ -8,8 +8,8 @@ import { Notifications } from "@mantine/notifications";
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
     return (
         <>
-            <ColorSchemeScript defaultColorScheme="light" />
-            <MantineProvider theme={theme} defaultColorScheme="light">
+            <ColorSchemeScript defaultColorScheme="dark" />
+            <MantineProvider theme={theme} defaultColorScheme="dark" forceColorScheme="dark">
                 <Notifications position="bottom-center" />
                 {children}
             </MantineProvider>

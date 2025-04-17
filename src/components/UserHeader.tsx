@@ -3,16 +3,12 @@ import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react';
 import { useMisskeyApiStore } from '@/stores/useMisskeyApiStore';
 import { useEffect, useState } from 'react';
 import { User } from 'misskey-js/entities.js';
-import { useMantineColorScheme } from '@mantine/core';
-import ThemeToggle from './ThemeToggle';
 import { useRouter } from "next/navigation";
 
 export default function UserHeader() {
     const { getUserInfo, logout, isLoggedIn } = useMisskeyApiStore();
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const { colorScheme } = useMantineColorScheme();
-    const isDark = colorScheme === 'dark';
     const router = useRouter();
 
     useEffect(() => {
@@ -65,8 +61,6 @@ export default function UserHeader() {
                 )}
 
                 <Group>
-                    <ThemeToggle />
-
                     <Menu shadow="md" width={200} position="bottom-end">
                         <Menu.Target>
                             <ActionIcon variant="outline">
