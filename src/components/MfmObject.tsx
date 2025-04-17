@@ -28,8 +28,6 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
             return node.children.map(getTextContent).join('');
         } else if (node.type === 'unicodeEmoji') {
             return node.props.emoji;
-        } else if (node.type === 'emojiCode') {
-            return `:${node.props.name}:`;
         } else if (node.type === 'mention') {
             return `@${node.props.username}`;
         } else if (node.type === 'hashtag') {
