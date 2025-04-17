@@ -1,12 +1,27 @@
 'use client';
 
-import { Button, Container, Card, Text, Title, Group, Stack } from "@mantine/core";
-import { useState } from "react";
+import { Button, Container, Card, Text, Title, Stack } from "@mantine/core";
+import { useEffect, useState } from "react";
 import { notifications } from '@mantine/notifications';
 import { IconLogin } from '@tabler/icons-react';
+import { useRouter } from "next/navigation";
 
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const router = useRouter();
+
+    // マウント時にログイン状態をチェック
+    useEffect(() => {
+        const token = localStorage.getItem('misskey_token');
+        if (token) {
+            // トークンが存在する場合はダッシュボードへリダイレクト
+            router.push('/dashboard');
+        } else {
+            // チェック完了
+            setIsCheckingAuth(false);
+        }
+    }, [router]);
 
     const handleLogin = async () => {
         try {
@@ -47,6 +62,22 @@ export default function Login() {
             });
             console.error('Login error:', error);
         }
+    }
+
+    // 認証チェック中はローディング表示
+    if (isCheckingAuth) {
+        return (
+            <Container size="xs" py="xl">
+                <Card shadow="sm" p="lg" radius="md" withBorder>
+                    <Stack align="center" gap="md">
+                        <Title order={2}>認証状態を確認中...</Title>
+                        <Text c="dimmed" size="sm" ta="center">
+                            しばらくお待ちください
+                        </Text>
+                    </Stack>
+                </Card>
+            </Container>
+        );
     }
 
     return (

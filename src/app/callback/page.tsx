@@ -2,10 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { api } from "misskey-js";
-import { Container, Card, Text, Center, Loader, Stack } from "@mantine/core";
+import { Container, Card, Text, Center, Loader, Stack, Button } from "@mantine/core";
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { IconCheck, IconX, IconLogin, IconArrowRight } from '@tabler/icons-react';
 
 export default function Callback() {
     const router = useRouter();
@@ -16,15 +15,20 @@ export default function Callback() {
         const verifyAndGetToken = async () => {
             try {
                 // URLからセッションIDを取得
-                const sessionParam = new URLSearchParams(window.location.search).get('session');
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionParam = urlParams.get('session');
                 if (!sessionParam) {
                     throw new Error('セッションIDが見つかりません');
                 }
 
                 // ローカルストレージから元のセッションIDを取得して検証
                 const storedSessionId = localStorage.getItem('misskey_session_id');
+                if (!storedSessionId) {
+                    throw new Error('セッション情報が見つかりません。再度ログインしてください');
+                }
+
                 if (storedSessionId !== sessionParam) {
-                    throw new Error('セッションIDが一致しません');
+                    throw new Error('セッションIDが一致しません。セキュリティのためログインをキャンセルしました');
                 }
 
                 // MiAuth認証を検証
@@ -49,7 +53,7 @@ export default function Callback() {
                 notifications.update({
                     id: 'login-notification',
                     title: 'ログイン成功',
-                    message: 'Misskeyへのログインに成功しました',
+                    message: `${data.user?.name || data.user?.username || 'ユーザー'}としてログインしました`,
                     color: 'green',
                     icon: <IconCheck />,
                     autoClose: 3000,
@@ -76,11 +80,6 @@ export default function Callback() {
                 });
 
                 console.error('Authentication error:', error);
-
-                // ログイン画面に戻るための準備
-                setTimeout(() => {
-                    router.push('/login');
-                }, 3000);
             } finally {
                 // セッションIDをクリア
                 localStorage.removeItem('misskey_session_id');
@@ -98,23 +97,41 @@ export default function Callback() {
                         <>
                             <Loader size="md" />
                             <Text>認証処理中です...</Text>
+                            <Text size="sm" c="dimmed">Misskeyからの応答を待っています</Text>
                         </>
                     )}
 
                     {status === 'success' && (
                         <>
-                            <IconCheck size={24} color="green" />
-                            <Text c="green">ログインに成功しました！</Text>
+                            <IconCheck size={40} color="green" />
+                            <Text c="green" size="lg" fw="bold">ログインに成功しました！</Text>
                             <Text size="sm" c="dimmed">ダッシュボードにリダイレクトします...</Text>
+                            <Button
+                                rightSection={<IconArrowRight size={16} />}
+                                onClick={() => router.push('/dashboard')}
+                                variant="light"
+                                color="green"
+                                mt="md"
+                            >
+                                今すぐダッシュボードへ
+                            </Button>
                         </>
                     )}
 
                     {status === 'error' && (
                         <>
-                            <IconX size={24} color="red" />
-                            <Text c="red">ログインに失敗しました</Text>
+                            <IconX size={40} color="red" />
+                            <Text c="red" size="lg" fw="bold">ログインに失敗しました</Text>
                             <Text size="sm" c="dimmed">{errorMessage}</Text>
-                            <Text mt="md" size="sm">ログイン画面に戻ります...</Text>
+                            <Button
+                                leftSection={<IconLogin size={16} />}
+                                onClick={() => router.push('/login')}
+                                variant="outline"
+                                color="red"
+                                mt="md"
+                            >
+                                ログインページに戻る
+                            </Button>
                         </>
                     )}
                 </Stack>
