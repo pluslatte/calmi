@@ -69,14 +69,20 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     const findUpdateBoundaryIndex = (): number | null => {
         if (!lastSwitchToAutoUpdateTime || notes.length === 0) return null;
 
+        let hasNewerNotes = false;
+        let boundaryIndex = null;
+
         for (let i = 0; i < notes.length; i++) {
             const noteDate = new Date(notes[i].createdAt);
-            if (noteDate < lastSwitchToAutoUpdateTime) {
-                return i;
+            if (noteDate >= lastSwitchToAutoUpdateTime) {
+                hasNewerNotes = true;
+            } else if (hasNewerNotes) {
+                boundaryIndex = i;
+                break;
             }
         }
 
-        return null
+        return hasNewerNotes ? boundaryIndex : null;
     };
 
     const renderItems = () => {
