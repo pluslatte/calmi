@@ -1,6 +1,6 @@
-// src/components/MisskeyTimelineContainer.tsx（Zustandを使用するように修正）
+// src/components/MisskeyTimelineContainer.tsx
 import { Box, Flex, ScrollArea, Tabs, Tooltip } from "@mantine/core";
-import React, { memo, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import MisskeyTimeline from "@/components/MisskeyTimeline";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer } from "@tabler/icons-react";
 import { useTimelineStore, TimelineType } from '@/stores/useTimelineStore';
@@ -13,8 +13,14 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     // Zustandストアからタイムラインタイプと変更アクションを取得
     const timelineType = useTimelineStore(state => state.timelineType);
     const changeTimelineType = useTimelineStore(state => state.changeTimelineType);
+    const updateButtonOffset = useTimelineStore(state => state.updateButtonOffset);
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    // コンポーネントのマウント時にボタン位置を更新
+    useEffect(() => {
+        updateButtonOffset(containerRef);
+    }, [containerRef, updateButtonOffset]);
 
     // タイムラインタイプの変更ハンドラ
     const handleTimelineTypeChange = (value: string | null) => {

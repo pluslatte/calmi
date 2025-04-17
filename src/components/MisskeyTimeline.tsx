@@ -1,4 +1,4 @@
-// src/components/MisskeyTimeline.tsx（Zustandを使用するように修正）
+// src/components/MisskeyTimeline.tsx
 'use client';
 
 import React, { memo, useEffect, useRef } from 'react';
@@ -8,7 +8,6 @@ import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp, IconRefreshOff } from "@tabler/icons-react";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
-import { useScrollToTop } from "@/hooks/useScrollToTop";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
 import TimelineUpdateBoundary from "./TimelineUpdateBoundary";
@@ -43,13 +42,18 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         skippedNotesGroups,
         trimmedNotesGroup,
         lastSwitchToAutoUpdateTime,
+        showScrollToTop,
+        buttonRightOffset,
         initializeTimeline,
         cleanupTimeline,
         loadMoreNotes,
         setAutoUpdateEnabled,
         loadSkippedNotes,
         loadTrimmedNotes,
-        changeTimelineType
+        changeTimelineType,
+        updateScrollPosition,
+        updateButtonOffset,
+        scrollToTop
     } = useTimelineStore();
 
     const lastBoundaryIndexRef = useRef<number | null>(null);
@@ -101,24 +105,17 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         2000
     );
 
-    // スクロールトップボタン
-    const {
-        showScrollToTop,
-        buttonRightOffset,
-        handleScrollToTop
-    } = useScrollToTop(scrollAreaRef, containerRef);
-
-    // スクロール位置に応じた自動更新切り替え
+    // スクロール位置の監視を設定
     useEffect(() => {
         if (!scrollAreaRef.current) return;
 
         const handleScroll = () => {
-            const scrollEl = scrollAreaRef.current;
-            if (!scrollEl) return;
+            const scrollInfo = updateScrollPosition(scrollAreaRef);
+            if (!scrollInfo) return;
 
-            const top = scrollEl.scrollTop;
-            const nearTop = top < 200;
+            const nearTop = scrollInfo.nearTop;
 
+            // スクロール位置に応じて自動更新の切り替え
             if (!nearTop && autoUpdateEnabled) {
                 setAutoUpdateEnabled(false);
             } else if (nearTop && !autoUpdateEnabled) {
@@ -128,7 +125,19 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
         scrollAreaRef.current.addEventListener('scroll', handleScroll);
         return () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
-    }, [scrollAreaRef, autoUpdateEnabled, setAutoUpdateEnabled]);
+    }, [scrollAreaRef, autoUpdateEnabled, setAutoUpdateEnabled, updateScrollPosition]);
+
+    // ボタン表示位置の計算
+    useEffect(() => {
+        updateButtonOffset(containerRef);
+
+        const handleResize = () => {
+            updateButtonOffset(containerRef);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [containerRef, updateButtonOffset]);
 
     // 更新境界インデックスを探す
     const findUpdateBoundaryIndex = (): number | null => {
@@ -263,6 +272,11 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             </Box>
         );
     }
+
+    // スクロールトップ処理
+    const handleScrollToTop = () => {
+        scrollToTop(scrollAreaRef);
+    };
 
     return (
         <Box pos="relative">
