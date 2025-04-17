@@ -42,7 +42,7 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
         return '';
     }
 
-    // 子ノードを処理する補助関数（型エラーを修正）
+    // 子ノードを処理する補助関数
     const renderNodes = (nodes: mfm.MfmNode[]): ReactElement => {
         return (
             <React.Fragment>
@@ -53,43 +53,55 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
         );
     }
 
+    // ノードに特殊なコンポーネント（絵文字など）が含まれているかチェック
+    const hasSpecialComponent = (node: mfm.MfmNode): boolean => {
+        if (node.type === 'emojiCode') {
+            return true;
+        }
+        if ('children' in node && Array.isArray(node.children)) {
+            return node.children.some(hasSpecialComponent);
+        }
+        return false;
+    }
+
     const nodeComponent = (node: mfm.MfmNode): ReactElement | string => {
         switch (node.type) {
             case "bold": {
-                // 太字ノードの場合、テキスト内容を先に取得してから一括で太字にする
-                const fullText = getTextContent(node);
-                if (fullText) {
-                    return <Box component="span" style={{ fontWeight: 'bold' }}>{fullText}</Box>;
+                // 特殊コンポーネントがあるかチェック
+                if (hasSpecialComponent(node)) {
+                    return <Box component="span" style={{ fontWeight: 'bold' }}>{renderNodes(node.children)}</Box>;
                 }
-                // 子ノードに特殊な要素がある場合は通常の方法でレンダリング
-                return <Box component="span" style={{ fontWeight: 'bold' }}>{renderNodes(node.children)}</Box>;
+                // 単純なテキストならまとめて処理
+                const fullText = getTextContent(node);
+                return <Box component="span" style={{ fontWeight: 'bold' }}>{fullText}</Box>;
             }
             case "italic": {
-                const fullText = getTextContent(node);
-                if (fullText) {
-                    return <Box component="span" style={{ fontStyle: 'italic' }}>{fullText}</Box>;
+                if (hasSpecialComponent(node)) {
+                    return <Box component="span" style={{ fontStyle: 'italic' }}>{renderNodes(node.children)}</Box>;
                 }
-                return <Box component="span" style={{ fontStyle: 'italic' }}>{renderNodes(node.children)}</Box>;
+                const fullText = getTextContent(node);
+                return <Box component="span" style={{ fontStyle: 'italic' }}>{fullText}</Box>;
             }
             case "strike": {
-                const fullText = getTextContent(node);
-                if (fullText) {
-                    return <Box component="span" style={{ textDecoration: 'line-through' }}>{fullText}</Box>;
+                if (hasSpecialComponent(node)) {
+                    return <Box component="span" style={{ textDecoration: 'line-through' }}>{renderNodes(node.children)}</Box>;
                 }
-                return <Box component="span" style={{ textDecoration: 'line-through' }}>{renderNodes(node.children)}</Box>;
+                const fullText = getTextContent(node);
+                return <Box component="span" style={{ textDecoration: 'line-through' }}>{fullText}</Box>;
             }
             case "small": {
-                const fullText = getTextContent(node);
-                if (fullText) {
-                    return <Box component="span" style={{ fontSize: '0.75em' }}>{fullText}</Box>;
+                if (hasSpecialComponent(node)) {
+                    return <Box component="span" style={{ fontSize: '0.75em' }}>{renderNodes(node.children)}</Box>;
                 }
-                return <Box component="span" style={{ fontSize: '0.75em' }}>{renderNodes(node.children)}</Box>;
+                const fullText = getTextContent(node);
+                return <Box component="span" style={{ fontSize: '0.75em' }}>{fullText}</Box>;
             }
             case "inlineCode":
                 return <Code>{node.props.code}</Code>;
             case "text":
                 return <React.Fragment>{preserveLineBreaks(node.props.text)}</React.Fragment>;
             case "emojiCode":
+                // ここが重要：絵文字ノードは必ず専用コンポーネントを使用する
                 return <EmojiNode name={node.props.name} assets={assets} />;
             case "unicodeEmoji":
                 return node.props.emoji;
