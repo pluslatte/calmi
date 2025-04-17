@@ -12,7 +12,7 @@ export default function TimelineUpdateBoundary({ timestamp }: TimelineUpdateBoun
     const isDark = colorScheme === 'dark';
     const formattedTime = format(timestamp, 'HH:mm', { locale: ja });
     const textColor = isDark ? theme.colors.dark[0] : theme.colors.gray[6];
-    const accentColor = isDark ? theme.colors.blue[5] : theme.colors.blue[4];
+    const accentColor = isDark ? theme.colors.cyan[5] : theme.colors.cyan[4];
 
     return (
         <Box my="md">
@@ -20,8 +20,9 @@ export default function TimelineUpdateBoundary({ timestamp }: TimelineUpdateBoun
                 my="xs"
                 label={
                     <Text size="xs" c={textColor}>
+                        これより
                         <Text span fw="bold" c={accentColor}>{formattedTime}</Text>
-                        からの新着ノート
+                        からの新着ノートを表示します...
                     </Text>
                 }
                 labelPosition="center"

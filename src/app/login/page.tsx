@@ -30,7 +30,7 @@ export default function Login() {
             notifications.show({
                 title: 'Misskeyにログインしています',
                 message: 'ブラウザで認証画面を開きます',
-                color: 'blue',
+                color: 'cyan',
                 loading: true,
                 autoClose: false,
                 id: 'login-notification'

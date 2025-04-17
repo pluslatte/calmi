@@ -21,7 +21,7 @@ export default function ThemeToggle() {
         <ActionIcon
             onClick={() => toggleColorScheme()}
             variant="outline"
-            color={colorScheme === 'dark' ? 'yellow' : 'blue'}
+            color={colorScheme === 'dark' ? 'yellow' : 'cyan'}
             title="Toggle color scheme"
         >
             {colorScheme === 'dark' ? <IconSun size={18} /> : <IconMoon size={18} />}

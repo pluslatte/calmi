@@ -136,7 +136,7 @@ export function MisskeyApiClientProvider({
         notifications.show({
             title: 'ログアウトしました',
             message: 'ログアウトに成功しました',
-            color: 'blue',
+            color: 'cyan',
             icon: <IconCheck />,
             autoClose: 3000,
         });

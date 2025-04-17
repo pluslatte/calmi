@@ -13,7 +13,7 @@ export default function HomePage() {
         <Text c="dimmed">
           Mantine テーマが正しく適用されていれば、このページはスタイリングされているはずです。
         </Text>
-        <Button color="blue">サンプルボタン</Button>
+        <Button color="cyan">サンプルボタン</Button>
       </Stack>
     </Container>
   );
