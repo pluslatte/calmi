@@ -2,7 +2,7 @@
 'use client';
 
 import '@mantine/core/styles.css';
-import { ColorSchemeScript } from '@mantine/core';
+import '@mantine/notifications/styles.css'
 import ThemeProvider from "@/theme-provider";
 import { useEffect, useState } from "react";
 

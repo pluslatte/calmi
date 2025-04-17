@@ -10,7 +10,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
         <>
             <ColorSchemeScript defaultColorScheme="auto" />
             <MantineProvider theme={theme} defaultColorScheme="auto">
-                <Notifications />
+                <Notifications position="bottom-center" />
                 {children}
             </MantineProvider>
         </>
