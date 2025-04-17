@@ -48,6 +48,10 @@ interface TimelineState {
     // 上へ戻るボタン関連の状態
     showScrollToTop: boolean;
     buttonRightOffset: number | null;
+
+    // 無限スクロール用の状態
+    isLoadingMore: boolean;
+    lastLoadMoreTime: number;
 }
 
 interface TimelineActions {
@@ -82,6 +86,20 @@ interface TimelineActions {
     scrollToTop: (scrollAreaRef: React.RefObject<HTMLDivElement | null>) => void;
     updateScrollPosition: (scrollAreaRef: React.RefObject<HTMLDivElement | null>) => { top: number, nearTop: boolean } | null;
     updateButtonOffset: (containerRef: React.RefObject<HTMLDivElement | null>) => void;
+
+    // 無限スクロール関連のアクション
+    handleInfiniteScroll: (
+        entries: IntersectionObserverEntry[],
+        observer: IntersectionObserver,
+        getTimelineFn: (params?: any) => Promise<Note[]>
+    ) => Promise<void>;
+    getInfiniteScrollProps: (
+        getTimelineFn: (params?: any) => Promise<Note[]>,
+        timeoutMs?: number
+    ) => {
+        isLoadingMore: boolean;
+        infiniteScrollRef: (node: HTMLDivElement | null) => void;
+    };
 }
 
 // フラグと定数
@@ -89,6 +107,7 @@ const MAX_NOTES_IN_TIMELINE = 50;
 const SKIPPED_GROUP_THRESHOLD = 60000; // 60秒
 const MAX_SKIPPED_NOTES_TO_LOAD = 20;
 const MAX_TRIMMED_NOTES_TO_LOAD = 20;
+const DEFAULT_INFINITE_SCROLL_TIMEOUT = 1000; // デフォルトのタイムアウト値 (ms)
 
 // Zustandストア
 export const useTimelineStore = create<TimelineState & TimelineActions>()(
@@ -107,6 +126,8 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         stream: null,
         showScrollToTop: false,
         buttonRightOffset: null,
+        isLoadingMore: false,
+        lastLoadMoreTime: 0,
 
         // アクション
         initializeTimeline: (client, timelineType) => {
@@ -129,6 +150,8 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 state.trimmedNotesGroup = null;
                 state.lastSwitchToAutoUpdateTime = null;
                 state.showScrollToTop = false;
+                state.isLoadingMore = false;
+                state.lastLoadMoreTime = 0;
 
                 // 新しいStreamインスタンスの作成
                 if (client.credential) {
@@ -427,6 +450,8 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 state.lastSwitchToAutoUpdateTime = null;
                 state.stream = null;
                 state.showScrollToTop = false;
+                state.isLoadingMore = false;
+                state.lastLoadMoreTime = 0;
             });
         },
 
@@ -490,6 +515,67 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             set(state => {
                 state.buttonRightOffset = offset + 16;
             });
+        },
+
+        // 無限スクロール：交差検出時のハンドラ
+        handleInfiniteScroll: async (entries, observer, getTimelineFn) => {
+            const state = get();
+            if (state.isLoadingMore) return;
+
+            // 交差検出
+            if (entries[0].isIntersecting) {
+                const now = Date.now();
+                // 前回のロードからの経過時間チェック
+                if (now - state.lastLoadMoreTime < DEFAULT_INFINITE_SCROLL_TIMEOUT) {
+                    return;
+                }
+
+                set(state => {
+                    state.isLoadingMore = true;
+                    state.lastLoadMoreTime = now;
+                });
+
+                try {
+                    await get().loadMoreNotes(getTimelineFn);
+                } catch (error) {
+                    console.error('Error loading more content:', error);
+                } finally {
+                    // タイムアウト後にロード状態をリセット
+                    setTimeout(() => {
+                        set(state => { state.isLoadingMore = false; });
+                    }, DEFAULT_INFINITE_SCROLL_TIMEOUT);
+                }
+            }
+        },
+
+        // 無限スクロール：フックスタイルのインターフェース
+        getInfiniteScrollProps: (getTimelineFn, timeoutMs = DEFAULT_INFINITE_SCROLL_TIMEOUT) => {
+            // IntersectionObserverのセットアップを行う関数
+            const infiniteScrollRef = (node: HTMLDivElement | null) => {
+                if (node === null) return;
+
+                // observer作成
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        const store = get();
+                        store.handleInfiniteScroll(entries, observer, getTimelineFn);
+                    },
+                    { rootMargin: '100px' }
+                );
+
+                // 監視開始
+                observer.observe(node);
+
+                // クリーンアップ関数（React.useEffectの戻り値と同様）
+                return () => {
+                    observer.disconnect();
+                };
+            };
+
+            return {
+                isLoadingMore: get().isLoadingMore,
+                infiniteScrollRef
+            };
         }
     }))
 );

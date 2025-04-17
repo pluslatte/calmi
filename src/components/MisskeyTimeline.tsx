@@ -7,7 +7,6 @@ import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp, IconRefreshOff } from "@tabler/icons-react";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
 import TimelineUpdateBoundary from "./TimelineUpdateBoundary";
@@ -53,7 +52,8 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         changeTimelineType,
         updateScrollPosition,
         updateButtonOffset,
-        scrollToTop
+        scrollToTop,
+        getInfiniteScrollProps,
     } = useTimelineStore();
 
     const lastBoundaryIndexRef = useRef<number | null>(null);
@@ -68,6 +68,8 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             case 'global': return getGlobalTimeline;
         }
     };
+
+    const { isLoadingMore, infiniteScrollRef } = getInfiniteScrollProps(getTimelineFunction());
 
     // 初期化処理
     useEffect(() => {
@@ -98,12 +100,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             cleanupTimeline();
         };
     }, [client, timelineType, initializeTimeline, loadMoreNotes, cleanupTimeline, changeTimelineType]);
-
-    // 無限スクロール
-    const { sentinelRef, isLoading: isLoadingMore } = useInfiniteScroll(
-        () => loadMoreNotes(getTimelineFunction()),
-        2000
-    );
 
     // スクロール位置の監視を設定
     useEffect(() => {
@@ -281,7 +277,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     return (
         <Box pos="relative">
             {renderItems()}
-            <div ref={sentinelRef} style={{ height: 1 }} />
+            <div ref={infiniteScrollRef} style={{ height: 1 }} />
             {isLoadingMore && (
                 <Box py="md" ta="center">
                     <Loader size="sm" />
