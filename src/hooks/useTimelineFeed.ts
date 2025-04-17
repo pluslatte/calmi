@@ -3,7 +3,14 @@ import { api } from "misskey-js";
 import { Note } from "misskey-js/entities.js";
 import { useEffect, useRef, useState } from "react";
 
-export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'global', misskeyApiClient: api.APIClient) {
+// タイムライン取得用の関数の型定義
+type TimelineRequestFunction = (params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
+
+export function useTimelineFeed(
+    timelineType: 'home' | 'social' | 'local' | 'global',
+    apiClient: api.APIClient | null,
+    timelineRequestFn: TimelineRequestFunction
+) {
     const [notes, setNotes] = useState<Note[]>([]);
     const [timelineAutoUpdateState, setTimelineAutoUpdateState] = useState(true);
     const [skippedNotesGroups, setSkippedNotesGroups] = useState<Array<{ count: number, timestamp: Date, referenceNoteId: string, loadedNotes: Note[] | null, isLoading: boolean }>>([]);
@@ -14,7 +21,10 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
     const timelineRef = useRef<TimelineFeed | null>(null);
 
     useEffect(() => {
-        const timeline = new TimelineFeed(timelineType, misskeyApiClient);
+        // apiClientがnullの場合は早期リターン
+        if (!apiClient) return;
+
+        const timeline = new TimelineFeed(timelineType, apiClient);
         timelineRef.current = timeline;
 
         const updateNotes = () => {
@@ -28,16 +38,54 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
 
         return (() => {
             timeline.notes.unsubscribe(updateNotes);
-            timeline.cleanup(); // Call the new cleanup method
+            timeline.cleanup();
         });
-    }, [timelineType, misskeyApiClient])
+    }, [timelineType, apiClient]);
 
-    const loadMore = () => {
-        timelineRef.current?.loadMore();
+    const loadMore = async () => {
+        console.log('loadMore');
+        if (!timelineRef.current || !apiClient) return;
+
+        try {
+            const len = notes.length;
+            const lastNoteId = notes[len - 1]?.id;
+            const limit = 20;
+
+            if (lastNoteId) {
+                const newNotes = await timelineRequestFn({
+                    limit,
+                    untilId: lastNoteId
+                });
+
+                if (newNotes && newNotes.length > 0) {
+                    newNotes.forEach(note => {
+                        timelineRef.current?.addNoteRev(note);
+                    });
+                }
+            } else {
+                // 初回読み込み
+                const initialNotes = await timelineRequestFn({
+                    limit
+                });
+
+                if (initialNotes && initialNotes.length > 0) {
+                    initialNotes.forEach(note => {
+                        timelineRef.current?.addNoteRev(note);
+                    });
+                }
+            }
+
+            if (timelineRef.current.initLoad) {
+                timelineRef.current.autoUpdateEnabled = true;
+                timelineRef.current.initLoad = false;
+            }
+        } catch (error) {
+            console.error('Failed to load timeline:', error);
+        }
     };
 
     const loadSkippedNotes = async (groupIndex: number) => {
-        if (!timelineRef.current || loadingSkippedNotes) return null;
+        if (!timelineRef.current || loadingSkippedNotes || !apiClient) return null;
 
         setLoadingSkippedNotes(true);
         try {
@@ -52,7 +100,7 @@ export function useTimelineFeed(timelineType: 'home' | 'social' | 'local' | 'glo
     };
 
     const loadTrimmedNotes = async () => {
-        if (!timelineRef.current || loadingTrimmedNotes) return null;
+        if (!timelineRef.current || loadingTrimmedNotes || !apiClient) return null;
 
         setLoadingTrimmedNotes(true);
         try {

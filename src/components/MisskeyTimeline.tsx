@@ -3,7 +3,7 @@
 import React, { memo, useEffect, useRef } from 'react';
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
-import { Box, Button, Divider, Text, Transition } from "@mantine/core";
+import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp } from "@tabler/icons-react";
 import { useTimelineFeed } from "@/hooks/useTimelineFeed";
@@ -20,8 +20,27 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
-    const misskeyApiClient = useMisskeyApiClient();
+    const {
+        client,
+        apiState,
+        getHomeTimeline,
+        getHybridTimeline,
+        getLocalTimeline,
+        getGlobalTimeline
+    } = useMisskeyApiClient();
+
     const lastBoundaryIndexRef = useRef<number | null>(null); // 最後の自動更新境界の位置を追跡する参照
+
+    // useTimelineFeedフックを使用する際、APIクライアントをそのまま渡す代わりに
+    // 各タイムライン取得関数を渡す
+    const getTimelineBasedOnType = () => {
+        switch (timelineType) {
+            case 'home': return getHomeTimeline;
+            case 'social': return getHybridTimeline;
+            case 'local': return getLocalTimeline;
+            case 'global': return getGlobalTimeline;
+        }
+    };
 
     const {
         notes,
@@ -35,7 +54,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         loadTrimmedNotes,
         loadingTrimmedNotes,
         lastSwitchToAutoUpdateTime,
-    } = useTimelineFeed(timelineType, misskeyApiClient);
+    } = useTimelineFeed(timelineType, client, getTimelineBasedOnType());
 
     const { sentinelRef } = useInfiniteScroll(loadMore);
 
@@ -177,6 +196,32 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         });
 
         return [...topIndicators, ...notesWithIndicators];
+    }
+
+    // APIの読み込み状態を表示
+    if (apiState.loading && notes.length === 0) {
+        return (
+            <Box py="xl" ta="center">
+                <Loader size="md" />
+                <Text mt="md">タイムラインを読み込み中...</Text>
+            </Box>
+        );
+    }
+
+    // APIエラーを表示
+    if (apiState.error && notes.length === 0) {
+        return (
+            <Box py="xl" ta="center">
+                <Text c="red">{apiState.error.message}</Text>
+                <Button
+                    onClick={loadMore}
+                    mt="md"
+                    variant="outline"
+                >
+                    再試行
+                </Button>
+            </Box>
+        );
     }
 
     return (

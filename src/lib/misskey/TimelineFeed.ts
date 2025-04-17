@@ -186,57 +186,38 @@ export class TimelineFeed {
 
         console.log(`loadmore! len: ${len} lastNoteId: ${lastNoteId}`);
 
+        const params = {
+            limit,
+            untilId: lastNoteId,
+        };
+
+        let promise;
         switch (this.timelineType) {
             case 'home':
-                this.misskeyApiClient.request('notes/timeline', {
-                    limit,
-                    untilId: lastNoteId,
-                }).then(
-                    (notes) => {
-                        notes.forEach((note) => {
-                            this.addNoteRev(note);
-                        })
-                    }
-                );
+                promise = this.misskeyApiClient.request('notes/timeline', params);
                 break;
             case 'social':
-                this.misskeyApiClient.request('notes/hybrid-timeline', {
-                    limit,
-                    untilId: lastNoteId,
-                }).then(
-                    (notes) => {
-                        notes.forEach((note) => {
-                            this.addNoteRev(note);
-                        })
-                    }
-                );
+                promise = this.misskeyApiClient.request('notes/hybrid-timeline', params);
                 break;
             case 'local':
-                this.misskeyApiClient.request('notes/local-timeline', {
-                    limit,
-                    untilId: lastNoteId,
-                }).then(
-                    (notes) => {
-                        notes.forEach((note) => {
-                            this.addNoteRev(note);
-                        })
-                    }
-                );
+                promise = this.misskeyApiClient.request('notes/local-timeline', params);
                 break;
             case 'global':
-                this.misskeyApiClient.request('notes/global-timeline', {
-                    limit,
-                    untilId: lastNoteId,
-                }).then(
-                    (notes) => {
-                        notes.forEach((note) => {
-                            this.addNoteRev(note);
-                        })
-                    }
-                );
+                promise = this.misskeyApiClient.request('notes/global-timeline', params);
                 break;
         }
 
+        if (promise) {
+            promise.then(
+                (notes) => {
+                    notes.forEach((note) => {
+                        this.addNoteRev(note);
+                    });
+                }
+            ).catch(error => {
+                console.error('Failed to load more notes:', error);
+            });
+        }
 
         if (this.initLoad) {
             this._autoUpdateEnabled = true;
@@ -283,11 +264,6 @@ export class TimelineFeed {
             // 読み込まれたノートを記憶
             group.loadedNotes = validNotes;
             group.isLoading = false;
-
-            // 読み込んだノート数が実際のスキップ数と異なる場合は表示用のカウントを更新
-            if (group.loadedNotes.length < group.count) {
-                console.log(`Loaded ${group.loadedNotes.length} of ${group.count} skipped notes`);
-            }
 
             // リストを更新
             this.notes.value = [...this.notes.value];
