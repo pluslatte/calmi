@@ -56,7 +56,10 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         lastSwitchToAutoUpdateTime,
     } = useTimelineFeed(timelineType, client, getTimelineBasedOnType());
 
-    const { sentinelRef } = useInfiniteScroll(loadMore);
+    const {
+        sentinelRef,
+        isLoading: isLoadingMore
+    } = useInfiniteScroll(loadMore, 2000);
 
     const {
         showScrollToTop,
@@ -228,6 +231,12 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         <Box pos="relative">
             {renderItems()}
             <div ref={sentinelRef} style={{ height: 1 }} />
+            {isLoadingMore && (
+                <Box py="md" ta="center">
+                    <Loader size="sm" />
+                    <Text size="xs" c="dimmed" mt="xs">読み込み中...</Text>
+                </Box>
+            )}
 
             {buttonRightOffset !== null && (
                 <React.Fragment>
