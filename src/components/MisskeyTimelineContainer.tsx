@@ -1,23 +1,34 @@
+// src/components/MisskeyTimelineContainer.tsx（Zustandを使用するように修正）
 import { Box, Flex, ScrollArea, Tabs, Tooltip } from "@mantine/core";
-import React, { memo, useRef, useState } from "react";
-import MisskeyTimeline, { TimelineType } from "@/components/MisskeyTimeline";
+import React, { memo, useRef } from "react";
+import MisskeyTimeline from "@/components/MisskeyTimeline";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer } from "@tabler/icons-react";
-
+import { useTimelineStore, TimelineType } from '@/stores/useTimelineStore';
 
 const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     containerRef
 }: {
     containerRef: React.RefObject<HTMLDivElement | null>
 }) {
-    const [timelineType, setTimelineType] = useState<TimelineType>('home');
+    // Zustandストアからタイムラインタイプと変更アクションを取得
+    const timelineType = useTimelineStore(state => state.timelineType);
+    const changeTimelineType = useTimelineStore(state => state.changeTimelineType);
+
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    // タイムラインタイプの変更ハンドラ
+    const handleTimelineTypeChange = (value: string | null) => {
+        if (value && ['home', 'social', 'local', 'global'].includes(value)) {
+            changeTimelineType(value as TimelineType);
+        }
+    };
 
     return (
         <Flex direction="column" h="100%">
             <Tabs
                 value={timelineType}
                 variant="default"
-                onChange={(value) => setTimelineType(value as TimelineType)}
+                onChange={handleTimelineTypeChange}
             >
                 <Tabs.List justify="center" px="md" pt="xs">
                     <Tooltip label="ホーム">
@@ -36,10 +47,15 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
             </Tabs>
             <ScrollArea viewportRef={scrollAreaRef} flex={1} type="auto">
                 <Box mr="sm">
-                    <MisskeyTimeline timelineType={timelineType} scrollAreaRef={scrollAreaRef} containerRef={containerRef} />
+                    <MisskeyTimeline
+                        timelineType={timelineType}
+                        scrollAreaRef={scrollAreaRef}
+                        containerRef={containerRef}
+                    />
                 </Box>
             </ScrollArea>
         </Flex>
     )
 });
+
 export default MisskeyTimelineContainer;

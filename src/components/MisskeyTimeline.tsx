@@ -1,3 +1,4 @@
+// src/components/MisskeyTimeline.tsx（Zustandを使用するように修正）
 'use client';
 
 import React, { memo, useEffect, useRef } from 'react';
@@ -6,16 +7,18 @@ import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp, IconRefreshOff } from "@tabler/icons-react";
-import { useTimelineFeed } from "@/hooks/useTimelineFeed";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
 import TimelineUpdateBoundary from "./TimelineUpdateBoundary";
+import { useTimelineStore, TimelineType } from '@/stores/useTimelineStore';
 
-export type TimelineType = 'home' | 'social' | 'local' | 'global';
-
-const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollAreaRef, containerRef }: {
+const MisskeyTimeline = memo(function MisskeyTimeline({
+    timelineType,
+    scrollAreaRef,
+    containerRef
+}: {
     timelineType: TimelineType;
     scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     containerRef: React.RefObject<HTMLDivElement | null>;
@@ -26,15 +29,34 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         getHomeTimeline,
         getHybridTimeline,
         getLocalTimeline,
-        getGlobalTimeline
+        getGlobalTimeline,
+        getNote
     } = useMisskeyApiClient();
 
-    const lastBoundaryIndexRef = useRef<number | null>(null); // 最後の自動更新境界の位置を追跡する参照
-    const prevTimelineTypeRef = useRef<TimelineType>(timelineType); // 前回のタイムラインタイプを記録
+    // Zustandストアからの状態とアクション
+    const {
+        notes,
+        autoUpdateEnabled,
+        isLoading,
+        hasError,
+        errorMessage,
+        skippedNotesGroups,
+        trimmedNotesGroup,
+        lastSwitchToAutoUpdateTime,
+        initializeTimeline,
+        cleanupTimeline,
+        loadMoreNotes,
+        setAutoUpdateEnabled,
+        loadSkippedNotes,
+        loadTrimmedNotes,
+        changeTimelineType
+    } = useTimelineStore();
 
-    // useTimelineFeedフックを使用する際、APIクライアントをそのまま渡す代わりに
-    // 各タイムライン取得関数を渡す
-    const getTimelineBasedOnType = () => {
+    const lastBoundaryIndexRef = useRef<number | null>(null);
+    const prevTimelineTypeRef = useRef<TimelineType>(timelineType);
+
+    // タイムラインタイプに応じた取得関数を返す
+    const getTimelineFunction = () => {
         switch (timelineType) {
             case 'home': return getHomeTimeline;
             case 'social': return getHybridTimeline;
@@ -43,53 +65,50 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         }
     };
 
-    const {
-        notes,
-        loadMore,
-        setAutoUpdateFeed,
-        timelineAutoUpdateState,
-        skippedNotesGroups,
-        loadSkippedNotes,
-        loadingSkippedNotes,
-        trimmedNotesGroup,
-        loadTrimmedNotes,
-        loadingTrimmedNotes,
-        lastSwitchToAutoUpdateTime,
-        resetTimelineState,
-    } = useTimelineFeed(timelineType, client, getTimelineBasedOnType());
-
-    const {
-        sentinelRef,
-        isLoading: isLoadingMore
-    } = useInfiniteScroll(loadMore, 2000);
-
-    const {
-        showScrollToTop,
-        buttonRightOffset,
-        handleScrollToTop
-    } = useScrollToTop(scrollAreaRef, containerRef);
-
-    // timelineTypeが変わったことを検知してStateをリセット
+    // 初期化処理
     useEffect(() => {
+        if (!client) return;
+
+        // タイムラインタイプが変更された場合
         if (prevTimelineTypeRef.current !== timelineType) {
-            console.log(`Timeline type changed from ${prevTimelineTypeRef.current} to ${timelineType}`);
-
-            // 境界インデックスをリセット
-            lastBoundaryIndexRef.current = null;
-
-            // タイムラインフィードの状態をリセット
-            resetTimelineState();
-
-            // 現在のタイプを保存
+            changeTimelineType(timelineType);
             prevTimelineTypeRef.current = timelineType;
 
             // スクロール位置をトップに戻す
             if (scrollAreaRef.current) {
                 scrollAreaRef.current.scrollTo({ top: 0 });
             }
-        }
-    }, [timelineType, resetTimelineState, scrollAreaRef]);
 
+            // 境界インデックスをリセット
+            lastBoundaryIndexRef.current = null;
+        }
+
+        // タイムラインを初期化
+        initializeTimeline(client, timelineType);
+
+        // 初期データのロード
+        loadMoreNotes(getTimelineFunction());
+
+        // クリーンアップ
+        return () => {
+            cleanupTimeline();
+        };
+    }, [client, timelineType, initializeTimeline, loadMoreNotes, cleanupTimeline, changeTimelineType]);
+
+    // 無限スクロール
+    const { sentinelRef, isLoading: isLoadingMore } = useInfiniteScroll(
+        () => loadMoreNotes(getTimelineFunction()),
+        2000
+    );
+
+    // スクロールトップボタン
+    const {
+        showScrollToTop,
+        buttonRightOffset,
+        handleScrollToTop
+    } = useScrollToTop(scrollAreaRef, containerRef);
+
+    // スクロール位置に応じた自動更新切り替え
     useEffect(() => {
         if (!scrollAreaRef.current) return;
 
@@ -100,17 +119,18 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
             const top = scrollEl.scrollTop;
             const nearTop = top < 200;
 
-            if (!nearTop && notes.length > 0) {
-                setAutoUpdateFeed(false);
-            } else if (nearTop) {
-                setAutoUpdateFeed(true);
+            if (!nearTop && autoUpdateEnabled) {
+                setAutoUpdateEnabled(false);
+            } else if (nearTop && !autoUpdateEnabled) {
+                setAutoUpdateEnabled(true);
             }
         };
 
         scrollAreaRef.current.addEventListener('scroll', handleScroll);
         return () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
-    }, [scrollAreaRef, notes.length, setAutoUpdateFeed]);
+    }, [scrollAreaRef, autoUpdateEnabled, setAutoUpdateEnabled]);
 
+    // 更新境界インデックスを探す
     const findUpdateBoundaryIndex = (): number | null => {
         if (!lastSwitchToAutoUpdateTime || notes.length === 0) return null;
 
@@ -121,55 +141,56 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
             }
         }
 
-        return null
+        return null;
     };
 
+    // タイムラインの内容をレンダリング
     const renderItems = () => {
-        // スキップされたノートのグループがタイムライン先頭にある場合専用
+        // トップに表示するスキップされたノート
         const topIndicators = skippedNotesGroups
             .filter(group => group.referenceNoteId === 'timeline-top')
             .map((group, index) => {
                 const groupIndex = skippedNotesGroups.findIndex(g =>
                     g.timestamp === group.timestamp && g.referenceNoteId === group.referenceNoteId);
+
                 return (
                     <Box key={`skipped-top-${group.timestamp.getTime()}`}>
                         <SkippedNotesIndicator
                             count={group.count}
                             timestamp={group.timestamp}
                             groupIndex={groupIndex}
-                            loadSkippedNotes={loadSkippedNotes}
+                            loadSkippedNotes={(groupIdx) => loadSkippedNotes(groupIdx, getNote)}
                             loadedNotes={group.loadedNotes}
                             isLoading={group.isLoading}
                         />
                     </Box>
-                )
-            })
+                );
+            });
 
-        // 自動更新の境界インデックス
+        // 更新境界インデックスを計算
         const boundaryIndex = findUpdateBoundaryIndex();
-        // インデックスの状態を保存
         if (boundaryIndex !== null) {
             lastBoundaryIndexRef.current = boundaryIndex;
         }
 
-        // 各ノートに関連しているスキップされたノートのグループを配置する
+        // 切り落とされたノートのインジケーター
+        const trimmedIndicator = trimmedNotesGroup && trimmedNotesGroup.count > 0 ? (
+            <Box key="trimmed-notes-indicator">
+                <TrimmedNotesIndicator
+                    count={trimmedNotesGroup.count}
+                    timestamp={trimmedNotesGroup.timestamp}
+                    loadTrimmedNotes={() => loadTrimmedNotes(getNote)}
+                    loadedNotes={trimmedNotesGroup.loadedNotes}
+                    isLoading={trimmedNotesGroup.isLoading}
+                />
+            </Box>
+        ) : null;
+
+        // 各ノートと関連するインジケーターをレンダリング
         let notesWithIndicators = notes.map((note, index) => {
             const showBoundary = lastBoundaryIndexRef.current === index && lastSwitchToAutoUpdateTime;
 
-            // 切り落とされたノートのインジケーター
-            const trimmedIndicator = trimmedNotesGroup && trimmedNotesGroup.count > 0 ? (
-                <Box key="trimmed-notes-indicator">
-                    <TrimmedNotesIndicator
-                        count={trimmedNotesGroup.count}
-                        timestamp={trimmedNotesGroup.timestamp}
-                        loadTrimmedNotes={loadTrimmedNotes}
-                        loadedNotes={trimmedNotesGroup.loadedNotes}
-                        isLoading={loadingTrimmedNotes}
-                    />
-                </Box>
-            ) : null;
-
-            const boudnary = showBoundary ? (
+            const boundary = showBoundary ? (
                 <React.Fragment key={`boundary-container-${lastSwitchToAutoUpdateTime?.getTime()}`}>
                     <TimelineUpdateBoundary
                         key={`boundary-${lastSwitchToAutoUpdateTime.getTime()}`}
@@ -193,7 +214,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
                                 count={group.count}
                                 timestamp={group.timestamp}
                                 groupIndex={groupIndex}
-                                loadSkippedNotes={loadSkippedNotes}
+                                loadSkippedNotes={(groupIdx) => loadSkippedNotes(groupIdx, getNote)}
                                 loadedNotes={group.loadedNotes}
                                 isLoading={group.isLoading}
                             />
@@ -203,7 +224,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
 
             return (
                 <React.Fragment key={note.id}>
-                    {boudnary}
+                    {boundary}
                     {relatedIndicators}
                     <Box p="xs">
                         <MisskeyNote note={note} />
@@ -211,14 +232,14 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
                         <Divider mt="xs" />
                     </Box>
                 </React.Fragment>
-            )
+            );
         });
 
         return [...topIndicators, ...notesWithIndicators];
-    }
+    };
 
-    // APIの読み込み状態を表示
-    if (apiState.loading && notes.length === 0) {
+    // API読み込み中の表示
+    if (isLoading && notes.length === 0) {
         return (
             <Box py="xl" ta="center">
                 <Loader size="md" />
@@ -227,13 +248,13 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         );
     }
 
-    // APIエラーを表示
-    if (apiState.error && notes.length === 0) {
+    // APIエラーの表示
+    if (hasError && notes.length === 0) {
         return (
             <Box py="xl" ta="center">
-                <Text c="red">{apiState.error.message}</Text>
+                <Text c="red">{errorMessage}</Text>
                 <Button
-                    onClick={loadMore}
+                    onClick={() => loadMoreNotes(getTimelineFunction())}
                     mt="md"
                     variant="outline"
                 >
@@ -285,7 +306,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
                             zIndex: 1000,
                         }}
                     >
-                        <Transition mounted={!timelineAutoUpdateState} transition="slide-up" duration={200} timingFunction="ease">
+                        <Transition mounted={!autoUpdateEnabled} transition="slide-up" duration={200} timingFunction="ease">
                             {(styles) => (
                                 <IconRefreshOff
                                     size={16}
@@ -299,4 +320,5 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         </Box>
     );
 });
+
 export default MisskeyTimeline;

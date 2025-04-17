@@ -1,3 +1,4 @@
+// src/components/SkippedNotesIndicator.tsx（Zustandを使用するように修正）
 import { Box, Collapse, Divider, Loader, Paper, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { formatDistanceToNow } from "date-fns";
@@ -56,6 +57,7 @@ export default function SkippedNotesIndicator({
     // 表示するノートの最大数
     const maxNotesToShow = 10;
     const hasMoreNotes = loadedNotes && loadedNotes.length < count;
+
     return (
         <Paper
             withBorder
