@@ -15,7 +15,7 @@ export default function TimelineUpdateBoundary({ timestamp }: TimelineUpdateBoun
     const accentColor = isDark ? theme.colors.blue[5] : theme.colors.blue[4];
 
     return (
-        <Box my="md" py="xs">
+        <Box my="md">
             <Divider
                 my="xs"
                 label={

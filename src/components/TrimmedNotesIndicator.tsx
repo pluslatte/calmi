@@ -74,8 +74,9 @@ export default function TrimmedNotesIndicator({
         >
             <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text size="sm" ta="center" c={textColor}>
-                    <Text span fw="bold" c={highlightColor}>{count}件</Text>
-                    のノートが表示範囲から外れました {timeAgo}
+                    {"表示範囲から外れたノートがあります "}
+                    <Text span fw="bold" c={highlightColor}>{count}件 </Text>
+                    <Text span c="dimmed">{timeAgo}</Text>
                 </Text>
                 {isLoading ? (
                     <Loader size="xs" />
