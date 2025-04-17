@@ -17,7 +17,7 @@ export function useScrollToTop(
             if (!scrollEl) return;
 
             const top = scrollEl.scrollTop;
-            setShowScrollToTop(top > 100);
+            setShowScrollToTop(top > 200);
 
             return { top, nearTop: top < 200 };
         };
