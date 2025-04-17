@@ -46,27 +46,21 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                 </Flex>
 
                 {/* ノート本文 */}
-                <Box
+                <Text
                     maw="100%"
                     style={{
                         wordBreak: 'break-word',
                         overflowWrap: 'break-word'
                     }}
                 >
-                    {note.text ? (
-                        <MfmObject
-                            mfmNodes={mfm.parse(note.text)}
-                            assets={{
-                                host: note.user.host,
-                                emojis: note.user.emojis
-                            }}
-                        />
-                    ) : (
-                        <Text fs="italic" size="sm" c="dimmed">
-                            (本文なし)
-                        </Text>
-                    )}
-                </Box>
+                    <MfmObject
+                        mfmNodes={mfm.parse(note.text ? note.text : "<small>（本文なし）</small>")}
+                        assets={{
+                            host: note.user.host,
+                            emojis: note.user.emojis
+                        }}
+                    />
+                </Text>
             </Box>
         </Flex>
     );

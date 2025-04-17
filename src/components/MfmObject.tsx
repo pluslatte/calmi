@@ -1,9 +1,9 @@
 'use client'
 
 import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
-import { Anchor, Blockquote, Code, Text } from "@mantine/core";
+import { Anchor, Blockquote, Code, Text, Box } from "@mantine/core";
 import * as mfm from 'mfm-js';
-import React, { ReactElement } from "react";
+import React, { ReactElement, ReactNode } from "react";
 import EmojiNode from "./EmojiNode";
 
 export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[]; assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
@@ -20,113 +20,123 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
         });
     }
 
-    const nodeComponent = (node: mfm.MfmNode): ReactElement | ReactElement[] => {
+    // テキストコンテンツのみを再帰的に取得する補助関数
+    const getTextContent = (node: mfm.MfmNode): string => {
+        if (node.type === 'text') {
+            return node.props.text;
+        } else if ('children' in node && Array.isArray(node.children)) {
+            return node.children.map(getTextContent).join('');
+        } else if (node.type === 'unicodeEmoji') {
+            return node.props.emoji;
+        } else if (node.type === 'emojiCode') {
+            return `:${node.props.name}:`;
+        } else if (node.type === 'mention') {
+            return `@${node.props.username}`;
+        } else if (node.type === 'hashtag') {
+            return `#${node.props.hashtag}`;
+        } else if (node.type === 'inlineCode') {
+            return node.props.code;
+        } else if (node.type === 'search') {
+            return `🔍 ${node.props.query}`;
+        }
+        return '';
+    }
+
+    // 子ノードを処理する補助関数（型エラーを修正）
+    const renderNodes = (nodes: mfm.MfmNode[]): ReactElement => {
+        return (
+            <React.Fragment>
+                {nodes.map((node, index) => (
+                    <React.Fragment key={index}>{nodeComponent(node)}</React.Fragment>
+                ))}
+            </React.Fragment>
+        );
+    }
+
+    const nodeComponent = (node: mfm.MfmNode): ReactElement | string => {
         switch (node.type) {
-            case "bold":
-                return node.children.map((child, index) => (
-                    <Text fw="bold" span key={index}>
-                        {nodeComponent(child)}
-                    </Text>
-                ));
-            case "italic":
-                return node.children.map((child, index) => (
-                    <Text fs="italic" span key={index}>
-                        {nodeComponent(child)}
-                    </Text>
-                ));
-            case "strike":
-                return node.children.map((child, index) => (
-                    <Text td="line-through" span key={index}>
-                        {nodeComponent(child)}
-                    </Text>
-                ));
-            case "small":
-                return node.children.map((child, index) => (
-                    <Text size="xs" span key={index}>
-                        {nodeComponent(child)}
-                    </Text>
-                ));
+            case "bold": {
+                // 太字ノードの場合、テキスト内容を先に取得してから一括で太字にする
+                const fullText = getTextContent(node);
+                if (fullText) {
+                    return <Box component="span" style={{ fontWeight: 'bold' }}>{fullText}</Box>;
+                }
+                // 子ノードに特殊な要素がある場合は通常の方法でレンダリング
+                return <Box component="span" style={{ fontWeight: 'bold' }}>{renderNodes(node.children)}</Box>;
+            }
+            case "italic": {
+                const fullText = getTextContent(node);
+                if (fullText) {
+                    return <Box component="span" style={{ fontStyle: 'italic' }}>{fullText}</Box>;
+                }
+                return <Box component="span" style={{ fontStyle: 'italic' }}>{renderNodes(node.children)}</Box>;
+            }
+            case "strike": {
+                const fullText = getTextContent(node);
+                if (fullText) {
+                    return <Box component="span" style={{ textDecoration: 'line-through' }}>{fullText}</Box>;
+                }
+                return <Box component="span" style={{ textDecoration: 'line-through' }}>{renderNodes(node.children)}</Box>;
+            }
+            case "small": {
+                const fullText = getTextContent(node);
+                if (fullText) {
+                    return <Box component="span" style={{ fontSize: '0.75em' }}>{fullText}</Box>;
+                }
+                return <Box component="span" style={{ fontSize: '0.75em' }}>{renderNodes(node.children)}</Box>;
+            }
             case "inlineCode":
-                return (
-                    <Code>{node.props.code}</Code>
-                );
+                return <Code>{node.props.code}</Code>;
             case "text":
-                return (
-                    <Text span>{preserveLineBreaks(node.props.text)}</Text>
-                );
+                return <React.Fragment>{preserveLineBreaks(node.props.text)}</React.Fragment>;
             case "emojiCode":
-                return (
-                    <EmojiNode name={node.props.name} assets={assets} />
-                );
+                return <EmojiNode name={node.props.name} assets={assets} />;
             case "unicodeEmoji":
-                return (
-                    <Text span>{node.props.emoji}</Text>
-                );
+                return node.props.emoji;
             case "mention":
-                return (
-                    <Text span c="blue">
-                        {`@${node.props.username}`}
-                    </Text>
-                );
+                return <Box component="span" style={{ color: 'blue' }}>{`@${node.props.username}`}</Box>;
             case "hashtag":
-                return (
-                    <Text span c="blue">
-                        {`#${node.props.hashtag}`}
-                    </Text>
-                );
+                return <Box component="span" style={{ color: 'blue' }}>{`#${node.props.hashtag}`}</Box>;
             case "url":
                 return (
-                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferer">
+                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer">
                         {node.props.url}
                     </Anchor>
                 );
             case "link":
                 return (
-                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferer">
-                        {node.children.map((child, index) => (
-                            <React.Fragment key={index}>
-                                {nodeComponent(child)}
-                            </React.Fragment>
-                        ))}
+                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer">
+                        {renderNodes(node.children)}
                     </Anchor>
                 );
             case "quote":
                 return (
                     <Blockquote>
-                        {node.children.map((child, index) => (
-                            <React.Fragment key={index}>
-                                {nodeComponent(child)}
-                            </React.Fragment>
-                        ))}
+                        {renderNodes(node.children)}
                     </Blockquote>
                 );
             case "search":
-                return (
-                    <Text span>{`🔍 ${node.props.query}`}</Text>
-                );
+                return <Box component="span">{`🔍 ${node.props.query}`}</Box>;
             case "plain":
-                return node.children.map((child, index) => (
-                    <React.Fragment key={index}>
-                        {nodeComponent(child)}
-                    </React.Fragment>
-                ));
+                return renderNodes(node.children);
             case "blockCode":
             case "mathBlock":
             case "center":
             case "mathInline":
             case "fn":
+                return <Box component="span" style={{ color: 'red' }}>{`Unsupported node: ${node.type}`}</Box>;
+            default:
+                return <Box component="span" style={{ color: 'red' }}>{`Unknown node: ${(node as any).type}`}</Box>;
         }
-
-        return (
-            <Text span c="red">
-                {`Unsupported node!!!: ${node.type}`}
-            </Text>
-        );
     }
 
-    return (mfmNodes.map((node, index) => (
-        <React.Fragment key={index}>
-            {nodeComponent(node)}
-        </React.Fragment>
-    )));
+    return (
+        <Box component="span" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+            {mfmNodes.map((node, index) => (
+                <React.Fragment key={index}>
+                    {nodeComponent(node)}
+                </React.Fragment>
+            ))}
+        </Box>
+    );
 }
