@@ -26,6 +26,7 @@ export default function TimelineUpdateBoundary({ timestamp }: TimelineUpdateBoun
                 }
                 labelPosition="center"
                 color={accentColor}
+                opacity={0.7}
             />
         </Box>
     );

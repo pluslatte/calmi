@@ -21,7 +21,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
     const misskeyApiClient = useMisskeyApiClient();
-    const lastBoundaryIndexRef = useRef<number | null>(null);
+    const lastBoundaryIndexRef = useRef<number | null>(null); // 最後の自動更新境界の位置を追跡する参照
 
     const {
         notes,
@@ -80,20 +80,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     };
 
     const renderItems = () => {
-        // 切り落とされたノートのインジケーターを表示（タイムライン上部に配置）
-        const trimmedIndicator = trimmedNotesGroup && trimmedNotesGroup.count > 0 ? (
-            <Box key="trimmed-notes-indicator">
-                <TrimmedNotesIndicator
-                    count={trimmedNotesGroup.count}
-                    timestamp={trimmedNotesGroup.timestamp}
-                    loadTrimmedNotes={loadTrimmedNotes}
-                    loadedNotes={trimmedNotesGroup.loadedNotes}
-                    isLoading={loadingTrimmedNotes}
-                />
-            </Box>
-        ) : null;
-
-
         // スキップされたノートのグループがタイムライン先頭にある場合専用（出番は少ないと思うが一応）
         const topIndicators = skippedNotesGroups
             .filter(group => group.referenceNoteId === 'timeline-top')
@@ -125,11 +111,28 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         // 各ノートに関連しているスキップされたノートのグループを配置する
         let notesWithIndicators = notes.map((note, index) => {
             const showBoundary = lastBoundaryIndexRef.current === index && lastSwitchToAutoUpdateTime;
+
+            // 切り落とされたノートのインジケーター
+            const trimmedIndicator = trimmedNotesGroup && trimmedNotesGroup.count > 0 ? (
+                <Box key="trimmed-notes-indicator">
+                    <TrimmedNotesIndicator
+                        count={trimmedNotesGroup.count}
+                        timestamp={trimmedNotesGroup.timestamp}
+                        loadTrimmedNotes={loadTrimmedNotes}
+                        loadedNotes={trimmedNotesGroup.loadedNotes}
+                        isLoading={loadingTrimmedNotes}
+                    />
+                </Box>
+            ) : null;
+
             const boudnary = showBoundary ? (
-                <TimelineUpdateBoundary
-                    key={`boundary-${lastSwitchToAutoUpdateTime.getTime()}`}
-                    timestamp={lastSwitchToAutoUpdateTime}
-                />
+                <React.Fragment key={`boundary-container-${lastSwitchToAutoUpdateTime?.getTime()}`}>
+                    <TimelineUpdateBoundary
+                        key={`boundary-${lastSwitchToAutoUpdateTime.getTime()}`}
+                        timestamp={lastSwitchToAutoUpdateTime}
+                    />
+                    {trimmedIndicator}
+                </React.Fragment>
             ) : null;
 
             const relatedGroups = skippedNotesGroups
@@ -167,7 +170,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
             )
         });
 
-        return [trimmedIndicator, ...topIndicators, ...notesWithIndicators];
+        return [...topIndicators, ...notesWithIndicators];
     }
 
     return (
