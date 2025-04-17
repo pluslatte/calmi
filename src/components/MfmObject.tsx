@@ -9,6 +9,17 @@ import EmojiNode from "./EmojiNode";
 export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[]; assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
     const misskeyApiClient = useMisskeyApiClient();
 
+    const preserveLineBreaks = (text: string): React.ReactNode[] => {
+        return text.split('\n').map((line, i, arr) => {
+            return (
+                <React.Fragment key={i}>
+                    {line}
+                    {i < arr.length - 1 && <br />}
+                </React.Fragment>
+            );
+        });
+    }
+
     const nodeComponent = (node: mfm.MfmNode): ReactElement | ReactElement[] => {
         switch (node.type) {
             case "bold":
@@ -41,7 +52,7 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                 );
             case "text":
                 return (
-                    <Text span>{node.props.text}</Text>
+                    <Text span>{preserveLineBreaks(node.props.text)}</Text>
                 );
             case "emojiCode":
                 return (
