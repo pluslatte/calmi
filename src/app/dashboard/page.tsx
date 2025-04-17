@@ -2,9 +2,9 @@
 
 import { Box, Button, Container, Grid, Textarea, Modal, ActionIcon } from "@mantine/core";
 import { useRef, useState, useEffect } from "react";
-import { useMisskeyApiClient } from "../MisskeyApiClientContext";
+import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
-import UserHeader from "@/components/UserHeader"; // 新しいコンポーネントをインポート
+import UserHeader from "@/components/UserHeader";
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconPencil } from '@tabler/icons-react';
 
@@ -13,7 +13,7 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { createNote, apiState } = useMisskeyApiClient();
+    const { createNote, apiState } = useMisskeyApiStore();
     const containerRef = useRef(null);
 
     // レスポンシブデザイン用のウィンドウサイズ監視
@@ -57,7 +57,7 @@ export default function Dashboard() {
                 autoClose: 3000
             });
         } catch (error) {
-            // エラーハンドリングはコンテキスト内で処理済み
+            // エラーハンドリングはストア内で処理済み
             console.error('Failed to create note:', error);
         } finally {
             setIsLoading(false);

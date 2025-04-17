@@ -3,7 +3,7 @@
 import { api } from "misskey-js";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { MisskeyApiClientProvider } from "../MisskeyApiClientContext";
+import { MisskeyApiProvider } from "../MisskeyApiProvider";
 import { Loader, Center, Text, Stack, Button } from "@mantine/core";
 import { IconLogin } from "@tabler/icons-react";
 
@@ -82,8 +82,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     return (
-        <MisskeyApiClientProvider initialClient={client}>
+        <MisskeyApiProvider initialClient={client}>
             {children}
-        </MisskeyApiClientProvider>
+        </MisskeyApiProvider>
     );
 }

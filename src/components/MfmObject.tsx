@@ -1,14 +1,11 @@
 'use client'
 
-import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import { Anchor, Blockquote, Code, Text, Box } from "@mantine/core";
 import * as mfm from 'mfm-js';
 import React, { ReactElement, ReactNode } from "react";
 import EmojiNode from "./EmojiNode";
 
 export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[]; assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
-    const misskeyApiClient = useMisskeyApiClient();
-
     const preserveLineBreaks = (text: string): React.ReactNode[] => {
         return text.split('\n').map((line, i, arr) => {
             return (

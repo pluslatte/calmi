@@ -1,4 +1,3 @@
-import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import { Avatar, Box, Flex, Text, Group } from "@mantine/core";
 import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
@@ -7,8 +6,6 @@ import * as mfm from 'mfm-js';
 import { memo } from "react";
 
 const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
-    const misskeyApiClient = useMisskeyApiClient();
-
     return (
         <Flex gap="sm" wrap="nowrap">
             {/* アバター */}

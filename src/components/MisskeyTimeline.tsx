@@ -2,7 +2,6 @@
 'use client';
 
 import React, { memo, useEffect, useRef } from 'react';
-import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
 import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
@@ -11,6 +10,7 @@ import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
 import TimelineUpdateBoundary from "./TimelineUpdateBoundary";
 import { useTimelineStore, TimelineType } from '@/stores/useTimelineStore';
+import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 
 const MisskeyTimeline = memo(function MisskeyTimeline({
     timelineType,
@@ -29,7 +29,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         getLocalTimeline,
         getGlobalTimeline,
         getNote
-    } = useMisskeyApiClient();
+    } = useMisskeyApiStore();
 
     // Zustandストアからの状態とアクション
     const {

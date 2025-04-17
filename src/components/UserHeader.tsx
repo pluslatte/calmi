@@ -1,6 +1,6 @@
 import { Avatar, Box, Group, Menu, ActionIcon, Text, Skeleton, Paper, Flex } from '@mantine/core';
-import { IconLogout, IconMoonStars, IconSun, IconSettings, IconUser } from '@tabler/icons-react';
-import { useMisskeyApiClient } from '@/app/MisskeyApiClientContext';
+import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react';
+import { useMisskeyApiStore } from '@/stores/useMisskeyApiStore';
 import { useEffect, useState } from 'react';
 import { User } from 'misskey-js/entities.js';
 import { useMantineColorScheme } from '@mantine/core';
@@ -8,7 +8,7 @@ import ThemeToggle from './ThemeToggle';
 import { useRouter } from "next/navigation";
 
 export default function UserHeader() {
-    const { getUserInfo, logout, isLoggedIn } = useMisskeyApiClient();
+    const { getUserInfo, logout, isLoggedIn } = useMisskeyApiStore();
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const { colorScheme } = useMantineColorScheme();

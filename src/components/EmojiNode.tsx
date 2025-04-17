@@ -1,9 +1,9 @@
-import { useMisskeyApiClient } from "@/app/MisskeyApiClientContext";
+import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 export default function EmojiNode({ name, assets }: { name: string, assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
-    const { getEmoji } = useMisskeyApiClient();
+    const { getEmoji } = useMisskeyApiStore();
     const [emojiData, setEmojiData] = useState<{ url: string; alt: string } | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
