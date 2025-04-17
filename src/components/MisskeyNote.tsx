@@ -26,9 +26,10 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                     {/* ユーザー情報（2段表示） */}
                     <Box>
                         {/* ユーザー名 */}
-                        <Text fw="bold" size="sm" lineClamp={1}>
-                            {note.user.name}
-                        </Text>
+                        <MfmObject
+                            mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
+                            assets={{ host: note.user.host, emojis: note.emojis }}
+                        />
                         {/* ユーザーID */}
                         <Text size="xs" c="dimmed" lineClamp={1}>
                             @{note.user.username}
