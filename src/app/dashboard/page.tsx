@@ -4,6 +4,7 @@ import { Box, Button, Container, Grid, Textarea, Modal, ActionIcon } from "@mant
 import { useRef, useState, useEffect } from "react";
 import { useMisskeyApiClient } from "../MisskeyApiClientContext";
 import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
+import UserHeader from "@/components/UserHeader"; // 新しいコンポーネントをインポート
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconPencil } from '@tabler/icons-react';
 
@@ -94,10 +95,12 @@ export default function Dashboard() {
 
     return (
         <Container p="4" ref={containerRef} style={{ position: 'relative' }}>
+            <UserHeader />
+
             {isMobile ? (
                 // モバイルレイアウト
                 <>
-                    <Box h="98vh">
+                    <Box h="calc(98vh - 70px)"> {/* ヘッダーの高さ分を引く */}
                         <MisskeyTimelineContainer containerRef={containerRef} />
                     </Box>
 
@@ -123,7 +126,7 @@ export default function Dashboard() {
                     {renderMobileNoteModal()}
                 </>
             ) : (
-                // デスクトップレイアウト (既存の実装を維持)
+                // デスクトップレイアウト
                 <Grid>
                     <Grid.Col span="content">
                         <Textarea
@@ -144,7 +147,7 @@ export default function Dashboard() {
                         </Button>
                     </Grid.Col>
                     <Grid.Col span="auto">
-                        <Box h="98vh">
+                        <Box h="calc(98vh - 70px)"> {/* ヘッダーの高さ分を引く */}
                             <MisskeyTimelineContainer containerRef={containerRef} />
                         </Box>
                     </Grid.Col>

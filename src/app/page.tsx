@@ -25,11 +25,6 @@ export default function HomePage() {
   return (
     <Container size="sm" py="xl">
       <Stack gap="lg" align="center" justify="center" style={{ minHeight: '70vh' }}>
-        <ThemeToggle />
-        <Title order={2}>calmi</Title>
-        <Text c="dimmed" ta="center">
-          静かに Misskey を使いたい人のためのクライアント
-        </Text>
         <Center>
           <Loader size="md" />
         </Center>

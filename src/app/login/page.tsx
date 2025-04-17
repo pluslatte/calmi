@@ -84,11 +84,10 @@ export default function Login() {
         <Container size="xs" py="xl">
             <Card shadow="sm" p="lg" radius="md" withBorder>
                 <Stack align="center" gap="md">
-                    <Title order={2}>Misskeyにログイン</Title>
-                    <Text c="dimmed" size="sm" ta="center">
-                        Misskeyのアカウントでログインして、静かなMisskeyクライアントを使い始めましょう
+                    <Title order={1}>calmi</Title>
+                    <Text c="dimmed" ta="center">
+                        静かに Misskey を使いたい人のためのクライアント
                     </Text>
-
                     <Button
                         onClick={handleLogin}
                         loading={isLoading}
@@ -97,6 +96,9 @@ export default function Login() {
                     >
                         ログイン
                     </Button>
+                    <Text c="dimmed" size="sm" ta="center">
+                        Misskeyのアカウントでログインして、静かなMisskeyクライアントを使い始めましょう
+                    </Text>
                 </Stack>
             </Card>
         </Container>
