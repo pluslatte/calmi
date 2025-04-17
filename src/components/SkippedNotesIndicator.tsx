@@ -76,7 +76,8 @@ export default function SkippedNotesIndicator({
             <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text size="sm" ta="center" c={textColor}>
                     <Text span fw="bold" c={highlightColor}>{count}件</Text>
-                    のノートがスキップされました {timeAgo}
+                    {"のノートがスキップされました "}
+                    <Text span c="dimmed">{timeAgo}</Text>
                 </Text>
                 {isLoading ? (
                     <Loader size="xs" />
