@@ -62,6 +62,14 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
         return false;
     }
 
+    // 引用ブロックがMFMノードに含まれているかチェック
+    const hasQuoteNode = (nodes: mfm.MfmNode[]): boolean => {
+        return nodes.some(node =>
+            node.type === 'quote' ||
+            ('children' in node && Array.isArray(node.children) && hasQuoteNode(node.children))
+        );
+    }
+
     const nodeComponent = (node: mfm.MfmNode): ReactElement | string => {
         switch (node.type) {
             case "bold": {
@@ -120,10 +128,13 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                     </Anchor>
                 );
             case "quote":
+                // 引用ブロックを直接返すのではなく、div要素でラップする
                 return (
-                    <Blockquote>
-                        {renderNodes(node.children)}
-                    </Blockquote>
+                    <Box component="div" className="mfm-quote-wrapper">
+                        <Blockquote>
+                            {renderNodes(node.children)}
+                        </Blockquote>
+                    </Box>
                 );
             case "search":
                 return <Box component="span">{`🔍 ${node.props.query}`}</Box>;
@@ -140,8 +151,11 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
         }
     }
 
+    // 引用ブロックが含まれている場合は div でラップ、それ以外は span でラップ
+    const containerComponent = hasQuoteNode(mfmNodes) ? 'div' : 'span';
+
     return (
-        <Box component="span" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+        <Box component={containerComponent} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
             {mfmNodes.map((node, index) => (
                 <React.Fragment key={index}>
                     {nodeComponent(node)}

@@ -45,8 +45,8 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                     </Box>
                 </Flex>
 
-                {/* ノート本文 */}
-                <Text
+                {/* ノート本文 - 引用ブロックを含む可能性があるためdivでラップ */}
+                <Box
                     maw="100%"
                     style={{
                         wordBreak: 'break-word',
@@ -60,7 +60,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                             emojis: note.user.emojis
                         }}
                     />
-                </Text>
+                </Box>
             </Box>
         </Flex>
     );
