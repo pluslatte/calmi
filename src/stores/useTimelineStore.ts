@@ -57,8 +57,7 @@ interface TimelineActions {
     loadMoreNotes: (getTimelineFn: (params?: any) => Promise<Note[]>) => Promise<void>;
 
     // ノート管理
-    addNote: (note: Note) => void;
-    addNoteToBottom: (note: Note) => void;
+    addNoteOnTop: (note: Note) => void;
 
     // 自動更新関連
     setAutoUpdateEnabled: (enabled: boolean) => void;
@@ -139,7 +138,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                         (note) => {
                             const store = get();
                             if (store.autoUpdateEnabled) {
-                                store.addNote(note);
+                                store.addNoteOnTop(note);
                             } else {
                                 store.addSkippedNote(note);
                             }
@@ -162,7 +161,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         },
 
         // ノートをタイムラインに追加（上部）
-        addNote: (note) => {
+        addNoteOnTop: (note) => {
             set(state => {
                 // 重複チェック
                 if (state.notes.some(n => n.id === note.id)) {
@@ -180,45 +179,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                     const oldNote = state.notes.pop();
                     if (oldNote) {
                         state.stream?.unsubscribeFromNote(oldNote.id);
-                    }
-                }
-            });
-        },
-
-        // ノートをタイムラインに追加（下部 - 過去のノート）
-        addNoteToBottom: (note) => {
-            set(state => {
-                // 重複チェック
-                if (state.notes.some(n => n.id === note.id)) {
-                    return;
-                }
-
-                // ノートを末尾に追加
-                state.notes.push(note);
-
-                // ストリーミングAPIでノート購読
-                state.stream?.subscribeToNote(note.id);
-
-                // 最大数超過時に古いノートを削除（先頭から）
-                if (state.notes.length > MAX_NOTES_IN_TIMELINE) {
-                    const oldNote = state.notes.shift();
-                    if (oldNote) {
-                        state.stream?.unsubscribeFromNote(oldNote.id);
-
-                        // 表示範囲外になったノートを記録
-                        if (!state.trimmedNotesGroup) {
-                            state.trimmedNotesGroup = {
-                                count: 1,
-                                timestamp: new Date(),
-                                trimmedNoteIds: [oldNote.id],
-                                loadedNotes: null,
-                                isLoading: false
-                            };
-                        } else {
-                            state.trimmedNotesGroup.count += 1;
-                            state.trimmedNotesGroup.timestamp = new Date();
-                            state.trimmedNotesGroup.trimmedNoteIds.push(oldNote.id);
-                        }
                     }
                 }
             });
@@ -245,6 +205,29 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                         if (!state.notes.some(n => n.id === note.id)) {
                             state.notes.push(note);
                             state.stream?.subscribeToNote(note.id);
+                        }
+
+                        // 最大数超過時に古いノートを削除（先頭から）
+                        if (state.notes.length > MAX_NOTES_IN_TIMELINE) {
+                            const oldNote = state.notes.shift();
+                            if (oldNote) {
+                                state.stream?.unsubscribeFromNote(oldNote.id);
+
+                                // 表示範囲外になったノートを記録
+                                if (!state.trimmedNotesGroup) {
+                                    state.trimmedNotesGroup = {
+                                        count: 1,
+                                        timestamp: new Date(),
+                                        trimmedNoteIds: [oldNote.id],
+                                        loadedNotes: null,
+                                        isLoading: false
+                                    };
+                                } else {
+                                    state.trimmedNotesGroup.count += 1;
+                                    state.trimmedNotesGroup.timestamp = new Date();
+                                    state.trimmedNotesGroup.trimmedNoteIds.push(oldNote.id);
+                                }
+                            }
                         }
                     });
 
