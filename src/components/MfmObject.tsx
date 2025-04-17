@@ -112,9 +112,9 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
             case "unicodeEmoji":
                 return node.props.emoji;
             case "mention":
-                return <Box component="span" style={{ color: 'blue' }}>{`@${node.props.username}`}</Box>;
+                return <Box component="span" style={{ color: 'cyan' }}>{`@${node.props.username}`}</Box>;
             case "hashtag":
-                return <Box component="span" style={{ color: 'blue' }}>{`#${node.props.hashtag}`}</Box>;
+                return <Box component="span" style={{ color: 'cyan' }}>{`#${node.props.hashtag}`}</Box>;
             case "url":
                 return (
                     <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer">
