@@ -1,3 +1,4 @@
+// hooks/useTimelineFeed.ts
 import { TimelineFeed } from "@/lib/misskey/TimelineFeed";
 import { api } from "misskey-js";
 import { Note } from "misskey-js/entities.js";
@@ -19,8 +20,20 @@ export function useTimelineFeed(
     const [loadingTrimmedNotes, setLoadingTrimmedNotes] = useState<boolean>(false);
     const [lastSwitchToAutoUpdateTime, setLastSwitchToAutoUpdateTime] = useState<Date | null>(null);
     const timelineRef = useRef<TimelineFeed | null>(null);
+    const previousTimelineTypeRef = useRef<string>(timelineType);
 
     useEffect(() => {
+        // タイムラインタイプが変更された場合
+        if (previousTimelineTypeRef.current !== timelineType) {
+            // 状態をリセット
+            setLastSwitchToAutoUpdateTime(null);
+            setSkippedNotesGroups([]);
+            setTrimmedNotesGroup(null);
+
+            // 現在のタイムラインタイプを保存
+            previousTimelineTypeRef.current = timelineType;
+        }
+
         // apiClientがnullの場合は早期リターン
         if (!apiClient) return;
 
@@ -135,7 +148,14 @@ export function useTimelineFeed(
     // タイムラインタイプが変更された時に呼び出す関数
     const resetTimelineState = useCallback(() => {
         setLastSwitchToAutoUpdateTime(null);
-        // 必要に応じて他の状態もリセット
+        setSkippedNotesGroups([]);
+        setTrimmedNotesGroup(null);
+        // TimelineFeedインスタンスの状態もリセット
+        if (timelineRef.current) {
+            timelineRef.current.skippedNotesGroups = [];
+            timelineRef.current.lastSkippedGroupTimestamp = null;
+            timelineRef.current.trimmedNotesGroup = null;
+        }
     }, []);
 
     return {

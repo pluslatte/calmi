@@ -116,6 +116,10 @@ export class TimelineFeed {
         this.notes.value = [];
         this.initLoad = true;
         this._autoUpdateEnabled = false;
+        // スキップされたノートグループをリセット
+        this.skippedNotesGroups = [];
+        this.lastSkippedGroupTimestamp = null;
+        this.trimmedNotesGroup = null;
         this.misskeyStream.connect();
     }
 
@@ -126,6 +130,7 @@ export class TimelineFeed {
         this.initLoad = true;
         this.skippedNotesGroups = [];
         this.lastSkippedGroupTimestamp = null;
+        this.trimmedNotesGroup = null;
     }
 
     addNote(note: Note) {

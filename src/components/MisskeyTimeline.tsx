@@ -30,6 +30,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     } = useMisskeyApiClient();
 
     const lastBoundaryIndexRef = useRef<number | null>(null); // 最後の自動更新境界の位置を追跡する参照
+    const prevTimelineTypeRef = useRef<TimelineType>(timelineType); // 前回のタイムラインタイプを記録
 
     // useTimelineFeedフックを使用する際、APIクライアントをそのまま渡す代わりに
     // 各タイムライン取得関数を渡す
@@ -68,15 +69,26 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
         handleScrollToTop
     } = useScrollToTop(scrollAreaRef, containerRef);
 
-    // timelineTypeが変わったことを検知するためにuseEffectを追加
+    // timelineTypeが変わったことを検知してStateをリセット
     useEffect(() => {
-        // タイムラインタイプが変わった時に実行される
-        // この時点でlastSwitchToAutoUpdateTimeをリセットする必要がある
-        lastBoundaryIndexRef.current = null; // 境界インデックスもリセット
+        if (prevTimelineTypeRef.current !== timelineType) {
+            console.log(`Timeline type changed from ${prevTimelineTypeRef.current} to ${timelineType}`);
 
-        // タイムラインフィードの状態もリセットする必要がある可能性があります
-        resetTimelineState();
-    }, [timelineType]);
+            // 境界インデックスをリセット
+            lastBoundaryIndexRef.current = null;
+
+            // タイムラインフィードの状態をリセット
+            resetTimelineState();
+
+            // 現在のタイプを保存
+            prevTimelineTypeRef.current = timelineType;
+
+            // スクロール位置をトップに戻す
+            if (scrollAreaRef.current) {
+                scrollAreaRef.current.scrollTo({ top: 0 });
+            }
+        }
+    }, [timelineType, resetTimelineState, scrollAreaRef]);
 
     useEffect(() => {
         if (!scrollAreaRef.current) return;
@@ -113,7 +125,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
     };
 
     const renderItems = () => {
-        // スキップされたノートのグループがタイムライン先頭にある場合専用（出番は少ないと思うが一応）
+        // スキップされたノートのグループがタイムライン先頭にある場合専用
         const topIndicators = skippedNotesGroups
             .filter(group => group.referenceNoteId === 'timeline-top')
             .map((group, index) => {
@@ -131,7 +143,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({ timelineType, scrollArea
                         />
                     </Box>
                 )
-
             })
 
         // 自動更新の境界インデックス
