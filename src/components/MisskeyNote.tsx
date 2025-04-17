@@ -12,7 +12,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
 
     return (
         <Flex align="start" gap="sm" wrap="nowrap">
-            <Avatar src={note.user.avatarUrl} radius={'md'} m="xs" />
+            <Avatar src={note.user.avatarUrl} radius={'md'} m="xs" mr={0} />
             <Box miw={0} mt="4" flex={1}>
                 <Flex justify="space-between" align="center" wrap="nowrap" miw={0}>
                     <Flex gap="xs" wrap="nowrap" align="center" miw={0} flex={1}>
@@ -21,7 +21,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                             truncate="end"
                             maw="100%"
                         >
-                            {note.user.username}
+                            {note.user.name}
                         </Text>
                         <Text
                             fw="normal"
@@ -29,6 +29,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                             truncate="end"
                             maw="100%"
                         >
+                            {note.user.username}
                             {note.user.host ? "@" + note.user.host : ''}
                         </Text>
                     </Flex>
