@@ -29,21 +29,52 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
 
         // リモートインスタンスの絵文字
         try {
-            const got = await fetch(`https://${host}/api/emoji?name=${emojiCode}`, {
-                method: 'GET'
-            });
-
-            if (!got.ok) {
-                throw new Error(`Failed to fetch emoji: ${got.status}`);
-            }
-
-            const json: { url: string; name: string; } = await got.json();
-            return { url: json.url, alt: json.name };
+            const emojiData = await getRemoteEmojiUrl(host, emojiCode);
+            return emojiData;
         } catch (err) {
             console.error('Failed to fetch remote emoji:', err);
             throw err;
         }
     }
+
+    // リモートインスタンスの種類を判別し、適切なエンドポイントを使用する関数
+    const getRemoteEmojiUrl = async (host: string, emojiCode: string): Promise<{ url: string; alt: string }> => {
+        // まずMisskeyのAPIを試す
+        try {
+            const response = await fetch(`https://${host}/api/emoji?name=${emojiCode}`, {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                const json = await response.json();
+                return { url: json.url, alt: json.name };
+            }
+        } catch (err) {
+            console.log(`Misskey emoji API failed for ${host}: ${err}`);
+            // エラーを無視して次の方法を試す
+        }
+
+        // Mastodonのカスタム絵文字APIを試す
+        try {
+            const response = await fetch(`https://${host}/api/v1/custom_emojis`, {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                const emojis = await response.json();
+                const foundEmoji = emojis.find((emoji: any) => emoji.shortcode === emojiCode);
+
+                if (foundEmoji) {
+                    return { url: foundEmoji.url, alt: foundEmoji.shortcode };
+                }
+            }
+        } catch (err) {
+            console.log(`Mastodon emoji API failed for ${host}: ${err}`);
+        }
+
+        // 両方失敗した場合はエラーをスロー
+        throw new Error(`リモート絵文字 ${emojiCode} をインスタンス ${host} から取得できませんでした`);
+    };
 
     useEffect(() => {
         let cancelled = false;
