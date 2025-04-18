@@ -23,7 +23,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 }) {
     const {
         client,
-        apiState,
         getHomeTimeline,
         getHybridTimeline,
         getLocalTimeline,
