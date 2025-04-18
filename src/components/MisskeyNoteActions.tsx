@@ -1,4 +1,4 @@
-import { Group, ActionIcon, useMantineTheme } from "@mantine/core";
+import { Group, ActionIcon, useMantineTheme, Box } from "@mantine/core";
 import { IconArrowBackUp, IconRepeat, IconHeart, IconDots } from "@tabler/icons-react";
 
 export default function MisskeyNoteActions() {
@@ -6,6 +6,7 @@ export default function MisskeyNoteActions() {
 
     return (
         <Group gap="xl" mt={4} mb={4}>
+            <Box w="md" />
             <ActionIcon
                 variant="subtle"
                 aria-label="reply"
