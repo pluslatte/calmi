@@ -7,13 +7,10 @@ interface TimelineUpdateBoundaryProps {
 }
 
 export default function TimelineUpdateBoundary({ timestamp }: TimelineUpdateBoundaryProps) {
-    const { colorScheme } = useMantineColorScheme();
     const theme = useMantineTheme();
-    const isDark = colorScheme === 'dark';
     const formattedTime = format(timestamp, 'HH:mm', { locale: ja });
-    const textColor = isDark ? theme.colors.dark[0] : theme.colors.gray[6];
-    const accentColor = isDark ? theme.colors.cyan[5] : theme.colors.cyan[4];
-
+    const textColor = theme.colors.dark[0];
+    const accentColor = theme.colors.cyan[5];
     return (
         <Box my="md">
             <Divider

@@ -23,16 +23,14 @@ export default function TrimmedNotesIndicator({
     isLoading
 }: TrimmedNotesIndicatorProps) {
     const timeAgo = formatDistanceToNow(timestamp, { addSuffix: true, locale: ja });
-    const { colorScheme } = useMantineColorScheme();
     const theme = useMantineTheme();
     const [expanded, setExpanded] = useState(false);
 
     // テーマに基づいてスタイルを調整
-    const isDark = colorScheme === 'dark';
-    const bgColor = isDark ? theme.colors.dark[6] : theme.colors.gray[0];
-    const textColor = isDark ? theme.colors.dark[0] : theme.colors.gray[6];
-    const accentColor = isDark ? theme.colors.yellow[8] : theme.colors.yellow[4]; // 黄色系に変更して区別
-    const highlightColor = isDark ? theme.colors.yellow[4] : theme.colors.yellow[6];
+    const bgColor = theme.colors.dark[6];
+    const textColor = theme.colors.dark[0];
+    const accentColor = theme.colors.yellow[8];
+    const highlightColor = theme.colors.yellow[4];
 
     // クリック時処理
     const handleClick = async () => {
@@ -64,9 +62,9 @@ export default function TrimmedNotesIndicator({
             style={{
                 borderLeft: `3px solid ${accentColor}`,
                 borderRadius: '4px',
-                borderTop: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-                borderRight: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-                borderBottom: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+                borderTop: `1px solid ${theme.colors.dark[4]}`,
+                borderRight: `1px solid ${theme.colors.dark[4]}`,
+                borderBottom: `1px solid ${theme.colors.dark[4]}`,
                 opacity: 0.7,
                 cursor: isLoading ? 'default' : 'pointer',
             }}
