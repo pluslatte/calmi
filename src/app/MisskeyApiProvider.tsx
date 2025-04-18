@@ -23,7 +23,8 @@ export function MisskeyApiProvider({
         if (initialClient) {
             setClient(initialClient);
         }
-    }, [initialClient, setClient]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialClient]);
 
     return <>{children}</>;
 }
