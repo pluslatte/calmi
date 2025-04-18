@@ -2,8 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Container, Stack, Text, Title, Button, Center, Loader } from '@mantine/core';
-import ThemeToggle from '@/components/ThemeToggle';
+import { Container, Stack, Text, Center, Loader } from '@mantine/core';
 
 export default function HomePage() {
   const router = useRouter();
