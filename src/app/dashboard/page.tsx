@@ -7,6 +7,7 @@ import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
 import UserHeader from "@/components/UserHeader";
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconPencil } from '@tabler/icons-react';
+import NoteComposer from "@/components/NoteComposer";
 
 export default function Dashboard() {
     const [note, setNote] = useState('');
@@ -70,22 +71,7 @@ export default function Dashboard() {
             size="lg"
             zIndex={1000}
         >
-            <Textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="今何してる？"
-                autosize
-                minRows={3}
-                maxRows={10}
-            />
-            <Button
-                onClick={handleCreateNote}
-                loading={apiState.loading}
-                mt="xs"
-                fullWidth
-            >
-                ノートを投稿
-            </Button>
+            <NoteComposer />
         </Modal>
     );
 
@@ -125,22 +111,7 @@ export default function Dashboard() {
                 // デスクトップレイアウト
                 <Grid>
                     <Grid.Col span="content">
-                        <Textarea
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                            placeholder="今何してる？"
-                            autosize
-                            minRows={3}
-                            maxRows={10}
-                        />
-                        <Button
-                            onClick={handleCreateNote}
-                            loading={apiState.loading}
-                            mt="xs"
-                            fullWidth
-                        >
-                            ノートを投稿
-                        </Button>
+                        <NoteComposer />
                     </Grid.Col>
                     <Grid.Col span="auto">
                         <Box h="calc(98vh - 70px)"> {/* ヘッダーの高さ分を引く */}

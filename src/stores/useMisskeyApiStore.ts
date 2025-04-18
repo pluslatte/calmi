@@ -54,6 +54,13 @@ interface MisskeyApiActions {
     createNote: (text: string, visibility?: 'public' | 'home' | 'followers' | 'specified') => Promise<{ createdNote: Note }>;
     getEmoji: (name: string) => Promise<{ url: string; name: string }>;
     getUserInfo: () => Promise<User>;
+
+    uploadFile: (file: File) => Promise<{ id: string; name: string; url: string; }>;
+    createNoteWithMedia: (
+        text: string,
+        fileIds: string[],
+        visibility?: 'public' | 'home' | 'followers' | 'specified'
+    ) => Promise<{ createdNote: Note }>;
 }
 
 // デフォルト値
@@ -274,6 +281,30 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 {},
                 'ユーザー情報の取得に失敗しました'
             );
-        }
+        },
+
+        uploadFile: async (file) => {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // FormDataをアップロード用のエンドポイントに送信
+            return await get().executeApiRequest(
+                'drive/files/create',
+                formData,
+                'ファイルのアップロードに失敗しました'
+            );
+        },
+
+        createNoteWithMedia: async (text, fileIds, visibility = 'home') => {
+            return await get().executeApiRequest(
+                'notes/create',
+                {
+                    text,
+                    visibility,
+                    fileIds // ドライブにアップロードしたファイルのID配列
+                },
+                'ノートの投稿に失敗しました'
+            );
+        },
     }))
 );
