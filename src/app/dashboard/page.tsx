@@ -63,7 +63,7 @@ export default function Dashboard() {
                         style={{
                             position: 'fixed',
                             bottom: 24,
-                            right: 24,
+                            left: 24,
                             zIndex: 900,
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
                         }}
