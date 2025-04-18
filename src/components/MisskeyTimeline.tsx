@@ -74,9 +74,12 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     useEffect(() => {
         if (!client) return;
 
+        // タイムラインを初期化（initializeTimelineは内部でローカルストレージから
+        // 保存されたタイムラインタイプを読み込む）
+        initializeTimeline(client, timelineType);
+
         // タイムラインタイプが変更された場合
         if (prevTimelineTypeRef.current !== timelineType) {
-            changeTimelineType(timelineType);
             prevTimelineTypeRef.current = timelineType;
 
             // スクロール位置をトップに戻す
@@ -88,9 +91,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             lastBoundaryIndexRef.current = null;
         }
 
-        // タイムラインを初期化
-        initializeTimeline(client, timelineType);
-
         // 初期データのロード
         loadMoreNotes(getTimelineFunction());
 
@@ -98,7 +98,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         return () => {
             cleanupTimeline();
         };
-    }, [client, timelineType, initializeTimeline, loadMoreNotes, cleanupTimeline, changeTimelineType]);
+    }, [client, timelineType, initializeTimeline, loadMoreNotes, cleanupTimeline]);
 
     // スクロール位置の監視を設定
     useEffect(() => {

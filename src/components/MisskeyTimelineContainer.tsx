@@ -26,6 +26,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     const handleTimelineTypeChange = (value: string | null) => {
         if (value && ['home', 'social', 'local', 'global'].includes(value)) {
             changeTimelineType(value as TimelineType);
+            // ストア内のchangeTimelineTypeがローカルストレージへの保存を担当
         }
     };
 

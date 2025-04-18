@@ -131,6 +131,17 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
 
         // アクション
         initializeTimeline: (client, timelineType) => {
+            // ローカルストレージからタイムラインタイプを読み込み
+            let savedType = timelineType;
+            try {
+                const saved = localStorage.getItem('calmi_timeline_type') as TimelineType | null;
+                if (saved && ['home', 'social', 'local', 'global'].includes(saved)) {
+                    savedType = saved;
+                }
+            } catch (error) {
+                console.error('Failed to load timeline type from localStorage:', error);
+            }
+
             // リソースのクリーンアップ
             const currentStream = get().stream;
             if (currentStream) {
@@ -140,7 +151,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             // 状態のリセット
             set(state => {
                 state.notes = [];
-                state.timelineType = timelineType;
+                state.timelineType = savedType;
                 state.autoUpdateEnabled = false;
                 state.isLoading = true;
                 state.hasError = false;
@@ -157,7 +168,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 if (client.credential) {
                     state.stream = new MisskeyStream(
                         client,
-                        timelineType,
+                        savedType,
                         (note) => {
                             const store = get();
                             if (store.autoUpdateEnabled) {
@@ -453,6 +464,13 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 state.isLoadingMore = false;
                 state.lastLoadMoreTime = 0;
             });
+
+            // タイムラインタイプをローカルストレージに保存
+            try {
+                localStorage.setItem('calmi_timeline_type', newType);
+            } catch (error) {
+                console.error('Failed to save timeline type to localStorage:', error);
+            }
         },
 
         // エラー状態の設定
