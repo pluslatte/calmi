@@ -308,9 +308,10 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                         </Transition>
                     </Box>
                     <Box
+                        c="dimmed"
                         style={{
                             position: 'fixed',
-                            top: 24,
+                            top: 73,
                             right: buttonRightOffset,
                             zIndex: 1000,
                         }}

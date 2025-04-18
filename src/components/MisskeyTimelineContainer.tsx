@@ -36,7 +36,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
                 variant="default"
                 onChange={handleTimelineTypeChange}
             >
-                <Tabs.List justify="center" px="md" pt="xs">
+                <Tabs.List justify="center" px="md">
                     <Tooltip label="ホーム">
                         <Tabs.Tab value="home" leftSection={<IconHome size={18} />}></Tabs.Tab>
                     </Tooltip>
