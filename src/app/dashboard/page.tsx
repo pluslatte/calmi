@@ -1,19 +1,15 @@
 'use client';
 
-import { Box, Button, Container, Grid, Textarea, Modal, ActionIcon } from "@mantine/core";
+import { Box, Container, Grid, Modal, ActionIcon } from "@mantine/core";
 import { useRef, useState, useEffect } from "react";
-import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
 import UserHeader from "@/components/UserHeader";
-import { notifications } from '@mantine/notifications';
-import { IconCheck, IconPencil } from '@tabler/icons-react';
+import { IconPencil } from '@tabler/icons-react';
 import NoteComposer from "@/components/NoteComposer";
 
 export default function Dashboard() {
-    const [note, setNote] = useState('');
     const [isMobile, setIsMobile] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { createNote, apiState } = useMisskeyApiStore();
     const containerRef = useRef(null);
 
     // レスポンシブデザイン用のウィンドウサイズ監視
@@ -31,35 +27,6 @@ export default function Dashboard() {
         // クリーンアップ
         return () => window.removeEventListener('resize', checkIfMobile);
     }, []);
-
-    const handleCreateNote = async () => {
-        if (!note.trim()) {
-            notifications.show({
-                title: '投稿エラー',
-                message: 'ノートの内容を入力してください',
-                color: 'red',
-            });
-            return;
-        }
-
-        try {
-            const result = await createNote(note);
-
-            setNote('');
-            if (isMobile) setIsModalOpen(false);
-
-            notifications.show({
-                title: '投稿成功',
-                message: 'ノートを投稿しました',
-                color: 'green',
-                icon: <IconCheck />,
-                autoClose: 3000
-            });
-        } catch (error) {
-            // エラーハンドリングはストア内で処理済み
-            console.error('Failed to create note:', error);
-        }
-    }
 
     // モバイル用投稿モーダル
     const renderMobileNoteModal = () => (
