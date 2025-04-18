@@ -34,7 +34,7 @@ export default function Login() {
             const callbackUrl = process.env.NODE_ENV === 'production'
                 ? `${window.location.origin}/callback`
                 : 'http://localhost:3000/callback';
-            const permissions = 'read:account,write:notes,read:channels,read:notifications,write:reactions';
+            const permissions = 'read:account,write:notes,read:channels,read:notifications,write:reactions,read:drive,write:drive';
 
             // セッションIDをローカルストレージに保存（コールバック後に検証するため）
             localStorage.setItem('misskey_session_id', sessionId);

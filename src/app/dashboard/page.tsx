@@ -71,7 +71,7 @@ export default function Dashboard() {
             size="lg"
             zIndex={1000}
         >
-            <NoteComposer />
+            <NoteComposer onSuccess={() => setIsModalOpen(false)} />
         </Modal>
     );
 

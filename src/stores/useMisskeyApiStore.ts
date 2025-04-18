@@ -3,7 +3,6 @@ import { immer } from 'zustand/middleware/immer';
 import { api, Endpoints } from 'misskey-js';
 import { Note, User } from 'misskey-js/entities.js';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX } from '@tabler/icons-react';
 
 export type PossibleEndPoints = keyof Endpoints;
 
@@ -109,7 +108,6 @@ const showNotification = (error: ApiError) => {
         title: 'エラーが発生しました',
         message: error.message,
         color: 'red',
-        icon: IconX({}),
         autoClose: 5000,
     });
 };
@@ -144,7 +142,6 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 title: 'ログアウトしました',
                 message: 'ログアウトに成功しました',
                 color: 'cyan',
-                icon: IconCheck({}),
                 autoClose: 3000,
             });
         },
@@ -284,15 +281,79 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         },
 
         uploadFile: async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
+            const state = get();
+            if (!state.client) {
+                const error: ApiError = {
+                    type: 'auth',
+                    message: 'APIクライアントが初期化されていません。ログインしてください。'
+                };
+                showNotification(error);
+                throw new Error(error.message);
+            }
 
-            // FormDataをアップロード用のエンドポイントに送信
-            return await get().executeApiRequest(
-                'drive/files/create',
-                formData,
-                'ファイルのアップロードに失敗しました'
-            );
+            set(state => {
+                state.apiState.loading = true;
+            });
+
+            try {
+                // FormDataを作成
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // misskey-jsのAPIクライアントでは、FormDataをオブジェクトとして扱えない
+                // 直接fetchでアップロード
+                const origin = state.client.origin || 'https://virtualkemomimi.net';
+                const credential = state.client.credential;
+
+                if (!credential) {
+                    throw new Error('認証情報がありません');
+                }
+
+                // 直接fetchアプローチ
+                const response = await fetch(`${origin}/api/drive/files/create`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${credential}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`サーバーエラー (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                set(state => {
+                    state.apiState.loading = false;
+                });
+
+                return data;
+            } catch (err: any) {
+                const errorType = determineErrorType(err);
+                const errorMsg = formatErrorMessage(errorType, err);
+
+                const apiError: ApiError = {
+                    type: errorType,
+                    message: errorMsg || 'ファイルのアップロードに失敗しました',
+                    original: err,
+                    statusCode: err.response?.status
+                };
+
+                set(state => {
+                    state.apiState.loading = false;
+                    state.apiState.error = apiError;
+                });
+
+                showNotification(apiError);
+
+                if (errorType === 'auth') {
+                    get().logout();
+                }
+
+                throw apiError;
+            }
         },
 
         createNoteWithMedia: async (text, fileIds, visibility = 'home') => {

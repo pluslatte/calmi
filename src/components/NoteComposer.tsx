@@ -1,26 +1,41 @@
 // src/components/NoteComposer.tsx
 'use client';
 
-import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon } from "@mantine/core";
+import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader } from "@mantine/core";
 import { useState, useRef } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { notifications } from '@mantine/notifications';
-import { IconPhoto, IconX, IconCheck } from '@tabler/icons-react';
+import { IconPhoto, IconX } from '@tabler/icons-react';
 
 type VisibilityOption = 'public' | 'home' | 'followers' | 'specified';
 
-export default function NoteComposer() {
+interface NoteComposerProps {
+    onSuccess?: () => void; // 投稿成功時のコールバック
+}
+
+export default function NoteComposer({ onSuccess }: NoteComposerProps) {
     const [text, setText] = useState('');
     const [visibility, setVisibility] = useState<VisibilityOption>('home');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const resetRef = useRef<() => void>(null);
 
-    const { createNote, apiState } = useMisskeyApiStore();
+    const { createNote, createNoteWithMedia, uploadFile, apiState } = useMisskeyApiStore();
 
     const handleFileChange = (file: File | null) => {
         if (file) {
+            // ファイルサイズチェック (8MB)
+            if (file.size > 8 * 1024 * 1024) {
+                notifications.show({
+                    title: 'ファイルエラー',
+                    message: 'ファイルサイズは8MB以下にしてください',
+                    color: 'red',
+                });
+                return;
+            }
+
             setImageFile(file);
             // プレビューを作成
             const reader = new FileReader();
@@ -52,9 +67,25 @@ export default function NoteComposer() {
         setIsSubmitting(true);
 
         try {
-            // 今はテキストのみ投稿可能、後で画像アップロード機能を実装
-            // TODO: アップロード機能を実装
-            const result = await createNote(text, visibility);
+            let createdNote;
+
+            // 画像がある場合は先にアップロード
+            if (imageFile) {
+                setIsUploading(true);
+                try {
+                    const uploadedFile = await uploadFile(imageFile);
+                    setIsUploading(false);
+
+                    // 画像付きノートを作成
+                    createdNote = await createNoteWithMedia(text, [uploadedFile.id], visibility);
+                } catch (error) {
+                    setIsUploading(false);
+                    throw error; // エラー処理を統一
+                }
+            } else {
+                // テキストのみのノートを作成
+                createdNote = await createNote(text, visibility);
+            }
 
             // 成功したらフォームをクリア
             setText('');
@@ -64,9 +95,13 @@ export default function NoteComposer() {
                 title: '投稿成功',
                 message: 'ノートを投稿しました',
                 color: 'green',
-                icon: <IconCheck />,
                 autoClose: 3000
             });
+
+            // 成功コールバックがあれば実行（モーダルを閉じるなど）
+            if (onSuccess) {
+                onSuccess();
+            }
         } catch (error) {
             console.error('Failed to create note:', error);
         } finally {
@@ -97,6 +132,7 @@ export default function NoteComposer() {
                             size="sm"
                             style={{ position: 'absolute', top: 5, right: 5, zIndex: 10 }}
                             onClick={clearImage}
+                            disabled={isSubmitting || isUploading}
                         >
                             <IconX size={16} />
                         </ActionIcon>
@@ -116,6 +152,7 @@ export default function NoteComposer() {
                             resetRef={resetRef}
                             onChange={handleFileChange}
                             accept="image/png,image/jpeg,image/gif,image/webp"
+                            disabled={isSubmitting || isUploading}
                         >
                             {(props) => (
                                 <ActionIcon
@@ -123,7 +160,7 @@ export default function NoteComposer() {
                                     variant="subtle"
                                     color="gray"
                                     aria-label="画像を添付"
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || isUploading || !!imageFile}
                                 >
                                     <IconPhoto size={20} />
                                 </ActionIcon>
@@ -139,19 +176,28 @@ export default function NoteComposer() {
                                 { value: 'followers', label: 'フォロワー' },
                                 { value: 'specified', label: 'ダイレクト' },
                             ]}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || isUploading}
                             size="xs"
                             w={120}
                         />
                     </Group>
 
-                    <Button
-                        onClick={handleSubmit}
-                        loading={isSubmitting || apiState.loading}
-                        disabled={(!text.trim() && !imageFile) || isSubmitting}
-                    >
-                        ノートする
-                    </Button>
+                    <Group>
+                        {isUploading && (
+                            <Group gap="xs">
+                                <Loader size="xs" />
+                                <Text size="xs" c="dimmed">アップロード中...</Text>
+                            </Group>
+                        )}
+
+                        <Button
+                            onClick={handleSubmit}
+                            loading={isSubmitting || apiState.loading}
+                            disabled={(!text.trim() && !imageFile) || isSubmitting || isUploading}
+                        >
+                            ノートする
+                        </Button>
+                    </Group>
                 </Group>
 
                 {/* 文字数カウンター */}
