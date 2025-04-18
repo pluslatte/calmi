@@ -10,7 +10,6 @@ import { IconCheck, IconPencil } from '@tabler/icons-react';
 
 export default function Dashboard() {
     const [note, setNote] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { createNote, apiState } = useMisskeyApiStore();
@@ -43,7 +42,6 @@ export default function Dashboard() {
         }
 
         try {
-            setIsLoading(true);
             const result = await createNote(note);
 
             setNote('');
@@ -59,8 +57,6 @@ export default function Dashboard() {
         } catch (error) {
             // エラーハンドリングはストア内で処理済み
             console.error('Failed to create note:', error);
-        } finally {
-            setIsLoading(false);
         }
     }
 
@@ -84,7 +80,7 @@ export default function Dashboard() {
             />
             <Button
                 onClick={handleCreateNote}
-                loading={isLoading || apiState.loading}
+                loading={apiState.loading}
                 mt="xs"
                 fullWidth
             >
@@ -139,7 +135,7 @@ export default function Dashboard() {
                         />
                         <Button
                             onClick={handleCreateNote}
-                            loading={isLoading || apiState.loading}
+                            loading={apiState.loading}
                             mt="xs"
                             fullWidth
                         >

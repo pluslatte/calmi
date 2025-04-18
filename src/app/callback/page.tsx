@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Container, Card, Text, Center, Loader, Stack, Button } from "@mantine/core";
+import { Container, Card, Text, Loader, Stack, Button } from "@mantine/core";
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX, IconLogin, IconArrowRight } from '@tabler/icons-react';
 
