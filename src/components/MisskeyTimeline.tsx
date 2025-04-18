@@ -196,10 +196,11 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
             const boundary = showBoundary ? (
                 <React.Fragment key={`boundary-container-${lastSwitchToAutoUpdateTime?.getTime()}`}>
-                    <TimelineUpdateBoundary
+                    {/* これ厄介なのでいったん保留で issue #1 */}
+                    {/* <TimelineUpdateBoundary
                         key={`boundary-${lastSwitchToAutoUpdateTime.getTime()}`}
                         timestamp={lastSwitchToAutoUpdateTime}
-                    />
+                    /> */}
                     {trimmedIndicator}
                 </React.Fragment>
             ) : null;
