@@ -170,6 +170,16 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         cleanupTimeline: () => {
             const currentStream = get().stream;
             if (currentStream) {
+                // 現在のタイムラインのすべてのノートの購読を解除
+                const notes = get().notes;
+                notes.forEach(note => {
+                    currentStream.unsubscribeFromNote(note.id);
+                    if (note.renote) {
+                        currentStream.unsubscribeFromNote(note.renote.id);
+                    }
+                });
+
+                // ストリームを切断
                 currentStream.disconnect();
             }
 
@@ -191,6 +201,11 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
 
                 // ストリーミングAPIでノート購読
                 state.stream?.subscribeToNote(note.id);
+
+                // リノートがあるならば、それも購読
+                if (note.renote) {
+                    state.stream?.subscribeToNote(note.renote.id);
+                }
 
                 // 最大数超過時に古いノートを削除
                 if (state.notes.length > MAX_NOTES_IN_TIMELINE) {
@@ -222,7 +237,13 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                     newNotes.forEach(note => {
                         if (!state.notes.some(n => n.id === note.id)) {
                             state.notes.push(note);
+                            // ノートを購読
                             state.stream?.subscribeToNote(note.id);
+
+                            // リノートがあるならば、それも購読
+                            if (note.renote) {
+                                state.stream?.subscribeToNote(note.renote.id);
+                            }
                         }
 
                         // 最大数超過時に古いノートを削除（先頭から）
