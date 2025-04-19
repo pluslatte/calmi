@@ -81,7 +81,7 @@ interface TimelineActions {
 }
 
 // フラグと定数
-const MAX_NOTES_IN_TIMELINE = 50;
+const MAX_NOTES_IN_TIMELINE = 100;
 const SKIPPED_GROUP_THRESHOLD = 60000; // 60秒
 const MAX_SKIPPED_NOTES_TO_LOAD = 20;
 const MAX_TRIMMED_NOTES_TO_LOAD = 20;
@@ -269,8 +269,8 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
 
             try {
                 const params = lastNoteId
-                    ? { limit: 20, untilId: lastNoteId }
-                    : { limit: 20 };
+                    ? { limit: 40, untilId: lastNoteId }
+                    : { limit: 40 };
 
                 const newNotes = await getTimelineFn(params);
 

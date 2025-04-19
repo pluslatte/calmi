@@ -54,8 +54,8 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
                     </Tooltip>
                 </Tabs.List>
             </Tabs>
-            <ScrollArea viewportRef={scrollAreaRef} flex={1} type="auto">
-                <Box mr="sm">
+            <ScrollArea viewportRef={scrollAreaRef} flex={1} type="scroll">
+                <Box mr="2px">
                     <MisskeyTimeline
                         timelineType={timelineType}
                         scrollAreaRef={scrollAreaRef}

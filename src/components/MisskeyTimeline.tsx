@@ -340,12 +340,12 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                         c="dimmed"
                         style={{
                             position: 'fixed',
-                            top: 73,
+                            top: 13,
                             right: buttonRightOffset,
                             zIndex: 1000,
                         }}
                     >
-                        <Transition mounted={!autoUpdateEnabled} transition="slide-up" duration={200} timingFunction="ease">
+                        <Transition mounted={!autoUpdateEnabled} transition="fade" duration={200} timingFunction="ease">
                             {(styles) => (
                                 <IconRefreshOff
                                     size={16}
