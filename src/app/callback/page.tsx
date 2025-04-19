@@ -23,6 +23,7 @@ export default function Callback() {
 
                 // ローカルストレージから元のセッションIDを取得して検証
                 const storedSessionId = localStorage.getItem('misskey_session_id');
+                const serverUrl = localStorage.getItem('misskey_server') || 'https://virtualkemomimi.net';
                 if (!storedSessionId) {
                     throw new Error('セッション情報が見つかりません。再度ログインしてください');
                 }
@@ -32,7 +33,7 @@ export default function Callback() {
                 }
 
                 // MiAuth認証を検証
-                const res = await fetch(`https://virtualkemomimi.net/api/miauth/${sessionParam}/check`, {
+                const res = await fetch(`${serverUrl}/api/miauth/${sessionParam}/check`, {
                     method: 'POST',
                 });
 

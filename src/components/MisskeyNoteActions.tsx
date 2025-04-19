@@ -92,7 +92,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                             ?
                             reaction.slice(1).split('@')[1].slice(0, -1) // remote サーバーのドメインが入るはず
                             :
-                            "virtualkemomimi.net" // ここはローカルサーバーのドメイン
+                            localStorage.getItem('misskey_server')?.slice(8) // ここはローカルサーバーのドメイン
                         :
                         '';
                     console.log("fetching: " + emojiName + " from " + emojiHost);
@@ -127,7 +127,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                                     <EmojiNode
                                         name={emojiName}
                                         assets={{
-                                            host: emojiHost,
+                                            host: emojiHost ? emojiHost : "",
                                             emojis: targetNoteEmojis,
                                         }}
                                     />

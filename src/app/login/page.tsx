@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Container, Card, Text, Title, Stack } from "@mantine/core";
+import { Button, Container, Card, Text, Title, Stack, TextInput } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { notifications } from '@mantine/notifications';
 import { IconLogin } from '@tabler/icons-react';
@@ -9,11 +9,18 @@ import { useRouter } from "next/navigation";
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const [serverUrl, setServerUrl] = useState('https://virtualkemomimi.net');
     const router = useRouter();
 
-    // マウント時にログイン状態をチェック
+    // マウント時にローカルストレージからサーバーURLを取得
     useEffect(() => {
         const token = localStorage.getItem('misskey_token');
+        const savedServer = localStorage.getItem('misskey_server');
+
+        if (savedServer) {
+            setServerUrl(savedServer);
+        }
+
         if (token) {
             // トークンが存在する場合はダッシュボードへリダイレクト
             router.push('/dashboard');
@@ -27,10 +34,34 @@ export default function Login() {
         try {
             setIsLoading(true);
 
+            // サーバーURLの検証
+            if (!serverUrl.trim()) {
+                notifications.show({
+                    title: '入力エラー',
+                    message: 'Misskeyサーバーのアドレスを入力してください',
+                    color: 'red',
+                    autoClose: 5000
+                });
+                setIsLoading(false);
+                return;
+            }
+
+            // サーバーURLの正規化
+            let normalizedUrl = serverUrl.trim();
+            if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+                normalizedUrl = 'https://' + normalizedUrl;
+            }
+
+            // 末尾のスラッシュを削除
+            if (normalizedUrl.endsWith('/')) {
+                normalizedUrl = normalizedUrl.slice(0, -1);
+            }
+
+            // サーバーURLをローカルストレージに保存
+            localStorage.setItem('misskey_server', normalizedUrl);
+
             const sessionId = crypto.randomUUID();
 
-            const misskeyHost = 'https://virtualkemomimi.net';
-            const appName = 'calmi';
             const callbackUrl = process.env.NODE_ENV === 'production'
                 ? `${window.location.origin}/callback`
                 : 'http://localhost:3000/callback';
@@ -39,7 +70,7 @@ export default function Login() {
             // セッションIDをローカルストレージに保存（コールバック後に検証するため）
             localStorage.setItem('misskey_session_id', sessionId);
 
-            const authUrl = `${misskeyHost}/miauth/${sessionId}?name=${appName}&callback=${callbackUrl}&permission=${permissions}`;
+            const authUrl = `${normalizedUrl}/miauth/${sessionId}?name=calmi&callback=${callbackUrl}&permission=${permissions}`;
 
             // ログイン試行を通知
             notifications.show({
@@ -88,6 +119,16 @@ export default function Login() {
                     <Text c="dimmed" ta="center">
                         静かに Misskey を使いたい人のためのクライアント
                     </Text>
+
+                    <TextInput
+                        label="Misskeyサーバー"
+                        placeholder="例：virtualkemomimi.net"
+                        value={serverUrl}
+                        onChange={(e) => setServerUrl(e.target.value)}
+                        required
+                        style={{ width: '100%' }}
+                    />
+
                     <Button
                         onClick={handleLogin}
                         loading={isLoading}

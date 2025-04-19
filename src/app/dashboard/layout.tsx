@@ -18,6 +18,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const checkAuth = async () => {
             try {
                 const token = localStorage.getItem('misskey_token');
+                const serverUrl = localStorage.getItem('misskey_server') || 'https://virtualkemomimi.net';
+
                 if (!token) {
                     setAuthError('ログインが必要です');
                     setLoading(false);
@@ -26,13 +28,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                 // APIクライアントを初期化
                 const misskeyApiClient = new api.APIClient({
-                    origin: 'https://virtualkemomimi.net',
+                    origin: serverUrl,
                     credential: token,
                 });
 
-                // APIで認証状態を確認（オプション）
+                // APIで認証状態を確認
                 try {
-                    // 簡単な自分の情報を取得してみる（トークンが有効か確認）
+                    // 自分の情報を取得してみる（トークンが有効か確認）
                     await misskeyApiClient.request('i', {});
                 } catch (error) {
                     console.error('API authentication error:', error);

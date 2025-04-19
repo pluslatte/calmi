@@ -47,7 +47,6 @@ export async function GET(request: NextRequest) {
             }
         } catch (error) {
             console.error(`Misskey emoji API failed for ${host}:`, error);
-            // エラーは無視して次の方法を試す
         }
 
         // Mastodonのカスタム絵文字APIを試す
@@ -65,7 +64,6 @@ export async function GET(request: NextRequest) {
                 const foundEmoji = emojis.find((emoji: any) => emoji.shortcode === name);
 
                 if (foundEmoji && foundEmoji.url) {
-                    // 成功した場合はJSON応答を返す
                     return NextResponse.json({
                         url: foundEmoji.url,
                         name: foundEmoji.shortcode || name,
