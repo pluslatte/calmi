@@ -60,6 +60,10 @@ interface MisskeyApiActions {
         fileIds: string[],
         visibility?: 'public' | 'home' | 'followers' | 'specified'
     ) => Promise<{ createdNote: Note }>;
+
+    // リアクション関連のアクション
+    createReaction: (noteId: string, reaction: string) => Promise<void>;
+    deleteReaction: (noteId: string, reaction: string) => Promise<void>;
 }
 
 // デフォルト値
@@ -365,6 +369,24 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                     fileIds // ドライブにアップロードしたファイルのID配列
                 },
                 'ノートの投稿に失敗しました'
+            );
+        },
+
+        // リアクションを追加
+        createReaction: async (noteId, reaction) => {
+            return await get().executeApiRequest<void>(
+                'notes/reactions/create',
+                { noteId, reaction },
+                'リアクションの追加に失敗しました'
+            );
+        },
+
+        // リアクションを削除
+        deleteReaction: async (noteId, reaction) => {
+            return await get().executeApiRequest<void>(
+                'notes/reactions/delete',
+                { noteId },
+                'リアクションの削除に失敗しました'
             );
         },
     }))

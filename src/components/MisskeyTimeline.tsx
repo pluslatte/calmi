@@ -249,7 +249,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                     {relatedIndicators}
                     <Box p="xs">
                         <MisskeyNote note={note} />
-                        <MisskeyNoteActions />
+                        <MisskeyNoteActions note={note} />
                         <Divider mt="xs" />
                     </Box>
                 </React.Fragment>
