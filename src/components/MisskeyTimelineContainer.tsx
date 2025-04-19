@@ -3,7 +3,7 @@ import { Box, Flex, ScrollArea, Tabs, Tooltip } from "@mantine/core";
 import React, { memo, useEffect, useRef } from "react";
 import MisskeyTimeline from "@/components/MisskeyTimeline";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer } from "@tabler/icons-react";
-import { useTimelineStore, TimelineType } from '@/stores/useTimelineStore';
+import { useTimelineStore, TimelineType } from '@/stores/timeline/useTimelineStore';
 
 const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     containerRef

@@ -9,7 +9,7 @@ import { IconArrowUp, IconRefreshOff } from "@tabler/icons-react";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
 import TimelineUpdateBoundary from "./TimelineUpdateBoundary";
-import { useTimelineStore, TimelineType } from '@/stores/useTimelineStore';
+import { useTimelineStore, TimelineType } from '@/stores/timeline/useTimelineStore';
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 
 const MisskeyTimeline = memo(function MisskeyTimeline({
