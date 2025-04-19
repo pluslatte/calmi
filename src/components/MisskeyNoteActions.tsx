@@ -32,7 +32,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
             console.error("リアクション追加エラー:", error);
             notifications.show({
                 title: 'リアクション失敗',
-                message: 'リアクションの追加に失敗しました: ' + error,
+                message: 'リアクションの追加に失敗しました',
                 color: 'red'
             });
         }
@@ -51,7 +51,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
             console.error("リアクション削除エラー:", error);
             notifications.show({
                 title: 'リアクション削除失敗',
-                message: 'リアクションの削除に失敗しました: ' + error,
+                message: 'リアクションの削除に失敗しました',
                 color: 'red'
             });
         }
