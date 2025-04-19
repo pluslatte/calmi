@@ -1,12 +1,74 @@
-import { Avatar, Box, Flex, Text } from "@mantine/core";
+import { Avatar, Box, Flex, Paper, Text } from "@mantine/core";
 import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
 import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
 import NoteAttachments from "./NoteAttachments";
 import { memo } from "react";
+import { IconRepeat } from "@tabler/icons-react";
 
 const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
+    // ノートの種類を判別
+    const isRepost = note.renote && !note.text;
+    const isQuote = note.renote && note.text;
+
+    // リノートヘッダー コンポーネント
+    const RepostHeader = () => (
+        <Flex align="center" gap="xs" mb={6}>
+            <IconRepeat size={16} opacity={0.7} />
+            <Text size="xs" c="dimmed">
+                {note.user.name || note.user.username} がリノート
+            </Text>
+        </Flex>
+    );
+
+    // 引用ノートコンポーネント
+    const QuotedNote = ({ quotedNote }: { quotedNote: Note }) => (
+        <Paper withBorder p="xs" mt="xs" bg="rgba(0,0,0,0.03)" style={{ borderRadius: '6px' }}>
+            <Flex gap="sm" wrap="nowrap">
+                <Avatar
+                    src={quotedNote.user.avatarUrl}
+                    radius="md"
+                    size="sm"
+                    mt={3}
+                />
+                <Box miw={0} flex={1}>
+                    <Flex justify="space-between" align="center" mb={2}>
+                        <Text size="sm" fw={600} lineClamp={1}>
+                            {quotedNote.user.name || quotedNote.user.username}
+                        </Text>
+                        <AutoRefreshTimestamp iso={quotedNote.createdAt} />
+                    </Flex>
+                    <Text size="xs" c="dimmed" mb={4} lineClamp={1}>
+                        @{quotedNote.user.username}
+                        {quotedNote.user.host ? `@${quotedNote.user.host}` : ''}
+                    </Text>
+                    <Box>
+                        <MfmObject
+                            mfmNodes={mfm.parse(quotedNote.text ? quotedNote.text : "")}
+                            assets={{
+                                host: quotedNote.user.host,
+                                emojis: quotedNote.user.emojis
+                            }}
+                        />
+                    </Box>
+                    {quotedNote.files && quotedNote.files.length > 0 && (
+                        <NoteAttachments files={quotedNote.files} />
+                    )}
+                </Box>
+            </Flex>
+        </Paper>
+    );
+
+    if (isRepost && note.renote) {
+        return (
+            <>
+                <RepostHeader />
+                <MisskeyNote note={note.renote} />
+            </>
+        );
+    }
+
     return (
         <Flex gap="sm" wrap="nowrap">
             {/* アバター */}
@@ -63,6 +125,11 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                 {/* 添付ファイル - 画像や動画、音声など*/}
                 {note.files && note.files.length > 0 && (
                     <NoteAttachments files={note.files} />
+                )}
+
+                {/* 引用ノート */}
+                {isQuote && note.renote && (
+                    <QuotedNote quotedNote={note.renote} />
                 )}
             </Box>
         </Flex>
