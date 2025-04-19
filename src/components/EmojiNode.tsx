@@ -1,6 +1,7 @@
+// src/components/EmojiNode.tsx の修正
 import { useEmojiCache } from "@/lib/emoji/EmojiCacheProvider";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
-import { Text, Tooltip } from "@mantine/core";
+import { Box, Text, Tooltip } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 export default function EmojiNode({ name, assets }: { name: string, assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
@@ -81,10 +82,7 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
                     console.error(`Error loading emoji :${name}:`, err);
                     setError(`${err.message || 'エラー'}`);
                     setLoading(false);
-
-                    // エラー時のフォールバック画像を設定
-                    const fallbackUrl = `https://via.placeholder.com/20x20?text=${encodeURIComponent(name)}`;
-                    setEmojiData({ url: fallbackUrl, alt: name });
+                    // エラー時はnullのままにして、フォールバック表示に任せる
                 }
             });
 
@@ -98,19 +96,35 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
         setRetryCount(count => count + 1);
     };
 
-    // 画像読み込みエラー時の処理
-    const handleImageError = () => {
-        const fallbackUrl = `https://via.placeholder.com/20x20?text=${encodeURIComponent(name)}`;
-        setEmojiData(prev => {
-            if (prev && prev.url !== fallbackUrl) {
-                return { ...prev, url: fallbackUrl };
-            }
-            return prev;
-        });
-    };
+    // ローディング中の表示
+    if (!emojiData && loading) {
+        return <Text span c="dimmed">{`:${name}:`}</Text>;
+    }
 
-    if (!emojiData || loading) {
-        return <Text span c="dimmed">{`:${name}:`}</Text>; // Loading state
+    // エラー時のフォールバック表示
+    if (!emojiData || error) {
+        return (
+            <Tooltip label={`:${name}: (読み込みエラー)`} position="bottom">
+                <Box
+                    component="span"
+                    onClick={handleRetry}
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '1.2em',
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        color: 'rgba(255, 0, 0, 0.8)',
+                        borderRadius: '3px',
+                        padding: '0 4px',
+                        fontSize: '0.9em',
+                        cursor: 'pointer'
+                    }}
+                >
+                    {name}
+                </Box>
+            </Tooltip>
+        );
     }
 
     return (
@@ -121,26 +135,10 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
                     alt={emojiData.alt}
                     style={{
                         height: "1.2em",
-                        verticalAlign: "middle",
-                        opacity: error ? 0.5 : 1
+                        verticalAlign: "middle"
                     }}
-                    onClick={error ? handleRetry : undefined}
-                    onError={handleImageError}
+                    onError={handleRetry} // 画像ロードエラー時にリトライ
                 />
-                {error && (
-                    <Text
-                        span
-                        size="xs"
-                        c="red"
-                        style={{
-                            position: 'absolute',
-                            fontSize: '0.5em',
-                            marginLeft: '-0.5em'
-                        }}
-                    >
-                        !
-                    </Text>
-                )}
             </span>
         </Tooltip>
     );
