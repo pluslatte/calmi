@@ -120,6 +120,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                     minRows={3}
                     maxRows={8}
                     disabled={isSubmitting}
+                    fz="16px"
                 />
 
                 {/* 画像プレビュー */}
@@ -179,6 +180,9 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                             disabled={isSubmitting || isUploading}
                             size="xs"
                             w={120}
+                            style={{
+                                zIndex: 1001,
+                            }}
                         />
                     </Group>
 
