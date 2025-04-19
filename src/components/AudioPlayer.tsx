@@ -1,7 +1,7 @@
 'use client';
 
-import { Box, Text, Paper, Group, ActionIcon } from "@mantine/core";
-import { IconPlayerPlay, IconPlayerPause, IconVolume, IconVolume3 } from "@tabler/icons-react";
+import { Box, Text, Paper, Group, ActionIcon, Slider, Tooltip } from "@mantine/core";
+import { IconPlayerPlay, IconPlayerPause, IconVolume, IconVolume3, IconVolume2, IconMinus, IconPlus } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { DriveFile } from "misskey-js/entities.js";
 
@@ -15,7 +15,9 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(0.5);
     const [isMuted, setIsMuted] = useState(false);
+    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // オーディオタグから時間情報を更新
@@ -68,6 +70,30 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
         setIsMuted(!isMuted);
     };
 
+    const handleVolumeChange = (value: number) => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        audio.volume = value;
+        setVolume(value);
+        if (value === 0) {
+            audio.muted = true;
+            setIsMuted(true);
+        } else if (isMuted) {
+            audio.muted = false;
+            setIsMuted(false);
+        }
+    };
+
+    const handleSeek = (value: number) => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        const newTime = (value / 100) * duration;
+        audio.currentTime = newTime;
+        setCurrentTime(newTime);
+    };
+
     // 秒を「分:秒」形式に変換
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -96,6 +122,17 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
                             {file.name || "音声ファイル"}
                         </Text>
                     </Group>
+                    <Tooltip label={formatTime(currentTime) + ' / ' + formatTime(duration)}>
+                        <Box w={90}>
+                            <Slider
+                                value={progressPercent}
+                                onChange={handleSeek}
+                                size="xs"
+                                color="cyan"
+                                disabled={!!error || duration === 0}
+                            />
+                        </Box>
+                    </Tooltip>
                     <audio ref={audioRef} src={file.url} preload="metadata" />
                 </Group>
             </Paper>
@@ -125,34 +162,65 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
                             </ActionIcon>
 
                             <Box style={{ flex: 1, margin: '0 10px' }}>
-                                <Box
-                                    style={{
-                                        height: '4px',
-                                        background: '#333',
-                                        borderRadius: '2px',
-                                        position: 'relative'
-                                    }}
-                                >
-                                    <Box
-                                        style={{
-                                            position: 'absolute',
-                                            left: 0,
-                                            top: 0,
-                                            height: '100%',
-                                            width: `${progressPercent}%`,
-                                            background: '#00acee',
-                                            borderRadius: '2px'
-                                        }}
-                                    />
-                                </Box>
+                                <Slider
+                                    value={progressPercent}
+                                    onChange={handleSeek}
+                                    size="sm"
+                                    color="cyan"
+                                    disabled={!!error || duration === 0}
+                                    label={formatTime(currentTime)}
+                                    labelAlwaysOn={false}
+                                />
                             </Box>
 
-                            <ActionIcon
-                                onClick={toggleMute}
-                                variant="subtle"
-                            >
-                                {isMuted ? <IconVolume3 size={18} /> : <IconVolume size={18} />}
-                            </ActionIcon>
+                            <Box style={{ position: 'relative' }}>
+                                <ActionIcon
+                                    onClick={() => toggleMute()}
+                                    variant="subtle"
+                                    onMouseEnter={() => setShowVolumeSlider(true)}
+                                >
+                                    {isMuted ? <IconVolume3 size={18} /> : <IconVolume size={18} />}
+                                </ActionIcon>
+
+                                {showVolumeSlider && (
+                                    <Paper
+                                        shadow="md"
+                                        p="xs"
+                                        style={{
+                                            position: 'absolute',
+                                            bottom: '100%',
+                                            right: 0,
+                                            width: 150,
+                                            zIndex: 100,
+                                        }}
+                                        onMouseLeave={() => setShowVolumeSlider(false)}
+                                    >
+                                        <Group justify="space-between" mb="xs" wrap="nowrap">
+                                            <ActionIcon
+                                                size="xs"
+                                                onClick={() => handleVolumeChange(Math.max(0, volume - 0.1))}
+                                            >
+                                                <IconMinus size={14} />
+                                            </ActionIcon>
+                                            <Slider
+                                                value={volume}
+                                                onChange={handleVolumeChange}
+                                                min={0}
+                                                max={1}
+                                                step={0.01}
+                                                size="xs"
+                                                w={80}
+                                            />
+                                            <ActionIcon
+                                                size="xs"
+                                                onClick={() => handleVolumeChange(Math.min(1, volume + 0.1))}
+                                            >
+                                                <IconPlus size={14} />
+                                            </ActionIcon>
+                                        </Group>
+                                    </Paper>
+                                )}
+                            </Box>
                         </Group>
 
                         <Group justify="space-between">
