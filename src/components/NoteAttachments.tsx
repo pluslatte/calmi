@@ -5,6 +5,7 @@ import { IconFile, IconFileMusic, IconPlayerPlay, IconExternalLink, IconEye } fr
 import { useState } from "react";
 import { DriveFile } from "misskey-js/entities.js";
 import ImageModal from "./ImageModal";
+import VideoModal from "./VideoModal";
 
 interface NoteAttachmentsProps {
     files: DriveFile[];
@@ -12,6 +13,7 @@ interface NoteAttachmentsProps {
 
 export default function NoteAttachments({ files }: NoteAttachmentsProps) {
     const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+    const [videoFile, setVideoFile] = useState<DriveFile | null>(null);
 
     // ファイルタイプを確認するヘルパー関数
     const isImage = (file: DriveFile) =>
@@ -28,9 +30,19 @@ export default function NoteAttachments({ files }: NoteAttachmentsProps) {
         setModalImageUrl(url);
     };
 
+    // 動画モーダルを開く
+    const openVideoModal = (file: DriveFile) => {
+        setVideoFile(file);
+    };
+
     // 画像モーダルを閉じる
     const closeImageModal = () => {
         setModalImageUrl(null);
+    };
+
+    // 動画モーダルを閉じる
+    const closeVideoModal = () => {
+        setVideoFile(null);
     };
 
     if (!files || files.length === 0) {
@@ -160,7 +172,7 @@ export default function NoteAttachments({ files }: NoteAttachmentsProps) {
                                         borderRadius: '4px',
                                         height: gridSpan === 12 ? 300 : 150,
                                     }}
-                                    onClick={() => window.open(file.url, '_blank')}
+                                    onClick={() => openVideoModal(file)}
                                 >
                                     {file.thumbnailUrl ? (
                                         <Image
@@ -285,6 +297,11 @@ export default function NoteAttachments({ files }: NoteAttachmentsProps) {
             <ImageModal
                 imageUrl={modalImageUrl}
                 onClose={closeImageModal}
+            />
+            {/* 動画モーダル */}
+            <VideoModal
+                file={videoFile}
+                onClose={closeVideoModal}
             />
         </Box>
     );
