@@ -14,13 +14,11 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true
   },
-  experimental: {
-    // Turbopackの設定
-    turbo: {
-      // PWAに必要なモジュールをTurbopackの設定に追加
-      resolveAlias: {
-        'next-pwa': 'next-pwa'
-      }
+  // Turbopackの設定
+  turbopack: {
+    // PWAに必要なモジュールをTurbopackの設定に追加
+    resolveAlias: {
+      'next-pwa': 'next-pwa'
     }
   }
 };
