@@ -56,8 +56,11 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         updateScrollPosition,
         updateButtonOffset,
     } = useTimelineUiStore();
+
     const {
-        getInfiniteScrollProps,
+        isLoading: isLoadingMore,
+        initialize: initializeInfiniteScroll,
+        useInfiniteScroll
     } = useInfiniteScrollStore();
 
     const lastBoundaryIndexRef = useRef<number | null>(null);
@@ -73,7 +76,13 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         }
     };
 
-    const { isInfiniteScrollLoadingMore, infiniteScrollRef } = getInfiniteScrollProps(getTimelineFunction(), loadMoreNotes);
+    // ロード関数をラップする
+    const loadMore = async () => {
+        await loadMoreNotes(getTimelineFunction());
+        return notes;
+    };
+
+    const { observerRef } = useInfiniteScroll(loadMore);
 
     // 初期化処理
     useEffect(() => {
@@ -83,6 +92,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         // 保存されたタイムラインタイプを読み込む）
         initializeTimeline(client, timelineType);
         initializeTimelineUi();
+        initializeInfiniteScroll();
 
         // タイムラインタイプが変更された場合
         if (prevTimelineTypeRef.current !== timelineType) {
@@ -104,7 +114,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         return () => {
             cleanupTimeline();
         };
-    }, [client, timelineType, initializeTimeline, loadMoreNotes, cleanupTimeline]);
+    }, [client, timelineType, initializeTimeline, loadMoreNotes, cleanupTimeline, initializeInfiniteScroll]);
 
     // スクロール位置の監視を設定
     useEffect(() => {
@@ -283,8 +293,8 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     return (
         <Box pos="relative">
             {renderItems()}
-            <div ref={infiniteScrollRef} style={{ height: 1 }} />
-            {isInfiniteScrollLoadingMore && (
+            <div ref={observerRef} style={{ height: 1 }} />
+            {isLoadingMore && (
                 <Box py="md" ta="center">
                     <Loader size="sm" />
                     <Text size="xs" c="dimmed" mt="xs">読み込み中...</Text>

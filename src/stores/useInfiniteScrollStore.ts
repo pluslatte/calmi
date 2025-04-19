@@ -1,106 +1,87 @@
+// src/stores/useInfiniteScrollStore.ts
 import { Note } from "misskey-js/entities.js";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
 interface InfiniteScrollState {
-    // 無限スクロール用の状態
-    isInfiniteScrollLoadingMore: boolean;
-    lastLoadMoreTime: number;
+    isLoading: boolean;
+    lastLoadTime: number;
 }
 
 interface InfiniteScrollActions {
-    // 無限スクロール関連のアクション
-    initializeInfiniteScroll: () => void;
-    handleInfiniteScroll: (
-        entries: IntersectionObserverEntry[],
-        getTimelineFn: (params?: any) => Promise<Note[]>,
-        onIntersection: (getTimelineFn: (params?: any) => Promise<Note[]>) => Promise<void>,
-    ) => Promise<void>;
-    getInfiniteScrollProps: (
-        getTimelineFn: (params?: any) => Promise<Note[]>,
-        onIntersection: (getTimelineFn: (params?: any) => Promise<Note[]>) => Promise<void>,
-        timeoutMs?: number,
+    initialize: () => void;
+    useInfiniteScroll: <T>(
+        loadMoreFn: () => Promise<T[]>,
+        timeoutMs?: number
     ) => {
-        isInfiniteScrollLoadingMore: boolean;
-        infiniteScrollRef: (node: HTMLDivElement | null) => void;
+        observerRef: (node: HTMLElement | null) => void;
     };
 }
 
-const DEFAULT_INFINITE_SCROLL_TIMEOUT = 1000; // デフォルトのタイムアウト値 (ms)
+const DEFAULT_TIMEOUT = 1000; // ms
 
 export const useInfiniteScrollStore = create<InfiniteScrollState & InfiniteScrollActions>()(
     immer((set, get) => ({
-        // 状態と初期値
-        isInfiniteScrollLoadingMore: false,
-        lastLoadMoreTime: 0,
+        // 状態
+        isLoading: false,
+        lastLoadTime: 0,
 
         // アクション
-        initializeInfiniteScroll: () => {
+        initialize: () => {
             set(state => {
-                state.isInfiniteScrollLoadingMore = false;
-                state.lastLoadMoreTime = 0;
-            })
+                state.isLoading = false;
+                state.lastLoadTime = 0;
+            });
         },
 
-        // 無限スクロール：交差検出時のハンドラ
-        handleInfiniteScroll: async (entries, getTimelineFn, onIntersection) => {
-            const state = get();
-            if (state.isInfiniteScrollLoadingMore) return;
+        useInfiniteScroll: <T>(loadMoreFn: () => Promise<T[]>, timeoutMs = DEFAULT_TIMEOUT) => {
+            const handleIntersection = async (entries: IntersectionObserverEntry[]) => {
+                const state = get();
+                if (state.isLoading) return;
 
-            // 交差検出
-            if (entries[0].isIntersecting) {
-                const now = Date.now();
-                // 前回のロードからの経過時間チェック
-                if (now - state.lastLoadMoreTime < DEFAULT_INFINITE_SCROLL_TIMEOUT) {
-                    return;
+                // 交差検出
+                if (entries[0]?.isIntersecting) {
+                    const now = Date.now();
+                    // 前回のロードからの経過時間チェック
+                    if (now - state.lastLoadTime < timeoutMs) {
+                        return;
+                    }
+
+                    set(state => {
+                        state.isLoading = true;
+                        state.lastLoadTime = now;
+                    });
+
+                    try {
+                        await loadMoreFn();
+                    } catch (error) {
+                        console.error('Infinite scroll error:', error);
+                    } finally {
+                        // タイムアウト後にロード状態をリセット
+                        setTimeout(() => {
+                            set(state => { state.isLoading = false; });
+                        }, timeoutMs);
+                    }
                 }
+            };
 
-                set(state => {
-                    state.isInfiniteScrollLoadingMore = true;
-                    state.lastLoadMoreTime = now;
+            const observerRef = (node: HTMLElement | null) => {
+                if (!node) return;
+
+                const observer = new IntersectionObserver(handleIntersection, {
+                    rootMargin: '100px'
                 });
 
-                try {
-                    await onIntersection(getTimelineFn);
-                } catch (error) {
-                    console.error('Error loading more content:', error);
-                } finally {
-                    // タイムアウト後にロード状態をリセット
-                    setTimeout(() => {
-                        set(state => { state.isInfiniteScrollLoadingMore = false; });
-                    }, DEFAULT_INFINITE_SCROLL_TIMEOUT);
-                }
-            }
-        },
-
-        // 無限スクロール：フックスタイルのインターフェース
-        getInfiniteScrollProps: (getTimelineFn, onIntersection) => {
-            // IntersectionObserverのセットアップを行う関数
-            const infiniteScrollRef = (node: HTMLDivElement | null) => {
-                if (node === null) return;
-
-                // observer作成
-                const observer = new IntersectionObserver(
-                    (entries) => {
-                        const store = get();
-                        store.handleInfiniteScroll(entries, getTimelineFn, onIntersection);
-                    },
-                    { rootMargin: '100px' }
-                );
-
-                // 監視開始
                 observer.observe(node);
 
-                // クリーンアップ関数（React.useEffectの戻り値と同様）
                 return () => {
                     observer.disconnect();
                 };
             };
 
             return {
-                isInfiniteScrollLoadingMore: get().isInfiniteScrollLoadingMore,
-                infiniteScrollRef
+                observerRef
             };
         }
     }))
-)
+);
