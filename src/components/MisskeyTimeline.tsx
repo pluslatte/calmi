@@ -11,6 +11,7 @@ import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
 import { useTimelineStore, TimelineType } from '@/stores/timeline/useTimelineStore';
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
+import { useInfiniteScrollStore } from "@/stores/useInfiniteScrollStore";
 
 const MisskeyTimeline = memo(function MisskeyTimeline({
     timelineType,
@@ -46,7 +47,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         setAutoUpdateEnabled,
         loadSkippedNotes,
         loadTrimmedNotes,
-        getInfiniteScrollProps,
     } = useTimelineStore();
     const {
         showScrollToTop,
@@ -56,6 +56,9 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         updateScrollPosition,
         updateButtonOffset,
     } = useTimelineUiStore();
+    const {
+        getInfiniteScrollProps,
+    } = useInfiniteScrollStore();
 
     const lastBoundaryIndexRef = useRef<number | null>(null);
     const prevTimelineTypeRef = useRef<TimelineType>(timelineType);
@@ -70,7 +73,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         }
     };
 
-    const { isLoadingMore, infiniteScrollRef } = getInfiniteScrollProps(getTimelineFunction());
+    const { isInfiniteScrollLoadingMore, infiniteScrollRef } = getInfiniteScrollProps(getTimelineFunction(), loadMoreNotes);
 
     // 初期化処理
     useEffect(() => {
@@ -281,7 +284,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         <Box pos="relative">
             {renderItems()}
             <div ref={infiniteScrollRef} style={{ height: 1 }} />
-            {isLoadingMore && (
+            {isInfiniteScrollLoadingMore && (
                 <Box py="md" ta="center">
                     <Loader size="sm" />
                     <Text size="xs" c="dimmed" mt="xs">読み込み中...</Text>
