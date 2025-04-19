@@ -120,7 +120,6 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                     minRows={3}
                     maxRows={8}
                     disabled={isSubmitting}
-                    fz="16px"
                 />
 
                 {/* 画像プレビュー */}
@@ -178,7 +177,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                                 { value: 'specified', label: 'ダイレクト' },
                             ]}
                             disabled={isSubmitting || isUploading}
-                            size="xs"
+                            size="sm"
                             w={120}
                             style={{
                                 zIndex: 1001,
@@ -206,7 +205,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
                 {/* 文字数カウンター */}
                 <Text size="xs" c="dimmed" ta="right">
-                    {text.length}/3000
+                    {text.length} 文字
                 </Text>
             </Stack>
         </Paper>
