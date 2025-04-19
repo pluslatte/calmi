@@ -1,9 +1,10 @@
-import { Group, ActionIcon, useMantineTheme, Box, Menu, Popover, Paper, Text, Avatar, Flex, rgba } from "@mantine/core";
-import { IconArrowBackUp, IconRepeat, IconHeart, IconDots, IconMoodSmile } from "@tabler/icons-react";
+import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rgba } from "@mantine/core";
+import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile } from "@tabler/icons-react";
 import { useState } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
+import EmojiNode from "./EmojiNode";
 
 interface MisskeyNoteActionsProps {
     note: Note;
@@ -20,6 +21,12 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     // リアクション対象のノートID
     // 純粋なリノートの場合は元のノートID、そうでない場合は現在のノートID
     const targetNoteId = isPlainRepost ? note.renote!.id : note.id;
+
+    // リノート先であるかどうかに合わせた、描画するノートのホスト情報
+    const targetNoteHost = isPlainRepost ? note.renote!.user.host : note.user.host;
+
+    // リノート先であるかどうかにあわせた、描画するノートの絵文字データ
+    const targetNoteEmojis = isPlainRepost ? note.renote!.emojis : note.emojis;
 
     // よく使われるリアクション絵文字のリスト
     const popularEmojis = ["👍", "❤️", "😆", "🎉", "🤔", "👏", "🙏", "🥺", "😮", "🫡"];
@@ -75,37 +82,63 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
 
         return (
             <Flex wrap="wrap" gap="xs" mt={8}>
-                {Object.entries(noteReactions).map(([reaction, count]) => (
-                    <Paper
-                        key={reaction}
-                        px="xs"
-                        py="3px"
-                        radius="xl"
-                        withBorder
-                        style={{
-                            cursor: "pointer",
-                            opacity: myReaction === reaction ? 1 : 0.8,
-                            backgroundColor: myReaction === reaction
-                                ? rgba(theme.colors.cyan[8], 0.1)
-                                : undefined,
-                            borderColor: myReaction === reaction
-                                ? theme.colors.cyan[5]
-                                : undefined,
-                        }}
-                        onClick={() => {
-                            if (myReaction === reaction) {
-                                handleRemoveReaction(reaction);
-                            } else {
-                                handleAddReaction(reaction);
-                            }
-                        }}
-                    >
-                        <Group gap={6} wrap="nowrap">
-                            <Text span>{reaction}</Text>
-                            <Text span size="xs" c="dimmed">{count}</Text>
-                        </Group>
-                    </Paper>
-                ))}
+                {Object.entries(noteReactions).map(([reaction, count]) => {
+                    // 絵文字コードかUnicode絵文字かを判定
+                    const isCustomEmoji = reaction.startsWith(':') && reaction.endsWith(':');
+                    const emojiName = isCustomEmoji ? reaction.slice(1).split('@')[0] : reaction;
+                    const emojiHost = isCustomEmoji
+                        ?
+                        reaction.slice(1).split('@')[1].slice(0, -1) !== '.' // NOTE: さすがに嘘だろそれは でもこれで動くからいいや
+                            ?
+                            reaction.slice(1).split('@')[1].slice(0, -1)
+                            :
+                            targetNoteHost
+                        :
+                        '';
+                    console.log("fetching: " + emojiName + " from " + emojiHost);
+
+                    return (
+                        <Paper
+                            key={reaction}
+                            px="xs"
+                            py="3px"
+                            radius="xl"
+                            withBorder
+                            style={{
+                                cursor: "pointer",
+                                opacity: myReaction === reaction ? 1 : 0.8,
+                                backgroundColor: myReaction === reaction
+                                    ? rgba(theme.colors.cyan[8], 0.1)
+                                    : undefined,
+                                borderColor: myReaction === reaction
+                                    ? theme.colors.cyan[5]
+                                    : undefined,
+                            }}
+                            onClick={() => {
+                                if (myReaction === reaction) {
+                                    handleRemoveReaction(reaction);
+                                } else {
+                                    handleAddReaction(reaction);
+                                }
+                            }}
+                        >
+                            <Group gap={6} wrap="nowrap">
+                                {isCustomEmoji ? (
+                                    <EmojiNode
+                                        name={emojiName}
+                                        assets={{
+                                            host: emojiHost,
+                                            emojis: targetNoteEmojis,
+                                        }}
+                                    />
+                                ) : (
+                                    <Text span>{reaction}</Text>
+                                )}
+                                <Text span size="xs" c="dimmed">{count}</Text>
+                            </Group>
+                        </Paper>
+                    );
+                })}
             </Flex>
         );
     };

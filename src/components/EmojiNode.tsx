@@ -17,16 +17,18 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
         if (cachedUrl) {
             return { url: cachedUrl, alt: emojiCode };
         }
+        console.log(`No emoji ${emojiCode} with host ${host} found in cache`);
 
         // 2. ローカルの絵文字セットをチェック
         if (assets.emojis) {
             const url = assets.emojis[emojiCode];
             if (url) {
                 // キャッシュに追加して返す
-                addEmojiToCache(host, emojiCode, url);
+                // addEmojiToCache(host, emojiCode, url);
                 return { url, alt: emojiCode };
             }
         }
+        console.log(`No emoji ${emojiCode} found in local server`);
 
         // 3. ローカルインスタンスの絵文字
         if (!host) {
@@ -40,6 +42,7 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
                 throw err;
             }
         }
+        console.log(`Emoji ${emojiCode} is not local`);
 
         // 4. リモートインスタンスの絵文字はプロキシ経由で取得
         try {
@@ -52,6 +55,7 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
 
             const data = await response.json();
             // キャッシュに追加して返す
+            console.log(`Found emoji ${emojiCode} in ${host}`);
             addEmojiToCache(host, emojiCode, data.url);
             return { url: data.url, alt: data.name || emojiCode };
         } catch (err) {
