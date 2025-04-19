@@ -4,6 +4,7 @@ import { Box, Text, Paper, Group, ActionIcon, Slider, Tooltip } from "@mantine/c
 import { IconPlayerPlay, IconPlayerPause, IconVolume, IconVolume3, IconVolume2, IconMinus, IconPlus } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { DriveFile } from "misskey-js/entities.js";
+import { useAudioSettingsStore } from "@/stores/useAudioSettingsStore";
 
 interface AudioPlayerProps {
     file: DriveFile;
@@ -15,14 +16,23 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [volume, setVolume] = useState(0.3);
-    const [isMuted, setIsMuted] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const {
+        volume,
+        muted,
+        setVolume,
+        toggleMute,
+    } = useAudioSettingsStore();
 
     // オーディオタグから時間情報を更新
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
+
+        // 初期状態を適用
+        audio.volume = volume;
+        audio.muted = muted;
 
         const updateTime = () => setCurrentTime(audio.currentTime);
         const updateDuration = () => setDuration(audio.duration);
@@ -61,27 +71,20 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
     };
 
     // ミュートの切り替え
-    const toggleMute = () => {
+    const handleToggleMute = () => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        audio.muted = !audio.muted;
-        setIsMuted(!isMuted);
+        toggleMute();
+        audio.muted = !muted;
     };
 
     const handleVolumeChange = (value: number) => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        audio.volume = value;
         setVolume(value);
-        if (value === 0) {
-            audio.muted = true;
-            setIsMuted(true);
-        } else if (isMuted) {
-            audio.muted = false;
-            setIsMuted(false);
-        }
+        audio.volume = value;
     };
 
     const handleSeek = (value: number) => {
@@ -196,10 +199,10 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
                             </Box>
 
                             <ActionIcon
-                                onClick={() => toggleMute()}
+                                onClick={handleToggleMute}
                                 variant="subtle"
                             >
-                                {isMuted ? <IconVolume3 size={18} /> : <IconVolume size={18} />}
+                                {muted ? <IconVolume3 size={18} /> : <IconVolume size={18} />}
                             </ActionIcon>
 
                             <Paper
