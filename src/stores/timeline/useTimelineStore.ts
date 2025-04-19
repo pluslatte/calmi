@@ -44,6 +44,9 @@ interface TimelineState {
 
     // MisskeyStreamインスタンス参照 (外部リソース)
     stream: MisskeyStream | null;
+
+    // キー: リノート元ID, 値: そのリノートを含むノートIDの配列
+    renoteRelationMap: Record<string, string[]>;
 }
 
 interface TimelineActions {
@@ -74,6 +77,7 @@ interface TimelineActions {
 
     // ノート情報のアップデート
     updateNoteInTimeline: (updatedNote: Note) => void;
+    updateRenoteSource: (updatedNote: Note) => void;
 }
 
 // フラグと定数
@@ -97,6 +101,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         trimmedNotesGroup: null,
         lastSwitchToAutoUpdateTime: null,
         stream: null,
+        renoteRelationMap: {},
 
         // アクション
         initializeTimeline: (client, timelineType): string => {
@@ -143,6 +148,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 state.lastSkippedGroupTimestamp = null;
                 state.trimmedNotesGroup = null;
                 state.lastSwitchToAutoUpdateTime = null;
+                state.renoteRelationMap = {};
 
                 // 新しいStreamインスタンスの作成
                 if (client.credential) {
@@ -158,6 +164,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                             }
                         },
                         handleNoteUpdated,
+                        (updatedNote) => { get().updateRenoteSource(updatedNote); },
                     );
                     state.stream.connect();
                 }
@@ -168,15 +175,21 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         },
 
         cleanupTimeline: () => {
+            const notes = get().notes;
             const currentStream = get().stream;
+            const renoteRelationMap = get().renoteRelationMap;
             if (currentStream) {
                 // 現在のタイムラインのすべてのノートの購読を解除
-                const notes = get().notes;
                 notes.forEach(note => {
                     currentStream.unsubscribeFromNote(note.id);
                     if (note.renote) {
                         currentStream.unsubscribeFromNote(note.renote.id);
                     }
+                });
+
+                // リノート元ノートの購読も解除
+                Object.keys(renoteRelationMap).forEach(renoteId => {
+                    currentStream.unsubscribeFromNote(renoteId);
                 });
 
                 // ストリームを切断
@@ -202,9 +215,20 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 // ストリーミングAPIでノート購読
                 state.stream?.subscribeToNote(note.id);
 
-                // リノートがあるならば、それも購読
+                // リノートがあるならば、それも購読し、関連付けを記録
                 if (note.renote) {
+                    const renoteId = note.renote.id;
                     state.stream?.subscribeToNote(note.renote.id);
+
+                    // 関連マップに登録
+                    if (!state.renoteRelationMap[renoteId]) {
+                        // その Id に結びついた string[] が空なら、まず空配列で初期化
+                        state.renoteRelationMap[renoteId] = [];
+                    }
+                    if (!state.renoteRelationMap[renoteId].includes(note.id)) {
+                        // string[] に該当するノートが見つからなければ登録
+                        state.renoteRelationMap[renoteId].push(note.id);
+                    }
                 }
 
                 // 最大数超過時に古いノートを削除
@@ -212,6 +236,23 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                     const oldNote = state.notes.pop();
                     if (oldNote) {
                         state.stream?.unsubscribeFromNote(oldNote.id);
+
+                        // リノートの関連付けも削除
+                        if (oldNote.renote) {
+                            const renoteId = oldNote.renote.id;
+                            state.stream?.unsubscribeFromNote(renoteId);
+
+                            // 関連マップから削除
+                            if (state.renoteRelationMap[renoteId]) {
+                                state.renoteRelationMap[renoteId] = state.renoteRelationMap[renoteId]
+                                    .filter(id => id !== oldNote.id);
+
+                                // 空になったら項目自体を削除
+                                if (state.renoteRelationMap[renoteId].length === 0) {
+                                    delete state.renoteRelationMap[renoteId];
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -240,9 +281,18 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                             // ノートを購読
                             state.stream?.subscribeToNote(note.id);
 
-                            // リノートがあるならば、それも購読
+                            // リノートがある場合は購読し、関連付けを記録
                             if (note.renote) {
-                                state.stream?.subscribeToNote(note.renote.id);
+                                const renoteId = note.renote.id;
+                                state.stream?.subscribeToNote(renoteId);
+
+                                // 関連マップに追加
+                                if (!state.renoteRelationMap[renoteId]) {
+                                    state.renoteRelationMap[renoteId] = [];
+                                }
+                                if (!state.renoteRelationMap[renoteId].includes(note.id)) {
+                                    state.renoteRelationMap[renoteId].push(note.id);
+                                }
                             }
                         }
 
@@ -502,5 +552,25 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 }
             });
         },
+
+        // リノート元ノートの更新処理
+        updateRenoteSource: (updatedNote: Note) => {
+            const state = get();
+            const relationIds = state.renoteRelationMap[updatedNote.id] || [];
+
+            // この更新されたノートをリノートしているノートがあれば、それら全てを更新
+            if (relationIds.length > 0) {
+                set(state => {
+                    // リノートしているノートそれぞれについて処理
+                    relationIds.forEach(noteId => {
+                        const noteIndex = state.notes.findIndex(n => n.id === noteId);
+                        if (noteIndex !== -1) {
+                            // ノートのrenoteプロパティを更新
+                            state.notes[noteIndex].renote = updatedNote;
+                        }
+                    });
+                });
+            }
+        }
     }))
 );

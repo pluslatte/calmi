@@ -8,6 +8,7 @@ import { TimelineType } from "@/types/misskey.types";
 
 export class MisskeyStream {
     private stream: Stream;
+    private apiClient: api.APIClient;
     private channel: Connection<{
         params: {
             withRenotes?: boolean;
@@ -20,19 +21,25 @@ export class MisskeyStream {
     }> | null = null;
     private subscribedNoteIds: Set<string> = new Set();
     private onNoteUpdated: ((event: NoteUpdatedEvent) => void) | null = null;
+    private updateRenoteSource: ((note: Note) => void) | null = null;
 
     constructor(
         misskeyApiClient: api.APIClient,
         private timelineType: TimelineType,
         private onNewNote: (note: Note) => void,
         noteUpdateCallback?: (event: NoteUpdatedEvent) => void,
+        renoteSourceUpdateCallback?: (note: Note) => void,
     ) {
         if (misskeyApiClient.credential == null) {
             throw Error('misskeyApiClient must have credential');
         }
+        this.apiClient = misskeyApiClient;
         this.stream = new Stream(misskeyApiClient.origin, { token: misskeyApiClient.credential });
         if (noteUpdateCallback) {
             this.onNoteUpdated = noteUpdateCallback;
+        }
+        if (renoteSourceUpdateCallback) {
+            this.updateRenoteSource = renoteSourceUpdateCallback;
         }
     }
 
@@ -73,12 +80,24 @@ export class MisskeyStream {
                 if (data.id === noteId && this.onNoteUpdated) {
                     // ノート更新時にコールバックを呼び出す
                     if (data.type === 'reacted' || data.type === 'unreacted') {
-                        // ノート情報を取得して更新（APIクライアントが必要）
+                        // ノート情報を取得して更新
                         this.onNoteUpdated({
                             id: noteId,
                             type: data.type,
                             body: data.body
                         });
+
+                        // リノート元ノートとして使われている場合も更新
+                        if (this.updateRenoteSource) {
+                            // ノート情報を取得（APIクライアントが必要）
+                            this.apiClient.request('notes/show', { noteId })
+                                .then((updatedNote: Note) => {
+                                    this.updateRenoteSource!(updatedNote);
+                                })
+                                .catch(err => {
+                                    console.error('Failed to fetch updated note:', err);
+                                });
+                        }
                     }
                 }
             });
