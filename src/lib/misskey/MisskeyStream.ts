@@ -3,6 +3,7 @@
 import { api, Stream } from "misskey-js";
 import { Note } from "misskey-js/entities.js";
 import { Connection } from "misskey-js/streaming.js";
+import { NoteUpdatedEvent } from "misskey-js/streaming.types.js";
 
 type TimelineType = 'home' | 'social' | 'local' | 'global';
 
@@ -19,16 +20,21 @@ export class MisskeyStream {
         receives: null;
     }> | null = null;
     private subscribedNoteIds: Set<string> = new Set();
+    private onNoteUpdated: ((event: NoteUpdatedEvent) => void) | null = null;
 
     constructor(
         misskeyApiClient: api.APIClient,
         private timelineType: TimelineType,
-        private onNewNote: (note: Note) => void
+        private onNewNote: (note: Note) => void,
+        noteUpdateCallback?: (event: NoteUpdatedEvent) => void,
     ) {
         if (misskeyApiClient.credential == null) {
             throw Error('misskeyApiClient must have credential');
         }
         this.stream = new Stream(misskeyApiClient.origin, { token: misskeyApiClient.credential });
+        if (noteUpdateCallback) {
+            this.onNoteUpdated = noteUpdateCallback;
+        }
     }
 
     connect(): void {
@@ -62,6 +68,21 @@ export class MisskeyStream {
         if (!this.subscribedNoteIds.has(noteId)) {
             this.stream.send('subNote', { id: noteId });
             this.subscribedNoteIds.add(noteId);
+
+            // リアクションイベントの購読
+            this.stream.on('noteUpdated', (data: { id: string; type: string; body: any }) => {
+                if (data.id === noteId && this.onNoteUpdated) {
+                    // ノート更新時にコールバックを呼び出す
+                    if (data.type === 'reacted' || data.type === 'unreacted') {
+                        // ノート情報を取得して更新（APIクライアントが必要）
+                        this.onNoteUpdated({
+                            id: noteId,
+                            type: data.type,
+                            body: data.body
+                        });
+                    }
+                }
+            });
         }
     }
 

@@ -3,6 +3,7 @@ import { immer } from 'zustand/middleware/immer';
 import { api } from 'misskey-js';
 import { Note } from 'misskey-js/entities.js';
 import { MisskeyStream } from '@/lib/misskey/MisskeyStream';
+import { NoteUpdatedEvent } from "misskey-js/streaming.types.js";
 
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
 
@@ -71,6 +72,9 @@ interface TimelineActions {
     // エラーハンドリング
     setError: (message: string) => void;
     clearError: () => void;
+
+    // ノート情報のアップデート
+    updateNoteInTimeline: (updatedNote: Note) => void;
 }
 
 // フラグと定数
@@ -114,6 +118,20 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 currentStream.disconnect();
             }
 
+            // ノート更新イベントのハンドラ
+            const handleNoteUpdated = (event: NoteUpdatedEvent) => {
+                if (client && (event.type === 'reacted' || event.type === 'unreacted')) {
+                    client.request('notes/show', { noteId: event.id })
+                        .then((updatedNote: Note) => {
+                            // ノート情報を更新
+                            get().updateNoteInTimeline(updatedNote);
+                        })
+                        .catch(error => {
+                            console.error('Failed to fetch updated note:', error);
+                        });
+                }
+            };
+
             // 状態のリセット
             set(state => {
                 state.notes = [];
@@ -139,7 +157,8 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                             } else {
                                 store.addSkippedNote(note);
                             }
-                        }
+                        },
+                        handleNoteUpdated,
                     );
                     state.stream.connect();
                 }
@@ -452,5 +471,16 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             });
         },
 
+        // ノート情報を更新するアクション
+        updateNoteInTimeline: (updatedNote: Note) => {
+            set(state => {
+                const index = state.notes.findIndex(note => note.id === updatedNote.id);
+                if (index !== -1) {
+                    state.notes[index] = updatedNote;
+                } else {
+                    console.warn('the specified note to update does not exist')
+                }
+            });
+        },
     }))
 );
