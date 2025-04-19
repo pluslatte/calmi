@@ -4,6 +4,7 @@ import { IconArrowBackUp, IconRepeat, IconHeart, IconDots, IconMoodSmile } from 
 import { useState } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note } from "misskey-js/entities.js";
+import { notifications } from "@mantine/notifications";
 
 interface MisskeyNoteActionsProps {
     note: Note;
@@ -22,8 +23,18 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
         try {
             await createReaction(note.id, emoji);
             setReactionPickerOpen(false);
+            notifications.show({
+                title: 'リアクション成功',
+                message: `${emoji} を追加しました`,
+                color: 'green'
+            });
         } catch (error) {
             console.error("リアクション追加エラー:", error);
+            notifications.show({
+                title: 'リアクション失敗',
+                message: 'リアクションの追加に失敗しました: ' + error,
+                color: 'red'
+            });
         }
     };
 
@@ -31,8 +42,18 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const handleRemoveReaction = async (emoji: string) => {
         try {
             await deleteReaction(note.id, emoji);
+            notifications.show({
+                title: 'リアクション削除',
+                message: `${emoji} を削除しました`,
+                color: 'gray'
+            });
         } catch (error) {
             console.error("リアクション削除エラー:", error);
+            notifications.show({
+                title: 'リアクション削除失敗',
+                message: 'リアクションの削除に失敗しました: ' + error,
+                color: 'red'
+            });
         }
     };
 
