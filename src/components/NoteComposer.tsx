@@ -1,11 +1,11 @@
 // src/components/NoteComposer.tsx
 'use client';
 
-import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader } from "@mantine/core";
+import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid } from "@mantine/core";
 import { useState, useRef } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { notifications } from '@mantine/notifications';
-import { IconPhoto, IconX } from '@tabler/icons-react';
+import { IconHome, IconLock, IconMail, IconPhoto, IconUsers, IconWorld, IconX } from '@tabler/icons-react';
 
 type VisibilityOption = 'public' | 'home' | 'followers' | 'specified';
 
@@ -167,22 +167,20 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                             )}
                         </FileButton>
 
-                        <Select
-                            value={visibility}
-                            onChange={(value) => setVisibility(value as VisibilityOption)}
-                            data={[
-                                { value: 'public', label: '公開' },
-                                { value: 'home', label: 'ホーム' },
-                                { value: 'followers', label: 'フォロワー' },
-                                { value: 'specified', label: 'ダイレクト' },
-                            ]}
-                            disabled={isSubmitting || isUploading}
-                            size="xs"
-                            w={120}
-                            style={{
-                                zIndex: 1001,
-                            }}
-                        />
+                        <Box>
+                            <SegmentedControl
+                                value={visibility}
+                                onChange={(value) => setVisibility(value as VisibilityOption)}
+                                data={[
+                                    { value: 'public', label: <IconWorld size={18} /> },
+                                    { value: 'home', label: <IconHome size={18} /> },
+                                    { value: 'followers', label: <IconLock size={18} /> },
+                                    { value: 'specified', label: <IconMail size={18} /> },
+                                ]}
+                                disabled={isSubmitting || isUploading}
+                                size="xs"
+                            />
+                        </Box>
                     </Group>
 
                     <Group>
