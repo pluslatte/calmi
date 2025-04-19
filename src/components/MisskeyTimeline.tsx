@@ -336,24 +336,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                             )}
                         </Transition>
                     </Box>
-                    <Box
-                        c="dimmed"
-                        style={{
-                            position: 'fixed',
-                            top: 13,
-                            right: buttonRightOffset,
-                            zIndex: 1000,
-                        }}
-                    >
-                        <Transition mounted={!autoUpdateEnabled} transition="fade" duration={200} timingFunction="ease">
-                            {(styles) => (
-                                <IconRefreshOff
-                                    size={16}
-                                    style={styles}
-                                />
-                            )}
-                        </Transition>
-                    </Box>
                 </React.Fragment>
             )}
         </Box>
