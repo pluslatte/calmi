@@ -177,7 +177,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                                 { value: 'specified', label: 'ダイレクト' },
                             ]}
                             disabled={isSubmitting || isUploading}
-                            size="sm"
+                            size="xs"
                             w={120}
                             style={{
                                 zIndex: 1001,
