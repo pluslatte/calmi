@@ -15,7 +15,7 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [volume, setVolume] = useState(0.5);
+    const [volume, setVolume] = useState(0.3);
     const [isMuted, setIsMuted] = useState(false);
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -173,54 +173,42 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
                                 />
                             </Box>
 
-                            <Box style={{ position: 'relative' }}>
-                                <ActionIcon
-                                    onClick={() => toggleMute()}
-                                    variant="subtle"
-                                    onMouseEnter={() => setShowVolumeSlider(true)}
-                                >
-                                    {isMuted ? <IconVolume3 size={18} /> : <IconVolume size={18} />}
-                                </ActionIcon>
+                            <ActionIcon
+                                onClick={() => toggleMute()}
+                                variant="subtle"
+                            >
+                                {isMuted ? <IconVolume3 size={18} /> : <IconVolume size={18} />}
+                            </ActionIcon>
 
-                                {showVolumeSlider && (
-                                    <Paper
-                                        shadow="md"
-                                        p="xs"
-                                        style={{
-                                            position: 'absolute',
-                                            bottom: '100%',
-                                            right: 0,
-                                            width: 150,
-                                            zIndex: 100,
-                                        }}
-                                        onMouseLeave={() => setShowVolumeSlider(false)}
+                            <Paper
+                                style={{
+                                    width: 150,
+                                }}
+                            >
+                                <Group justify="space-between" wrap="nowrap">
+                                    <ActionIcon
+                                        size="xs"
+                                        onClick={() => handleVolumeChange(Math.max(0, volume - 0.1))}
                                     >
-                                        <Group justify="space-between" mb="xs" wrap="nowrap">
-                                            <ActionIcon
-                                                size="xs"
-                                                onClick={() => handleVolumeChange(Math.max(0, volume - 0.1))}
-                                            >
-                                                <IconMinus size={14} />
-                                            </ActionIcon>
-                                            <Slider
-                                                value={volume}
-                                                onChange={handleVolumeChange}
-                                                min={0}
-                                                max={1}
-                                                step={0.01}
-                                                size="xs"
-                                                w={80}
-                                            />
-                                            <ActionIcon
-                                                size="xs"
-                                                onClick={() => handleVolumeChange(Math.min(1, volume + 0.1))}
-                                            >
-                                                <IconPlus size={14} />
-                                            </ActionIcon>
-                                        </Group>
-                                    </Paper>
-                                )}
-                            </Box>
+                                        <IconMinus size={14} />
+                                    </ActionIcon>
+                                    <Slider
+                                        value={volume}
+                                        onChange={handleVolumeChange}
+                                        min={0}
+                                        max={1}
+                                        step={0.01}
+                                        size="xs"
+                                        w={80}
+                                    />
+                                    <ActionIcon
+                                        size="xs"
+                                        onClick={() => handleVolumeChange(Math.min(1, volume + 0.1))}
+                                    >
+                                        <IconPlus size={14} />
+                                    </ActionIcon>
+                                </Group>
+                            </Paper>
                         </Group>
 
                         <Group justify="space-between">
