@@ -6,6 +6,7 @@ import { useState } from "react";
 import { DriveFile } from "misskey-js/entities.js";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
+import AudioPlayer from "./AudioPlayer";
 
 interface NoteAttachmentsProps {
     files: DriveFile[];
@@ -235,29 +236,10 @@ export default function NoteAttachments({ files }: NoteAttachmentsProps) {
                     if (isAudio(file)) {
                         return (
                             <Grid.Col key={file.id} span={{ base: 12, sm: gridSpan }}>
-                                <Paper
-                                    shadow="xs"
-                                    p="md"
-                                    withBorder
-                                    style={{
-                                        cursor: 'pointer',
-                                        height: '100%',
-                                        minHeight: 70
-                                    }}
-                                    onClick={() => window.open(file.url, '_blank')}
-                                >
-                                    <Group>
-                                        <IconFileMusic size={24} />
-                                        <Box>
-                                            <Text size="sm" fw={500} lineClamp={1}>
-                                                {file.name}
-                                            </Text>
-                                            <Text size="xs" c="dimmed">
-                                                Audio
-                                            </Text>
-                                        </Box>
-                                    </Group>
-                                </Paper>
+                                <AudioPlayer
+                                    file={file}
+                                    compact={files.length > 1}
+                                />
                             </Grid.Col>
                         );
                     }
