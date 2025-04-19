@@ -90,9 +90,9 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                         ?
                         reaction.slice(1).split('@')[1].slice(0, -1) !== '.' // NOTE: さすがに嘘だろそれは でもこれで動くからいいや
                             ?
-                            reaction.slice(1).split('@')[1].slice(0, -1)
+                            reaction.slice(1).split('@')[1].slice(0, -1) // remote サーバーのドメインが入るはず
                             :
-                            targetNoteHost
+                            "virtualkemomimi.net" // ここはローカルサーバーのドメイン
                         :
                         '';
                     console.log("fetching: " + emojiName + " from " + emojiHost);

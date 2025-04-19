@@ -24,7 +24,7 @@ export default function EmojiNode({ name, assets }: { name: string, assets: { ho
             const url = assets.emojis[emojiCode];
             if (url) {
                 // キャッシュに追加して返す
-                // addEmojiToCache(host, emojiCode, url);
+                addEmojiToCache(host, emojiCode, url);
                 return { url, alt: emojiCode };
             }
         }
