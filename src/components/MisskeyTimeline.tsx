@@ -73,6 +73,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             case 'social': return getHybridTimeline;
             case 'local': return getLocalTimeline;
             case 'global': return getGlobalTimeline;
+            default: return getHomeTimeline;
         }
     };
 
@@ -88,15 +89,14 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     useEffect(() => {
         if (!client) return;
 
-        // タイムラインを初期化（initializeTimelineは内部でローカルストレージから
-        // 保存されたタイムラインタイプを読み込む）
-        initializeTimeline(client, timelineType);
+        // タイムラインを初期化し、実際に使用されるタイムラインタイプを取得
+        const actualTimelineType = initializeTimeline(client, timelineType);
         initializeTimelineUi();
         initializeInfiniteScroll();
 
         // タイムラインタイプが変更された場合
-        if (prevTimelineTypeRef.current !== timelineType) {
-            prevTimelineTypeRef.current = timelineType;
+        if (prevTimelineTypeRef.current !== actualTimelineType) {
+            prevTimelineTypeRef.current = actualTimelineType as TimelineType;
 
             // スクロール位置をトップに戻す
             if (scrollAreaRef.current) {
@@ -107,8 +107,19 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             lastBoundaryIndexRef.current = null;
         }
 
+        // initializeTimeline で設定されたタイプに基づいてデータをロード
+        const currentGetTimelineFn = () => {
+            switch (actualTimelineType) {
+                case 'home': return getHomeTimeline;
+                case 'social': return getHybridTimeline;
+                case 'local': return getLocalTimeline;
+                case 'global': return getGlobalTimeline;
+                default: return getHomeTimeline;
+            }
+        };
+
         // 初期データのロード
-        loadMoreNotes(getTimelineFunction());
+        loadMoreNotes(currentGetTimelineFn());
 
         // クリーンアップ
         return () => {

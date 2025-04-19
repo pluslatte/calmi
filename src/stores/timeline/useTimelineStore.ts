@@ -48,7 +48,7 @@ interface TimelineState {
 
 interface TimelineActions {
     // 初期化と基本操作
-    initializeTimeline: (client: api.APIClient, timelineType: TimelineType) => void;
+    initializeTimeline: (client: api.APIClient, timelineType: TimelineType) => string;
     cleanupTimeline: () => void;
     loadMoreNotes: (getTimelineFn: (params?: any) => Promise<Note[]>) => Promise<void>;
 
@@ -96,7 +96,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         stream: null,
 
         // アクション
-        initializeTimeline: (client, timelineType) => {
+        initializeTimeline: (client, timelineType): string => {
             // ローカルストレージからタイムラインタイプを読み込み
             let savedType = timelineType;
             try {
@@ -117,7 +117,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             // 状態のリセット
             set(state => {
                 state.notes = [];
-                state.timelineType = savedType;
+                state.timelineType = savedType; // ここで savedType を使用
                 state.autoUpdateEnabled = false;
                 state.isLoading = true;
                 state.hasError = false;
@@ -131,7 +131,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 if (client.credential) {
                     state.stream = new MisskeyStream(
                         client,
-                        savedType,
+                        savedType, // ここでも savedType を使用
                         (note) => {
                             const store = get();
                             if (store.autoUpdateEnabled) {
@@ -144,6 +144,9 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                     state.stream.connect();
                 }
             });
+
+            // 状態更新が確実に完了した後に返す
+            return savedType; // savedType を返すように変更
         },
 
         cleanupTimeline: () => {
