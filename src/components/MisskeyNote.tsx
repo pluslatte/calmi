@@ -1,8 +1,9 @@
-import { Avatar, Box, Flex, Text, Group } from "@mantine/core";
+import { Avatar, Box, Flex, Text } from "@mantine/core";
 import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
 import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
+import NoteAttachments from "./NoteAttachments";
 import { memo } from "react";
 
 const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
@@ -58,6 +59,11 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                         }}
                     />
                 </Box>
+
+                {/* 添付ファイル - 画像や動画、音声など*/}
+                {note.files && note.files.length > 0 && (
+                    <NoteAttachments files={note.files} />
+                )}
             </Box>
         </Flex>
     );
