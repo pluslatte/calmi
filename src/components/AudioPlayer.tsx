@@ -17,7 +17,6 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(0.3);
     const [isMuted, setIsMuted] = useState(false);
-    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // オーディオタグから時間情報を更新
@@ -123,7 +122,7 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
                         </Text>
                     </Group>
                     <Tooltip label={formatTime(currentTime) + ' / ' + formatTime(duration)}>
-                        <Box w={90}>
+                        <Box w="100%">
                             <Slider
                                 value={progressPercent}
                                 onChange={handleSeek}
@@ -133,6 +132,29 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
                             />
                         </Box>
                     </Tooltip>
+                    <Group justify="space-between" wrap="nowrap">
+                        <ActionIcon
+                            size="xs"
+                            onClick={() => handleVolumeChange(Math.max(0, volume - 0.1))}
+                        >
+                            <IconMinus size={14} />
+                        </ActionIcon>
+                        <Slider
+                            value={volume}
+                            onChange={handleVolumeChange}
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            size="xs"
+                            w={80}
+                        />
+                        <ActionIcon
+                            size="xs"
+                            onClick={() => handleVolumeChange(Math.min(1, volume + 0.1))}
+                        >
+                            <IconPlus size={14} />
+                        </ActionIcon>
+                    </Group>
                     <audio ref={audioRef} src={file.url} preload="metadata" />
                 </Group>
             </Paper>
