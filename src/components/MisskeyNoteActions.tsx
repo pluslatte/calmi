@@ -1,4 +1,3 @@
-// src/components/MisskeyNoteActions.tsx の修正
 import { Group, ActionIcon, useMantineTheme, Box, Menu, Popover, Paper, Text, Avatar, Flex, rgba } from "@mantine/core";
 import { IconArrowBackUp, IconRepeat, IconHeart, IconDots, IconMoodSmile } from "@tabler/icons-react";
 import { useState } from "react";
@@ -15,13 +14,20 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
     const { createReaction, deleteReaction, apiState } = useMisskeyApiStore();
 
+    // リノートチェック：リノートかつテキストがない場合は純粋なリノート（リポストのみ）と判断
+    const isPlainRepost = note.renote && !note.text;
+
+    // リアクション対象のノートID
+    // 純粋なリノートの場合は元のノートID、そうでない場合は現在のノートID
+    const targetNoteId = isPlainRepost ? note.renote!.id : note.id;
+
     // よく使われるリアクション絵文字のリスト
     const popularEmojis = ["👍", "❤️", "😆", "🎉", "🤔", "👏", "🙏", "🥺", "😮", "🫡"];
 
     // リアクション追加
     const handleAddReaction = async (emoji: string) => {
         try {
-            await createReaction(note.id, emoji);
+            await createReaction(targetNoteId, emoji);
             setReactionPickerOpen(false);
             notifications.show({
                 title: 'リアクション成功',
@@ -41,7 +47,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     // リアクション削除
     const handleRemoveReaction = async (emoji: string) => {
         try {
-            await deleteReaction(note.id, emoji);
+            await deleteReaction(targetNoteId, emoji);
             notifications.show({
                 title: 'リアクション削除',
                 message: `${emoji} を削除しました`,
@@ -57,15 +63,19 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
         }
     };
 
+    // ノートのリアクション情報を取得（純粋なリノートの場合は元のノートのリアクション情報を使用）
+    const noteReactions = isPlainRepost ? note.renote!.reactions : note.reactions;
+    const myReaction = isPlainRepost ? note.renote!.myReaction : note.myReaction;
+
     // リアクション表示部分
     const renderReactions = () => {
-        if (!note.reactions || Object.keys(note.reactions).length === 0) {
+        if (!noteReactions || Object.keys(noteReactions).length === 0) {
             return null;
         }
 
         return (
             <Flex wrap="wrap" gap="xs" mt={8}>
-                {Object.entries(note.reactions).map(([reaction, count]) => (
+                {Object.entries(noteReactions).map(([reaction, count]) => (
                     <Paper
                         key={reaction}
                         px="xs"
@@ -74,16 +84,16 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                         withBorder
                         style={{
                             cursor: "pointer",
-                            opacity: note.myReaction === reaction ? 1 : 0.8,
-                            backgroundColor: note.myReaction === reaction
+                            opacity: myReaction === reaction ? 1 : 0.8,
+                            backgroundColor: myReaction === reaction
                                 ? rgba(theme.colors.cyan[8], 0.1)
                                 : undefined,
-                            borderColor: note.myReaction === reaction
+                            borderColor: myReaction === reaction
                                 ? theme.colors.cyan[5]
                                 : undefined,
                         }}
                         onClick={() => {
-                            if (note.myReaction === reaction) {
+                            if (myReaction === reaction) {
                                 handleRemoveReaction(reaction);
                             } else {
                                 handleAddReaction(reaction);
