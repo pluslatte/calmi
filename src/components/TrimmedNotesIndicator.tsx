@@ -90,7 +90,7 @@ export default function TrimmedNotesIndicator({
                             {loadedNotes.slice(0, maxNotesToShow).map(note => (
                                 <Box key={note.id} mt="md">
                                     <MisskeyNote note={note} />
-                                    <MisskeyNoteActions />
+                                    <MisskeyNoteActions note={note} />
                                     <Divider my="sm" />
                                 </Box>
                             ))}
