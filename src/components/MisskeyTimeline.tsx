@@ -8,9 +8,9 @@ import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp, IconRefreshOff } from "@tabler/icons-react";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
-import TimelineUpdateBoundary from "./TimelineUpdateBoundary";
 import { useTimelineStore, TimelineType } from '@/stores/timeline/useTimelineStore';
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
+import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
 
 const MisskeyTimeline = memo(function MisskeyTimeline({
     timelineType,
@@ -40,20 +40,22 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         skippedNotesGroups,
         trimmedNotesGroup,
         lastSwitchToAutoUpdateTime,
-        showScrollToTop,
-        buttonRightOffset,
         initializeTimeline,
         cleanupTimeline,
         loadMoreNotes,
         setAutoUpdateEnabled,
         loadSkippedNotes,
         loadTrimmedNotes,
-        changeTimelineType,
-        updateScrollPosition,
-        updateButtonOffset,
-        scrollToTop,
         getInfiniteScrollProps,
     } = useTimelineStore();
+    const {
+        showScrollToTop,
+        buttonRightOffset,
+        initializeTimelineUi,
+        scrollToTop,
+        updateScrollPosition,
+        updateButtonOffset,
+    } = useTimelineUiStore();
 
     const lastBoundaryIndexRef = useRef<number | null>(null);
     const prevTimelineTypeRef = useRef<TimelineType>(timelineType);
@@ -77,6 +79,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         // タイムラインを初期化（initializeTimelineは内部でローカルストレージから
         // 保存されたタイムラインタイプを読み込む）
         initializeTimeline(client, timelineType);
+        initializeTimelineUi();
 
         // タイムラインタイプが変更された場合
         if (prevTimelineTypeRef.current !== timelineType) {

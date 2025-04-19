@@ -4,6 +4,7 @@ import React, { memo, useEffect, useRef } from "react";
 import MisskeyTimeline from "@/components/MisskeyTimeline";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer } from "@tabler/icons-react";
 import { useTimelineStore, TimelineType } from '@/stores/timeline/useTimelineStore';
+import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
 
 const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     containerRef
@@ -13,7 +14,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     // Zustandストアからタイムラインタイプと変更アクションを取得
     const timelineType = useTimelineStore(state => state.timelineType);
     const changeTimelineType = useTimelineStore(state => state.changeTimelineType);
-    const updateButtonOffset = useTimelineStore(state => state.updateButtonOffset);
+    const updateButtonOffset = useTimelineUiStore(state => state.updateButtonOffset);
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 

@@ -45,10 +45,6 @@ interface TimelineState {
     // MisskeyStreamインスタンス参照 (外部リソース)
     stream: MisskeyStream | null;
 
-    // 上へ戻るボタン関連の状態
-    showScrollToTop: boolean;
-    buttonRightOffset: number | null;
-
     // 無限スクロール用の状態
     isLoadingMore: boolean;
     lastLoadMoreTime: number;
@@ -79,13 +75,6 @@ interface TimelineActions {
     // エラーハンドリング
     setError: (message: string) => void;
     clearError: () => void;
-
-    // 上へ戻るボタン関連のアクション
-    setShowScrollToTop: (show: boolean) => void;
-    setButtonRightOffset: (offset: number | null) => void;
-    scrollToTop: (scrollAreaRef: React.RefObject<HTMLDivElement | null>) => void;
-    updateScrollPosition: (scrollAreaRef: React.RefObject<HTMLDivElement | null>) => { top: number, nearTop: boolean } | null;
-    updateButtonOffset: (containerRef: React.RefObject<HTMLDivElement | null>) => void;
 
     // 無限スクロール関連のアクション
     handleInfiniteScroll: (
@@ -124,8 +113,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         trimmedNotesGroup: null,
         lastSwitchToAutoUpdateTime: null,
         stream: null,
-        showScrollToTop: false,
-        buttonRightOffset: null,
         isLoadingMore: false,
         lastLoadMoreTime: 0,
 
@@ -160,7 +147,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 state.lastSkippedGroupTimestamp = null;
                 state.trimmedNotesGroup = null;
                 state.lastSwitchToAutoUpdateTime = null;
-                state.showScrollToTop = false;
                 state.isLoadingMore = false;
                 state.lastLoadMoreTime = 0;
 
@@ -460,7 +446,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 state.trimmedNotesGroup = null;
                 state.lastSwitchToAutoUpdateTime = null;
                 state.stream = null;
-                state.showScrollToTop = false;
                 state.isLoadingMore = false;
                 state.lastLoadMoreTime = 0;
             });
@@ -486,52 +471,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             set(state => {
                 state.hasError = false;
                 state.errorMessage = null;
-            });
-        },
-
-        // 以下、上へ戻るボタン関連のアクション
-        setShowScrollToTop: (show) => {
-            set(state => {
-                state.showScrollToTop = show;
-            });
-        },
-
-        setButtonRightOffset: (offset) => {
-            set(state => {
-                state.buttonRightOffset = offset;
-            });
-        },
-
-        // スクロール位置をトップに戻す
-        scrollToTop: (scrollAreaRef) => {
-            if (!scrollAreaRef.current) return;
-            scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-        },
-
-        // スクロール位置の監視
-        updateScrollPosition: (scrollAreaRef): { top: number, nearTop: boolean } | null => {
-            if (!scrollAreaRef.current) return null;
-
-            const scrollEl = scrollAreaRef.current;
-            const top = scrollEl.scrollTop;
-
-            // スクロール位置によってボタン表示を切り替え
-            set(state => {
-                state.showScrollToTop = top > 200;
-            });
-
-            return { top, nearTop: top < 200 };
-        },
-
-        // ボタンの位置調整
-        updateButtonOffset: (containerRef) => {
-            if (!containerRef.current) return;
-
-            const rect = containerRef.current.getBoundingClientRect();
-            const offset = window.innerWidth - rect.right;
-
-            set(state => {
-                state.buttonRightOffset = offset + 16;
             });
         },
 
