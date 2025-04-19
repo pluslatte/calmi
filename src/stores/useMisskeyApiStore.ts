@@ -4,7 +4,7 @@ import { api, Endpoints } from 'misskey-js';
 import { Note, User } from 'misskey-js/entities.js';
 import { notifications } from '@mantine/notifications';
 
-export type PossibleEndPoints = keyof Endpoints;
+type PossibleEndPoints = keyof Endpoints;
 
 // エラータイプを定義
 export type ApiErrorType =
