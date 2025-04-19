@@ -4,8 +4,7 @@ import { api } from 'misskey-js';
 import { Note } from 'misskey-js/entities.js';
 import { MisskeyStream } from '@/lib/misskey/MisskeyStream';
 import { NoteUpdatedEvent } from "misskey-js/streaming.types.js";
-
-export type TimelineType = 'home' | 'social' | 'local' | 'global';
+import { TimelineType } from "@/types/misskey.types";
 
 export interface SkippedNotesGroup {
     count: number;

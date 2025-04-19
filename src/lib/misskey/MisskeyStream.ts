@@ -4,8 +4,7 @@ import { api, Stream } from "misskey-js";
 import { Note } from "misskey-js/entities.js";
 import { Connection } from "misskey-js/streaming.js";
 import { NoteUpdatedEvent } from "misskey-js/streaming.types.js";
-
-type TimelineType = 'home' | 'social' | 'local' | 'global';
+import { TimelineType } from "@/types/misskey.types";
 
 export class MisskeyStream {
     private stream: Stream;

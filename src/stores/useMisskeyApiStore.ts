@@ -4,8 +4,6 @@ import { api, Endpoints } from 'misskey-js';
 import { Note, User } from 'misskey-js/entities.js';
 import { notifications } from '@mantine/notifications';
 
-type PossibleEndPoints = keyof Endpoints;
-
 // エラータイプを定義
 export type ApiErrorType =
     | 'network'
@@ -42,7 +40,7 @@ interface MisskeyApiActions {
     logout: () => void;
     clearError: () => void;
 
-    executeApiRequest: <T>(endpoint: PossibleEndPoints, params: any, errorMessage: string) => Promise<T>;
+    executeApiRequest: <T>(endpoint: keyof Endpoints, params: any, errorMessage: string) => Promise<T>;
 
     // エンドポイント関連のアクション
     getHomeTimeline: (params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
@@ -159,7 +157,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
 
         // APIリクエスト共通ラッパー
         executeApiRequest: async <T>(
-            endpoint: PossibleEndPoints,
+            endpoint: keyof Endpoints,
             params: any,
             errorMessage: string
         ): Promise<T> => {

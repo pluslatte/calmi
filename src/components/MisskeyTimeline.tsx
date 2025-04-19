@@ -8,10 +8,11 @@ import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp, IconRefreshOff } from "@tabler/icons-react";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
-import { useTimelineStore, TimelineType } from '@/stores/timeline/useTimelineStore';
+import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
 import { useInfiniteScrollStore } from "@/stores/useInfiniteScrollStore";
+import { TimelineType } from "@/types/misskey.types";
 
 const MisskeyTimeline = memo(function MisskeyTimeline({
     timelineType,
