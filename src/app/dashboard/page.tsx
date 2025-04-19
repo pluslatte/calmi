@@ -44,12 +44,10 @@ export default function Dashboard() {
 
     return (
         <Container p="4" ref={containerRef} style={{ position: 'relative' }}>
-            <UserHeader />
-
             {isMobile ? (
                 // モバイルレイアウト
                 <>
-                    <Box h="calc(98vh - 70px)"> {/* ヘッダーの高さ分を引く */}
+                    <Box h="calc(100vh - 70px)"> {/* ヘッダーの高さ分を引く */}
                         <MisskeyTimelineContainer containerRef={containerRef} />
                     </Box>
 
@@ -62,7 +60,7 @@ export default function Dashboard() {
                         onClick={() => setIsModalOpen(true)}
                         style={{
                             position: 'fixed',
-                            bottom: 24,
+                            bottom: 94,
                             left: 24,
                             zIndex: 900,
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
@@ -81,12 +79,14 @@ export default function Dashboard() {
                         <NoteComposer />
                     </Grid.Col>
                     <Grid.Col span="auto">
-                        <Box h="calc(98vh - 70px)"> {/* ヘッダーの高さ分を引く */}
+                        <Box h="calc(100vh - 70px)"> {/* ヘッダーの高さ分を引く */}
                             <MisskeyTimelineContainer containerRef={containerRef} />
                         </Box>
                     </Grid.Col>
                 </Grid>
             )}
+
+            <UserHeader />
         </Container>
     );
 }
