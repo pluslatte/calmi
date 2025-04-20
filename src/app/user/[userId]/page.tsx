@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Tabs, LoadingOverlay, Text, Box, ScrollArea, Button, Divider } from "@mantine/core";
+import { Container, Tabs, LoadingOverlay, Text, Box, ScrollArea, Button, Divider, Affix } from "@mantine/core";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note, UserDetailed } from "misskey-js/entities.js";
 import UserProfile from "@/components/UserProfile";
@@ -185,16 +185,20 @@ export default function UserPage() {
         <Container size="md" py="lg" style={{ position: 'relative' }}>
             <LoadingOverlay visible={loading} overlayProps={{ radius: "sm", blur: 2 }} />
 
-            <Button
-                variant="subtle"
-                leftSection={<IconArrowLeft size={16} />}
-                onClick={() => router.back()}
-                mb="md"
-            >
-                戻る
-            </Button>
-
             {user && <UserProfile user={user} />}
+
+            {/* 固定位置の戻るボタンを追加 */}
+            <Affix position={{ top: 45, left: 16 }} zIndex={100}>
+                <Button
+                    variant="filled"
+                    leftSection={<IconArrowLeft size={16} />}
+                    onClick={() => router.back()}
+                    opacity={0.8}
+                    radius="xl"
+                >
+                    戻る
+                </Button>
+            </Affix>
 
             <Tabs value={activeTab} onChange={setActiveTab} mb="md">
                 <Tabs.List>
