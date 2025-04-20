@@ -79,20 +79,17 @@ export default function UserFooter() {
                 )}
 
                 <Group>
-                    <Menu shadow="md" width={240} position="top-end">
+                    <Menu shadow="md" width={240} position="top-end" closeOnItemClick={false}>
                         <Menu.Target>
                             <ActionIcon variant="outline">
-                                <IconUser size={18} />
+                                <IconSettings size={18} />
                             </ActionIcon>
                         </Menu.Target>
 
                         <Menu.Dropdown>
-                            <Menu.Label>アカウント</Menu.Label>
-                            <Menu.Item
-                                leftSection={<IconSettings size={14} />}
-                            >
-                                設定
-                                <Box mt="xs">
+                            <Menu.Label>設定</Menu.Label>
+                            <Menu.Item>
+                                <Box>
                                     <Group justify="space-between">
                                         <Text size="sm">CWを自動的に展開</Text>
                                         <Switch
@@ -108,6 +105,7 @@ export default function UserFooter() {
                                 leftSection={<IconLogout size={14} />}
                                 onClick={handleLogout}
                                 color="red"
+                                closeMenuOnClick={true}
                             >
                                 ログアウト
                             </Menu.Item>
