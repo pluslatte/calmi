@@ -172,10 +172,10 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                                 value={visibility}
                                 onChange={(value) => setVisibility(value as VisibilityOption)}
                                 data={[
-                                    { value: 'public', label: <IconWorld size={18} /> },
-                                    { value: 'home', label: <IconHome size={18} /> },
-                                    { value: 'followers', label: <IconLock size={18} /> },
-                                    { value: 'specified', label: <IconMail size={18} /> },
+                                    { value: 'public', label: <Tooltip label="パブリック"><IconWorld size={18} /></Tooltip> },
+                                    { value: 'home', label: <Tooltip label="ホーム"><IconHome size={18} /></Tooltip> },
+                                    { value: 'followers', label: <Tooltip label="フォロワー"><IconLock size={18} /></Tooltip> },
+                                    { value: 'specified', label: <Tooltip label="ダイレクト"><IconMail size={18} /></Tooltip> },
                                 ]}
                                 disabled={isSubmitting || isUploading}
                                 size="xs"
