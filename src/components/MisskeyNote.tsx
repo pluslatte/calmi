@@ -73,12 +73,15 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
     return (
         <Flex gap="sm" wrap="nowrap">
             {/* アバター */}
-            <Avatar
-                src={note.user.avatarUrl}
-                radius="md"
-                size="md"
-                mt={3}
-            />
+            <Link href={`/user/${note.user.id}`} style={{ textDecoration: 'none' }}>
+                <Avatar
+                    src={note.user.avatarUrl}
+                    radius="md"
+                    size="md"
+                    mt={3}
+                    style={{ cursor: 'pointer' }}
+                />
+            </Link>
 
             {/* ノートの本文エリア */}
             <Box miw={0} flex={1}>
