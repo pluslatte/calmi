@@ -1,7 +1,7 @@
 // src/components/NoteComposer.tsx
 'use client';
 
-import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid, Tooltip, Switch } from "@mantine/core";
+import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid, Tooltip, Switch, Collapse } from "@mantine/core";
 import { useState, useRef } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { notifications } from '@mantine/notifications';
@@ -137,31 +137,19 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
     return (
         <Paper p="md" withBorder>
             <Stack gap="sm">
-                {/* CWトグル */}
-                <Group justify="space-between">
-                    <Group gap="xs">
-                        <IconAlertTriangle size={16} color={enableCw ? 'orange' : 'gray'} />
-                        <Text size="sm">CW（閲覧注意）</Text>
-                    </Group>
-                    <Switch
-                        checked={enableCw}
-                        onChange={() => setEnableCw(!enableCw)}
-                        size="sm"
-                    />
-                </Group>
-
                 {/* CW入力エリア（CWが有効な場合のみ表示） */}
-                {enableCw && (
+                <Collapse in={enableCw}>
                     <Textarea
-                        placeholder="ここに警告内容を入力（必須）"
+                        placeholder="閲覧注意の内容を入力（必須）"
                         value={cw}
                         onChange={(e) => setCw(e.target.value)}
                         autosize
                         minRows={1}
                         maxRows={2}
                         disabled={isSubmitting}
+                        mb="xs"
                     />
-                )}
+                </Collapse>
 
                 {/* 本文入力エリア */}
                 <Textarea
@@ -200,6 +188,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
                 <Group justify="space-between">
                     <Group>
+                        {/* 画像添付ボタン */}
                         <FileButton
                             resetRef={resetRef}
                             onChange={handleFileChange}
@@ -219,6 +208,19 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                             )}
                         </FileButton>
 
+                        {/* CWトグルボタン - 他のアイコンと統合 */}
+                        <Tooltip label={enableCw ? "CWを無効にする" : "CWを有効にする"}>
+                            <ActionIcon
+                                variant="subtle"
+                                color={enableCw ? "orange" : "gray"}
+                                onClick={() => setEnableCw(!enableCw)}
+                                disabled={isSubmitting}
+                            >
+                                <IconAlertTriangle size={20} />
+                            </ActionIcon>
+                        </Tooltip>
+
+                        {/* 公開範囲選択 */}
                         <Box>
                             <SegmentedControl
                                 value={visibility}
