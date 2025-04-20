@@ -168,7 +168,7 @@ export default function NotificationList() {
                 <Divider mb="md" />
 
                 <Box style={{ flex: "1", overflow: "hidden" }}>
-                    <ScrollArea type="auto" h="100%">
+                    <ScrollArea type="scroll" h="100%">
                         {notifications.length === 0 ? (
                             <Text c="dimmed" ta="center" py="md">
                                 通知はありません

@@ -148,7 +148,7 @@ export default function UserPage() {
                 </Tabs.List>
             </Tabs>
 
-            <ScrollArea viewportRef={scrollAreaRef} h="calc(100vh - 300px)" type="auto">
+            <ScrollArea viewportRef={scrollAreaRef} h="calc(100vh - 80px)" type="scroll">
                 {displayNotes()}
                 <div ref={observerRef} style={{ height: 1 }} />
 
