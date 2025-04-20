@@ -1,11 +1,10 @@
-// src/components/NotificationList.tsx
 import { Box, Paper, Title, Divider, Text, Loader, Avatar, Group, UnstyledButton, ActionIcon, ScrollArea, Flex, Badge } from "@mantine/core";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
-import { IconBell, IconCheck, IconUser, IconHeart, IconRepeat, IconMessageCircle, IconHash, IconInfoCircle, IconArrowRight } from "@tabler/icons-react";
+import { IconBell, IconCheck, IconUser, IconHeart, IconRepeat, IconMessageCircle, IconHash, IconInfoCircle, IconArrowRight, IconPhoto } from "@tabler/icons-react";
 import { Notification } from "misskey-js/entities.js";
 
 export default function NotificationList() {
@@ -61,6 +60,34 @@ export default function NotificationList() {
         }
     };
 
+    // 通知タイプごとの背景色とボーダー色を取得
+    const getNotificationStyle = (type: string) => {
+        switch (type) {
+            case 'reaction':
+                return {
+                    bg: 'rgba(231, 76, 60, 0.05)',
+                    border: 'rgba(231, 76, 60, 0.5)'
+                };
+            case 'renote':
+            case 'quote':
+                return {
+                    bg: 'rgba(155, 89, 182, 0.05)',
+                    border: 'rgba(155, 89, 182, 0.5)'
+                };
+            case 'mention':
+            case 'reply':
+                return {
+                    bg: 'rgba(46, 204, 113, 0.05)',
+                    border: 'rgba(46, 204, 113, 0.5)'
+                };
+            default:
+                return {
+                    bg: 'rgba(0, 0, 0, 0.03)',
+                    border: 'rgba(0, 0, 0, 0.1)'
+                };
+        }
+    };
+
     // 通知の内容を取得
     const getNotificationContent = (notification: Notification) => {
         switch (notification.type) {
@@ -72,6 +99,8 @@ export default function NotificationList() {
                 return `${notification.user?.name || notification.user?.username} さんから返信がありました`;
             case 'renote':
                 return `${notification.user?.name || notification.user?.username} さんがリノートしました`;
+            case 'quote':
+                return `${notification.user?.name || notification.user?.username} さんが引用リノートしました`;
             case 'reaction':
                 return `${notification.user?.name || notification.user?.username} さんがリアクションしました: ${notification.reaction}`;
             case 'roleAssigned':
@@ -204,15 +233,16 @@ export default function NotificationList() {
                                                     {/* リアクション対象ノートの表示 */}
                                                     {notification.type === 'reaction' && notification.note && (
                                                         <Box mt={4} p="xs" style={{
-                                                            background: 'rgba(0,0,0,0.03)',
+                                                            background: getNotificationStyle('reaction').bg,
                                                             borderRadius: '4px',
-                                                            borderLeft: '2px solid rgba(231, 76, 60, 0.5)'
+                                                            borderLeft: `2px solid ${getNotificationStyle('reaction').border}`
                                                         }}>
                                                             <Group justify="space-between" mb={2}>
+                                                                <Text size="xs" fw={500}>リアクション対象のノート:</Text>
                                                                 <Badge
                                                                     size="xs"
                                                                     variant="outline"
-                                                                    color="gray"
+                                                                    color="red"
                                                                     style={{ cursor: 'pointer' }}
                                                                     rightSection={<IconArrowRight size={10} />}
                                                                     onClick={(e) => handleViewNote(notification.note!.id, e)}
@@ -226,25 +256,68 @@ export default function NotificationList() {
                                                         </Box>
                                                     )}
 
-                                                    {/* 返信・メンションノートの表示（リアクション以外） */}
-                                                    {hasNoteText(notification) && notification.note && (
-                                                        <Box mt={4}>
+                                                    {/* リノート対象ノートの表示 */}
+                                                    {(notification.type === 'renote' || notification.type === 'quote') && notification.note && (
+                                                        <Box mt={4} p="xs" style={{
+                                                            background: getNotificationStyle('renote').bg,
+                                                            borderRadius: '4px',
+                                                            borderLeft: `2px solid ${getNotificationStyle('renote').border}`
+                                                        }}>
                                                             <Group justify="space-between" mb={2}>
-                                                                <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
-                                                                    {notification.note.text}
+                                                                <Text size="xs" fw={500}>
+                                                                    {notification.type === 'renote' ? 'リノートされたノート:' : '引用リノートされたノート:'}
                                                                 </Text>
-                                                                {hasRelatedNote(notification) && (
-                                                                    <ActionIcon
-                                                                        size="xs"
-                                                                        variant="subtle"
-                                                                        onClick={(e) => handleViewNote(notification.note!.id, e)}
-                                                                    >
-                                                                        <IconArrowRight size={14} />
-                                                                    </ActionIcon>
-                                                                )}
+                                                                <Badge
+                                                                    size="xs"
+                                                                    variant="outline"
+                                                                    color="violet"
+                                                                    style={{ cursor: 'pointer' }}
+                                                                    rightSection={<IconArrowRight size={10} />}
+                                                                    onClick={(e) => handleViewNote(notification.note!.id, e)}
+                                                                >
+                                                                    ノートを表示
+                                                                </Badge>
                                                             </Group>
+                                                            <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
+                                                                {notification.note.text || '(内容なし)'}
+                                                            </Text>
+                                                            {notification.note.files && notification.note.files.length > 0 && (
+                                                                <Text size="xs" c="dimmed" mt={2}>
+                                                                    <IconPhoto size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                                                                    {notification.note.files.length}個のメディア
+                                                                </Text>
+                                                            )}
                                                         </Box>
                                                     )}
+
+                                                    {/* 返信・メンションノートの表示 */}
+                                                    {hasNoteText(notification) && notification.note &&
+                                                        !['reaction', 'renote'].includes(notification.type) && (
+                                                            <Box mt={4} p="xs" style={{
+                                                                background: getNotificationStyle('mention').bg,
+                                                                borderRadius: '4px',
+                                                                borderLeft: `2px solid ${getNotificationStyle('mention').border}`
+                                                            }}>
+                                                                <Group justify="space-between" mb={2}>
+                                                                    <Text size="xs" fw={500}>
+                                                                        {notification.type === 'reply' ? '返信内容:' : 'メンション内容:'}
+                                                                    </Text>
+                                                                    <Badge
+                                                                        size="xs"
+                                                                        variant="outline"
+                                                                        color="green"
+                                                                        style={{ cursor: 'pointer' }}
+                                                                        rightSection={<IconArrowRight size={10} />}
+                                                                        onClick={(e) => handleViewNote(notification.note!.id, e)}
+                                                                    >
+                                                                        ノートを表示
+                                                                    </Badge>
+                                                                </Group>
+                                                                <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
+                                                                    {notification.note.text || '(内容なし)'}
+                                                                </Text>
+                                                            </Box>
+                                                        )}
                                                 </Box>
                                             </Group>
                                         </Paper>
