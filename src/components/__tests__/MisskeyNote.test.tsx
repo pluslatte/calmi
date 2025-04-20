@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import MisskeyNote from '../MisskeyNote';
 import { Note } from 'misskey-js/entities.js';
 import '@testing-library/jest-dom';
+import { MantineProvider } from "@mantine/core";
 
 // モックの作成
 vi.mock('mfm-js', () => ({
@@ -54,7 +55,11 @@ describe('MisskeyNote', () => {
         };
 
         // 実行 (Act)
-        render(<MisskeyNote note={mockNote} />);
+        render(
+            <MantineProvider>
+                <MisskeyNote note={mockNote} />
+            </MantineProvider>
+        );
 
         // 検証 (Assert)
         expect(screen.getByText('テストユーザー')).toBeInTheDocument();
