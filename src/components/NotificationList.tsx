@@ -6,6 +6,109 @@ import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import { IconBell, IconCheck, IconUser, IconHeart, IconRepeat, IconMessageCircle, IconHash, IconInfoCircle, IconArrowRight, IconPhoto } from "@tabler/icons-react";
 import { Notification } from "misskey-js/entities.js";
+import MfmObject from "@/components/MfmObject";
+import * as mfm from 'mfm-js';
+import EmojiNode from "@/components/EmojiNode";
+
+// 通知内容のコンポーネント
+const NotificationContent = ({ notification }: { notification: Notification }) => {
+    // ユーザー名部分をMfmObjectで表示
+    const renderUserName = () => {
+        if (!('user' in notification)) return null;
+
+        const userName = notification.user.name || notification.user.username;
+        return (
+            <MfmObject
+                mfmNodes={mfm.parse(`**${userName}**`)}
+                assets={{
+                    host: notification.user.host,
+                    emojis: notification.user.emojis
+                }}
+            />
+        );
+    };
+
+    // リアクション絵文字を表示するコンポーネント
+    const ReactionEmoji = () => {
+        if (notification.type !== 'reaction' || !notification.reaction) return null;
+
+        // カスタム絵文字かどうかを判定
+        const isCustomEmoji = notification.reaction.startsWith(':') && notification.reaction.endsWith(':');
+
+        if (isCustomEmoji) {
+            const emojiName = notification.reaction.slice(1, -1).split('@')[0];
+            const emojiHost = notification.reaction.includes('@')
+                ? notification.reaction.slice(1, -1).split('@')[1]
+                : notification.user?.host || null;
+
+            return (
+                <Box component="span" mr={4} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    <EmojiNode
+                        name={emojiName}
+                        assets={{
+                            host: emojiHost,
+                            emojis: notification.user?.emojis || {}
+                        }}
+                    />
+                </Box>
+            );
+        }
+
+        // 通常の絵文字の場合はそのまま表示
+        return <Box component="span" mr={4}>{notification.reaction}</Box>;
+    };
+
+    switch (notification.type) {
+        case 'follow':
+            return (
+                <Text size="sm" style={{ wordBreak: 'break-word' }}>
+                    {renderUserName()} さんにフォローされました
+                </Text>
+            );
+        case 'mention':
+            return (
+                <Text size="sm" style={{ wordBreak: 'break-word' }}>
+                    {renderUserName()} さんからメンションされました
+                </Text>
+            );
+        case 'reply':
+            return (
+                <Text size="sm" style={{ wordBreak: 'break-word' }}>
+                    {renderUserName()} さんから返信がありました
+                </Text>
+            );
+        case 'renote':
+            return (
+                <Text size="sm" style={{ wordBreak: 'break-word' }}>
+                    {renderUserName()} さんがリノートしました
+                </Text>
+            );
+        case 'quote':
+            return (
+                <Text size="sm" style={{ wordBreak: 'break-word' }}>
+                    {renderUserName()} さんが引用リノートしました
+                </Text>
+            );
+        case 'reaction':
+            return (
+                <Text size="sm" style={{ wordBreak: 'break-word', display: 'flex', alignItems: 'center' }}>
+                    {renderUserName()} さんがリアクションしました: <ReactionEmoji />
+                </Text>
+            );
+        case 'roleAssigned':
+            return (
+                <Text size="sm" style={{ wordBreak: 'break-word' }}>
+                    ロール「{notification.role?.name}」が割り当てられました
+                </Text>
+            );
+        default:
+            return (
+                <Text size="sm" style={{ wordBreak: 'break-word' }}>
+                    新しい通知があります
+                </Text>
+            );
+    }
+};
 
 export default function NotificationList() {
     const { client } = useMisskeyApiStore();
@@ -207,10 +310,18 @@ export default function NotificationList() {
                                                 <Box style={{ flex: 1, minWidth: 0 }}>
                                                     <Group justify="space-between" mb={4}>
                                                         <Text size="sm" fw={500} lineClamp={1}>
-                                                            {/* 通知タイプによって表示を分岐 */}
-                                                            {hasUserAvatar(notification) && 'user' in notification
-                                                                ? (notification.user?.name || notification.user?.username)
-                                                                : '通知'}
+                                                            {/* ユーザー名をMfmObjectで表示 */}
+                                                            {hasUserAvatar(notification) && 'user' in notification && notification.user ? (
+                                                                <MfmObject
+                                                                    mfmNodes={mfm.parse(notification.user.name || notification.user.username)}
+                                                                    assets={{
+                                                                        host: notification.user.host,
+                                                                        emojis: notification.user.emojis
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                '通知'
+                                                            )}
                                                         </Text>
                                                         <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
                                                             {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ja })}
@@ -220,9 +331,8 @@ export default function NotificationList() {
                                                         <Box style={{ flexShrink: 0 }}>
                                                             {getNotificationIcon(notification)}
                                                         </Box>
-                                                        <Text size="sm" style={{ wordBreak: 'break-word', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                            {getNotificationContent(notification)}
-                                                        </Text>
+                                                        {/* 通知内容コンポーネントに置き換え */}
+                                                        <NotificationContent notification={notification} />
                                                     </Group>
 
                                                     {/* リアクション対象ノートの表示 */}
