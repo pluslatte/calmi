@@ -1,11 +1,11 @@
 // src/components/NoteComposer.tsx
 'use client';
 
-import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid } from "@mantine/core";
+import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid, Tooltip } from "@mantine/core";
 import { useState, useRef } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { notifications } from '@mantine/notifications';
-import { IconHome, IconLock, IconMail, IconPhoto, IconUsers, IconWorld, IconX } from '@tabler/icons-react';
+import { IconHome, IconLock, IconMail, IconPhoto, IconSend, IconUsers, IconWorld, IconX } from '@tabler/icons-react';
 
 type VisibilityOption = 'public' | 'home' | 'followers' | 'specified';
 
@@ -191,13 +191,15 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                             </Group>
                         )}
 
-                        <Button
-                            onClick={handleSubmit}
-                            loading={isSubmitting || apiState.loading}
-                            disabled={(!text.trim() && !imageFile) || isSubmitting || isUploading}
-                        >
-                            ノートする
-                        </Button>
+                        <Tooltip label="送信">
+                            <Button
+                                onClick={handleSubmit}
+                                loading={isSubmitting || apiState.loading}
+                                disabled={(!text.trim() && !imageFile) || isSubmitting || isUploading}
+                            >
+                                <IconSend size={16} />
+                            </Button>
+                        </Tooltip>
                     </Group>
                 </Group>
 
