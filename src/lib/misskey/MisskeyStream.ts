@@ -60,7 +60,7 @@ export class MisskeyStream {
         }
 
         this.channel.on('note', (note: Note) => {
-            console.log('channel: new note: ' + note.id);
+            // console.log('channel: new note: ' + note.id);
             this.onNewNote(note);
         });
     }

@@ -95,7 +95,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                             localStorage.getItem('misskey_server')?.slice(8) // ここはローカルサーバーのドメイン
                         :
                         '';
-                    console.log("fetching: " + emojiName + " from " + emojiHost);
+                    // console.log("fetching: " + emojiName + " from " + emojiHost);
 
                     return (
                         <Paper
