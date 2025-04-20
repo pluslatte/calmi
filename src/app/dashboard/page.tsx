@@ -6,7 +6,6 @@ import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
 import { IconPencil } from '@tabler/icons-react';
 import NoteComposer from "@/components/NoteComposer";
 import NotificationList from "@/components/NotificationList";
-import UserFooter from "@/components/UserFooter";
 
 export default function Dashboard() {
     const [isMobile, setIsMobile] = useState(false);
@@ -85,14 +84,12 @@ export default function Dashboard() {
                         </Flex>
                     </Grid.Col>
                     <Grid.Col span="auto">
-                        <Box h="calc(100vh - 70px)"> {/* ヘッダーの高さ分を引く */}
+                        <Box h="calc(100vh - 70px)"> {/* フッターの高さ分を引く */}
                             <MisskeyTimelineContainer containerRef={containerRef} />
                         </Box>
                     </Grid.Col>
                 </Grid>
             )}
-
-            <UserFooter />
         </Container>
     );
 }

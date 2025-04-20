@@ -4,9 +4,10 @@ import { api } from "misskey-js";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { MisskeyApiProvider } from "../MisskeyApiProvider";
-import { Loader, Center, Text, Stack, Button } from "@mantine/core";
+import { Loader, Center, Text, Stack, Button, Box } from "@mantine/core";
 import { IconLogin } from "@tabler/icons-react";
 import { EmojiCacheProvider } from "@/lib/emoji/EmojiCacheProvider";
+import UserFooter from "@/components/UserFooter";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -88,6 +89,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <MisskeyApiProvider initialClient={client}>
             <EmojiCacheProvider>
                 {children}
+                <UserFooter />
             </EmojiCacheProvider>
         </MisskeyApiProvider>
     );
