@@ -5,7 +5,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Container, Tabs, LoadingOverlay, Text, Box, ScrollArea, Button, Divider } from "@mantine/core";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
-import { User, Note, UserDetailed } from "misskey-js/entities.js";
+import { Note, UserDetailed } from "misskey-js/entities.js";
 import UserProfile from "@/components/UserProfile";
 import MisskeyNote from "@/components/MisskeyNote";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
@@ -211,20 +211,22 @@ export default function UserPage() {
             </Tabs>
 
             <ScrollArea viewportRef={scrollAreaRef} h="calc(100vh - 90px - 70px)" type="scroll">
-                {displayNotes()}
-                <div ref={observerRef} style={{ height: 1 }} />
+                <Box pr="xs"> {/* 右側のパディングを追加してコンテンツが横にはみ出すのを防ぐ */}
+                    {displayNotes()}
+                    <div ref={observerRef} style={{ height: 1 }} />
 
-                {isLoadingMore && (
-                    <Text size="sm" c="dimmed" ta="center" py="sm">
-                        読み込み中...
-                    </Text>
-                )}
+                    {isLoadingMore && (
+                        <Text size="sm" c="dimmed" ta="center" py="sm">
+                            読み込み中...
+                        </Text>
+                    )}
 
-                {!isLoadingMore && !loading && notes.length > 0 && (
-                    <Text size="sm" c="dimmed" ta="center" py="sm">
-                        これ以上の投稿はありません
-                    </Text>
-                )}
+                    {!isLoadingMore && !loading && notes.length > 0 && (
+                        <Text size="sm" c="dimmed" ta="center" py="sm">
+                            これ以上の投稿はありません
+                        </Text>
+                    )}
+                </Box>
             </ScrollArea>
         </Container>
     );

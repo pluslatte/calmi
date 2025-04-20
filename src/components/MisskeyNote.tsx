@@ -94,11 +94,11 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
             </Link>
 
             {/* ノートの本文エリア */}
-            <Box miw={0} flex={1}>
+            <Box miw={0} flex={1} style={{ maxWidth: '100%' }}>
                 {/* ユーザー情報とタイムスタンプ */}
                 <Flex justify="space-between" align="flex-start" mb={4}>
                     {/* ユーザー情報（2段表示） */}
-                    <Box>
+                    <Box style={{ minWidth: 0, maxWidth: 'calc(100% - 80px)' }}>
                         {/* ユーザー名をリンクに */}
                         <Link
                             href={`/user/${note.user.id}`}
@@ -111,7 +111,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                                 }
                             }}
                         >
-                            <Text size="md" lineClamp={1} style={{ cursor: 'pointer' }}>
+                            <Text size="md" lineClamp={1} style={{ cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                                 <MfmObject
                                     mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
                                     assets={{ host: note.user.host, emojis: note.emojis }}
@@ -119,14 +119,14 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                             </Text>
                         </Link>
                         {/* ユーザーID */}
-                        <Text size="xs" c="dimmed" lineClamp={1}>
+                        <Text size="xs" c="dimmed" lineClamp={1} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                             @{note.user.username}
                             {note.user.host ? `@${note.user.host}` : ''}
                         </Text>
                     </Box>
 
                     {/* タイムスタンプ */}
-                    <Box ml="auto">
+                    <Box>
                         <AutoRefreshTimestamp iso={note.createdAt} />
                     </Box>
                 </Flex>
