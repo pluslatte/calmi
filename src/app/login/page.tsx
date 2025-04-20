@@ -1,9 +1,9 @@
 'use client';
 
-import { Button, Container, Card, Text, Title, Stack, TextInput } from "@mantine/core";
+import { Button, Container, Card, Text, Title, Stack, TextInput, Paper, Flex, Group, List, ThemeIcon, Box, Divider, Anchor } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { notifications } from '@mantine/notifications';
-import { IconLogin } from '@tabler/icons-react';
+import { IconLogin, IconBrandGithub, IconMoon, IconFilter, IconRocket, IconCoffee, IconArrowRight } from '@tabler/icons-react';
 import { useRouter } from "next/navigation";
 
 export default function Login() {
@@ -112,36 +112,92 @@ export default function Login() {
     }
 
     return (
-        <Container size="xs" py="xl">
-            <Card shadow="sm" p="lg" radius="md" withBorder>
-                <Stack align="center" gap="md">
-                    <Title order={1}>calmi</Title>
-                    <Text c="dimmed" ta="center">
-                        静かに Misskey を使いたい人のためのクライアント
-                    </Text>
+        <Container size="md" py="xl">
+            <Flex gap="md" direction={{ base: 'column', md: 'row' }}>
+                {/* 左カラム: ログインカード */}
+                <Card shadow="sm" p="lg" radius="md" withBorder style={{ flex: '1' }}>
+                    <Stack align="center" gap="md">
+                        <Title order={1}>calmi</Title>
+                        <Text ta="center" size="sm">静かなMisskeyクライアント。</Text>
+                        <Text c="dimmed" ta="left">
+                            シンプルで使いやすいMisskeyクライアント。
+                            必要な機能だけを残し、読みやすく。
+                        </Text>
 
-                    <TextInput
-                        label="Misskeyサーバー"
-                        placeholder="例：virtualkemomimi.net"
-                        value={serverUrl}
-                        onChange={(e) => setServerUrl(e.target.value)}
-                        required
-                        style={{ width: '100%' }}
-                    />
+                        <TextInput
+                            label="Misskeyサーバー"
+                            placeholder="例：virtualkemomimi.net"
+                            value={serverUrl}
+                            onChange={(e) => setServerUrl(e.target.value)}
+                            required
+                            style={{ width: '100%' }}
+                        />
 
-                    <Button
-                        onClick={handleLogin}
-                        loading={isLoading}
-                        leftSection={<IconLogin size={18} />}
-                        size="md"
-                    >
-                        ログイン
-                    </Button>
-                    <Text c="dimmed" size="sm" ta="center">
-                        Misskeyのアカウントでログインして、静かなMisskeyクライアントを使い始めましょう
-                    </Text>
-                </Stack>
-            </Card>
+                        <Button
+                            onClick={handleLogin}
+                            loading={isLoading}
+                            leftSection={<IconLogin size={18} />}
+                            size="md"
+                            fullWidth
+                        >
+                            ログイン
+                        </Button>
+                    </Stack>
+                </Card>
+
+                {/* 右カラム: 特徴・説明 */}
+                <Card shadow="sm" p="lg" radius="md" withBorder style={{ flex: '1.5' }}>
+                    <Stack gap="md">
+                        <Title order={3}>
+                            <IconCoffee size={20} style={{ marginRight: 8 }} />
+                            静かなMisskeyエクスペリエンス
+                        </Title>
+
+                        <Title order={4}>主な特徴</Title>
+
+                        <List spacing="xs" size="sm" center>
+                            <List.Item icon={
+                                <ThemeIcon color="cyan" size={22} radius="xl">
+                                    <IconMoon size={14} />
+                                </ThemeIcon>
+                            }>
+                                <Text>シンプルで見やすいインターフェースで、本当に必要な情報に集中できます</Text>
+                            </List.Item>
+                            <List.Item icon={
+                                <ThemeIcon color="cyan" size={22} radius="xl">
+                                    <IconFilter size={14} />
+                                </ThemeIcon>
+                            }>
+                                <Text>余分な機能を省いて、使いやすさと読みやすさを優先しました</Text>
+                            </List.Item>
+                            <List.Item icon={
+                                <ThemeIcon color="cyan" size={22} radius="xl">
+                                    <IconRocket size={14} />
+                                </ThemeIcon>
+                            }>
+                                <Text>軽快な動作で、モバイル端末でも快適なMisskeyライフをサポートします</Text>
+                            </List.Item>
+                        </List>
+
+                        <Divider my="sm" />
+
+                        <Group justify="space-between">
+                            <Anchor href="https://github.com/pluslatte/calmi" target="_blank" rel="noopener noreferrer">
+                                <Group gap={6}>
+                                    <IconBrandGithub size={16} />
+                                    <Text size="sm">ソースコード</Text>
+                                </Group>
+                            </Anchor>
+                            <Anchor href="https://github.com/pluslatte/calmi/issues" target="_blank" rel="noopener noreferrer">
+                                <Group gap={6}>
+                                    <IconArrowRight size={16} />
+                                    <Text size="sm">バグ報告・機能要望</Text>
+                                </Group>
+                            </Anchor>
+                        </Group>
+                    </Stack>
+                </Card>
+            </Flex>
         </Container>
     );
 }
