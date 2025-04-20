@@ -108,92 +108,94 @@ export default function NotificationList() {
     }
 
     return (
-        <Paper p="md" withBorder>
-            <Group justify="space-between" mb="md">
-                <Title order={4}>
-                    <IconBell size={18} style={{ marginRight: 8 }} />
-                    通知
-                </Title>
-                <Group gap="xs">
-                    <Text size="sm" c="dimmed">
-                        {unreadCount > 0 ? `${unreadCount}件の未読` : '既読'}
-                    </Text>
-                    {unreadCount > 0 && (
-                        <ActionIcon size="sm" onClick={markAsRead} title="すべて既読にする">
-                            <IconCheck size={16} />
-                        </ActionIcon>
-                    )}
-                </Group>
-            </Group>
-
-            <Divider mb="md" />
-
-            <Box flex={1} style={{ overflow: "auto" }}>
-                <ScrollArea type="auto">
-                    {notifications.length === 0 ? (
-                        <Text c="dimmed" ta="center" py="md">
-                            通知はありません
+        <Paper p="md" withBorder h="100%">
+            <Flex direction="column" h="100%">
+                <Group justify="space-between" mb="md">
+                    <Title order={4}>
+                        <IconBell size={18} style={{ marginRight: 8 }} />
+                        通知
+                    </Title>
+                    <Group gap="xs">
+                        <Text size="sm" c="dimmed">
+                            {unreadCount > 0 ? `${unreadCount}件の未読` : '既読'}
                         </Text>
-                    ) : (
-                        notifications.map((notification) => (
-                            <Box key={notification.id}>
-                                <UnstyledButton
-                                    onClick={() => {/* ノートへの遷移などの処理 */ }}
-                                >
-                                    <Paper
-                                        p="xs"
-                                        withBorder
-                                        mb="xs"
-                                        style={{
-                                            borderLeft: lastReadAt && new Date(notification.createdAt) > lastReadAt
-                                                ? '3px solid #3498db'
-                                                : '1px solid #e0e0e0'
-                                        }}
+                        {unreadCount > 0 && (
+                            <ActionIcon size="sm" onClick={markAsRead} title="すべて既読にする">
+                                <IconCheck size={16} />
+                            </ActionIcon>
+                        )}
+                    </Group>
+                </Group>
+
+                <Divider mb="md" />
+
+                <Box style={{ flex: "1", overflow: "hidden" }}>
+                    <ScrollArea type="auto" h="100%">
+                        {notifications.length === 0 ? (
+                            <Text c="dimmed" ta="center" py="md">
+                                通知はありません
+                            </Text>
+                        ) : (
+                            notifications.map((notification) => (
+                                <Box key={notification.id}>
+                                    <UnstyledButton
+                                        onClick={() => {/* ノートへの遷移などの処理 */ }}
                                     >
-                                        <Group wrap="nowrap" align="flex-start">
-                                            {hasUserAvatar(notification) && 'user' in notification && notification.user ? (
-                                                <Avatar
-                                                    src={notification.user?.avatarUrl}
-                                                    radius="md"
-                                                    size="md"
-                                                />
-                                            ) : (
-                                                <Box w={40} h={40} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    {getNotificationIcon(notification)}
-                                                </Box>
-                                            )}
-                                            <Box style={{ flex: 1 }}>
-                                                <Group justify="space-between" mb={4}>
-                                                    <Text size="sm" fw={500}>
-                                                        {/* 通知タイプによって表示を分岐 */}
-                                                        {hasUserAvatar(notification) && 'user' in notification
-                                                            ? (notification.user?.name || notification.user?.username)
-                                                            : '通知'}
-                                                    </Text>
-                                                    <Text size="xs" c="dimmed">
-                                                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ja })}
-                                                    </Text>
-                                                </Group>
-                                                <Group gap="xs">
-                                                    {getNotificationIcon(notification)}
-                                                    <Text size="sm">
-                                                        {getNotificationContent(notification)}
-                                                    </Text>
-                                                </Group>
-                                                {hasNoteText(notification) && notification.note && (
-                                                    <Text size="xs" c="dimmed" mt={4} lineClamp={2}>
-                                                        {notification.note.text}
-                                                    </Text>
+                                        <Paper
+                                            p="xs"
+                                            withBorder
+                                            mb="xs"
+                                            style={{
+                                                borderLeft: lastReadAt && new Date(notification.createdAt) > lastReadAt
+                                                    ? '3px solid #3498db'
+                                                    : '1px solid #e0e0e0'
+                                            }}
+                                        >
+                                            <Group wrap="nowrap" align="flex-start">
+                                                {hasUserAvatar(notification) && 'user' in notification && notification.user ? (
+                                                    <Avatar
+                                                        src={notification.user?.avatarUrl}
+                                                        radius="md"
+                                                        size="md"
+                                                    />
+                                                ) : (
+                                                    <Box w={40} h={40} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        {getNotificationIcon(notification)}
+                                                    </Box>
                                                 )}
-                                            </Box>
-                                        </Group>
-                                    </Paper>
-                                </UnstyledButton>
-                            </Box>
-                        ))
-                    )}
-                </ScrollArea>
-            </Box>
+                                                <Box style={{ flex: 1 }}>
+                                                    <Group justify="space-between" mb={4}>
+                                                        <Text size="sm" fw={500}>
+                                                            {/* 通知タイプによって表示を分岐 */}
+                                                            {hasUserAvatar(notification) && 'user' in notification
+                                                                ? (notification.user?.name || notification.user?.username)
+                                                                : '通知'}
+                                                        </Text>
+                                                        <Text size="xs" c="dimmed">
+                                                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ja })}
+                                                        </Text>
+                                                    </Group>
+                                                    <Group gap="xs">
+                                                        {getNotificationIcon(notification)}
+                                                        <Text size="sm">
+                                                            {getNotificationContent(notification)}
+                                                        </Text>
+                                                    </Group>
+                                                    {hasNoteText(notification) && notification.note && (
+                                                        <Text size="xs" c="dimmed" mt={4} lineClamp={2}>
+                                                            {notification.note.text}
+                                                        </Text>
+                                                    )}
+                                                </Box>
+                                            </Group>
+                                        </Paper>
+                                    </UnstyledButton>
+                                </Box>
+                            ))
+                        )}
+                    </ScrollArea>
+                </Box>
+            </Flex>
         </Paper>
     );
 }

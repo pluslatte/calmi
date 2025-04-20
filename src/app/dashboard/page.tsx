@@ -79,7 +79,7 @@ export default function Dashboard() {
                     <Grid.Col span="content" maw="300px">
                         <Flex h="calc(100vh - 70px)" direction="column" gap="xs">
                             <NoteComposer />
-                            <Box flex={1}>
+                            <Box style={{ flex: 1, overflow: 'hidden' }}>
                                 <NotificationList />
                             </Box>
                         </Flex>
