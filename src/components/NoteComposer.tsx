@@ -5,7 +5,10 @@ import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack,
 import { useState, useRef, useEffect } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { notifications } from '@mantine/notifications';
-import { IconAlertTriangle, IconHome, IconLock, IconMail, IconPhoto, IconPlus, IconSend, IconUsers, IconWorld, IconX } from '@tabler/icons-react';
+import {
+    IconAlertTriangle, IconHome, IconLock, IconMail, IconPhoto, IconPlus, IconSend,
+    IconUsers, IconWorld, IconX, IconFile, IconFileMusic, IconVideo
+} from '@tabler/icons-react';
 
 type VisibilityOption = 'public' | 'home' | 'followers' | 'specified';
 
@@ -13,22 +16,33 @@ interface NoteComposerProps {
     onSuccess?: () => void; // 投稿成功時のコールバック
 }
 
-interface ImagePreview {
+interface FilePreview {
     file: File;
-    preview: string;
+    preview: string | null; // 画像/動画のプレビューURL（ない場合はnull）
+    type: 'image' | 'video' | 'audio' | 'other'; // ファイルタイプ
+    name: string; // ファイル名
 }
 
-// 許可される最大ファイルサイズ（8MB）
-const MAX_FILE_SIZE = 8 * 1024 * 1024;
-// 添付可能な最大画像数
-const MAX_IMAGES = 4;
+// 許可される最大ファイルサイズ（64MB）
+const MAX_FILE_SIZE = 64 * 1024 * 1024;
+// 添付可能な最大ファイル数
+const MAX_FILES = 4;
+
+// 許可されるファイルタイプを定義
+const ALLOWED_FILE_TYPES = {
+    image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+    video: ['video/mp4', 'video/webm', 'video/quicktime'],
+    audio: ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'],
+    // その他一般的なファイルタイプも許可
+    other: ['application/pdf', 'text/plain', 'application/zip', 'application/x-zip-compressed', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+};
 
 export default function NoteComposer({ onSuccess }: NoteComposerProps) {
     const [text, setText] = useState('');
     const [cw, setCw] = useState('');
     const [enableCw, setEnableCw] = useState(false);
     const [visibility, setVisibility] = useState<VisibilityOption>('home');
-    const [imageFiles, setImageFiles] = useState<ImagePreview[]>([]);
+    const [uploadedFiles, setUploadedFiles] = useState<FilePreview[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
@@ -38,14 +52,24 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
     const { createNote, createNoteWithMedia, uploadFile, apiState } = useMisskeyApiStore();
 
+    // ファイルタイプを判別する関数
+    const getFileType = (mimeType: string): 'image' | 'video' | 'audio' | 'other' | null => {
+        if (ALLOWED_FILE_TYPES.image.includes(mimeType)) return 'image';
+        if (ALLOWED_FILE_TYPES.video.includes(mimeType)) return 'video';
+        if (ALLOWED_FILE_TYPES.audio.includes(mimeType)) return 'audio';
+        if (ALLOWED_FILE_TYPES.other.includes(mimeType)) return 'other';
+        return null; // サポートされていない場合
+    };
+
     // ファイル処理の共通関数
-    const processFile = (file: File): Promise<ImagePreview | null> => {
+    const processFile = (file: File): Promise<FilePreview | null> => {
         return new Promise((resolve) => {
-            // ファイルタイプが画像かチェック
-            if (!file.type.startsWith('image/')) {
+            // ファイルタイプをチェック
+            const fileType = getFileType(file.type);
+            if (!fileType) {
                 notifications.show({
                     title: 'ファイルエラー',
-                    message: '画像ファイルのみアップロードできます',
+                    message: 'このファイル形式はサポートされていません',
                     color: 'red',
                 });
                 resolve(null);
@@ -63,39 +87,61 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                 return;
             }
 
-            // 最大枚数チェック
-            if (imageFiles.length >= MAX_IMAGES) {
+            // 最大数チェック
+            if (uploadedFiles.length >= MAX_FILES) {
                 notifications.show({
                     title: 'ファイルエラー',
-                    message: `画像は最大${MAX_IMAGES}枚までです`,
+                    message: `ファイルは最大${MAX_FILES}個までです`,
                     color: 'red',
                 });
                 resolve(null);
                 return;
             }
 
-            // プレビューを作成
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if (e.target?.result) {
-                    resolve({
-                        file,
-                        preview: e.target.result as string
+            // 画像の場合はプレビューを作成
+            if (fileType === 'image') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (e.target?.result) {
+                        resolve({
+                            file,
+                            preview: e.target.result as string,
+                            type: fileType,
+                            name: file.name
+                        });
+                    } else {
+                        resolve(null);
+                    }
+                };
+                reader.onerror = () => {
+                    notifications.show({
+                        title: 'ファイルエラー',
+                        message: 'ファイルの読み込みに失敗しました',
+                        color: 'red',
                     });
-                } else {
                     resolve(null);
-                }
-            };
-            reader.onerror = () => {
-                notifications.show({
-                    title: 'ファイルエラー',
-                    message: 'ファイルの読み込みに失敗しました',
-                    color: 'red',
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // 非画像ファイルはプレビューなしで追加
+                resolve({
+                    file,
+                    preview: null,
+                    type: fileType,
+                    name: file.name
                 });
-                resolve(null);
-            };
-            reader.readAsDataURL(file);
+            }
         });
+    };
+
+    // ファイルタイプに応じたアイコンを取得する関数
+    const getFileIcon = (fileType: string) => {
+        switch (fileType) {
+            case 'image': return <IconPhoto size={24} />;
+            case 'video': return <IconVideo size={24} />;
+            case 'audio': return <IconFileMusic size={24} />;
+            default: return <IconFile size={24} />;
+        }
     };
 
     // ファイル選択ハンドラー
@@ -104,13 +150,13 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
         const preview = await processFile(file);
         if (preview) {
-            setImageFiles([...imageFiles, preview]);
+            setUploadedFiles([...uploadedFiles, preview]);
         }
     };
 
     // ファイル削除ハンドラー
-    const removeImage = (index: number) => {
-        setImageFiles(imageFiles.filter((_, i) => i !== index));
+    const removeFile = (index: number) => {
+        setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
     };
 
     // ドラッグ＆ドロップイベントハンドラー
@@ -138,40 +184,40 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
         const files = Array.from(e.dataTransfer.files);
 
-        // 画像以外のファイルをフィルタリング
-        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+        if (files.length === 0) {
+            return;
+        }
 
-        if (imageFiles.length === 0) {
+        // 最大数を超える場合は警告
+        const remainingSlots = MAX_FILES - uploadedFiles.length;
+        if (remainingSlots <= 0) {
             notifications.show({
-                title: '情報',
-                message: '画像ファイルをドロップしてください',
-                color: 'blue',
+                title: '警告',
+                message: `ファイルは最大${MAX_FILES}個までです`,
+                color: 'yellow',
             });
             return;
         }
 
-        // 最大枚数を超える場合は警告
-        const remainingSlots = MAX_IMAGES - imageFiles.length;
-        if (remainingSlots < 0) {
-            notifications.show({
-                title: '警告',
-                message: `画像は最大${MAX_IMAGES}枚までです。最初の${MAX_IMAGES}枚のみ追加します。`,
-                color: 'yellow',
-            });
-        }
-
-        // 処理する画像数を制限
-        const filesToProcess = imageFiles.slice(0, remainingSlots > 0 ? imageFiles.length : MAX_IMAGES);
+        // 処理するファイル数を制限
+        const filesToProcess = files.slice(0, remainingSlots);
 
         // 非同期で全ファイルを処理
         const previewPromises = filesToProcess.map(file => processFile(file));
         const previews = await Promise.all(previewPromises);
 
         // 有効なプレビューのみをフィルタリング
-        const validPreviews = previews.filter((preview): preview is ImagePreview => preview !== null);
+        const validPreviews = previews.filter((preview): preview is FilePreview => preview !== null);
 
         if (validPreviews.length > 0) {
-            setImageFiles(prev => [...prev, ...validPreviews]);
+            setUploadedFiles(prev => [...prev, ...validPreviews]);
+
+            // 追加されたファイルの数に応じてメッセージを表示
+            notifications.show({
+                title: 'ファイル追加',
+                message: `${validPreviews.length}個のファイルを追加しました`,
+                color: 'green',
+            });
         }
     };
 
@@ -182,18 +228,19 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
             const items = e.clipboardData.items;
 
-            // クリップボードアイテムをチェック
+            // クリップボードに画像があるかチェック
             for (let i = 0; i < items.length; i++) {
+                // 画像のみペースト対応
                 if (items[i].type.startsWith('image/')) {
                     // 画像データを取得
                     const file = items[i].getAsFile();
                     if (file) {
                         e.preventDefault(); // テキストエリアへのデフォルトのペーストを防止
 
-                        if (imageFiles.length >= MAX_IMAGES) {
+                        if (uploadedFiles.length >= MAX_FILES) {
                             notifications.show({
                                 title: 'ファイルエラー',
-                                message: `画像は最大${MAX_IMAGES}枚までです`,
+                                message: `ファイルは最大${MAX_FILES}個までです`,
                                 color: 'red',
                             });
                             return;
@@ -201,7 +248,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
                         const preview = await processFile(file);
                         if (preview) {
-                            setImageFiles(prev => [...prev, preview]);
+                            setUploadedFiles(prev => [...prev, preview]);
 
                             notifications.show({
                                 title: '画像追加',
@@ -224,14 +271,61 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
         return () => {
             document.removeEventListener('paste', handlePaste);
         };
-    }, [imageFiles]);
+    }, [uploadedFiles]);
+
+    // 許可されるファイルタイプをaccept属性用に整形
+    const getAcceptedFileTypes = () => {
+        return [
+            ...ALLOWED_FILE_TYPES.image,
+            ...ALLOWED_FILE_TYPES.video,
+            ...ALLOWED_FILE_TYPES.audio,
+            ...ALLOWED_FILE_TYPES.other
+        ].join(',');
+    };
+
+    // ファイルプレビュー表示
+    const renderFilePreview = (file: FilePreview, index: number) => {
+        return (
+            <Box key={index} style={{ position: 'relative', display: 'inline-block' }}>
+                <ActionIcon
+                    color="red"
+                    variant="filled"
+                    radius="xl"
+                    size="sm"
+                    style={{ position: 'absolute', top: 5, right: 5, zIndex: 10 }}
+                    onClick={() => removeFile(index)}
+                    disabled={isSubmitting || isUploading}
+                >
+                    <IconX size={16} />
+                </ActionIcon>
+
+                {file.type === 'image' && file.preview ? (
+                    <Image
+                        src={file.preview}
+                        alt={file.name}
+                        fit="cover"
+                        h={100}
+                        w={100}
+                        radius="sm"
+                    />
+                ) : (
+                    <Paper p="xs" withBorder h={100} w={100} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        {getFileIcon(file.type)}
+                        <Text size="xs" lineClamp={2} mt={4}>
+                            {file.name}
+                        </Text>
+                    </Paper>
+                )}
+            </Box>
+        );
+    };
 
     const handleSubmit = async () => {
-        // 本文もしくは画像がある場合のみ投稿可能
-        if (!text.trim() && imageFiles.length === 0) {
+        // 本文もしくはファイルがある場合のみ投稿可能
+        if (!text.trim() && uploadedFiles.length === 0) {
             notifications.show({
                 title: '投稿エラー',
-                message: 'テキストまたは画像を入力してください',
+                message: 'テキストまたはファイルを入力してください',
                 color: 'red',
             });
             return;
@@ -252,19 +346,19 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
         try {
             const cwText = enableCw ? cw : null;
 
-            // 画像がある場合は先にアップロード
-            if (imageFiles.length > 0) {
+            // ファイルがある場合は先にアップロード
+            if (uploadedFiles.length > 0) {
                 setIsUploading(true);
                 try {
-                    // 複数画像を順次アップロード
-                    const uploadPromises = imageFiles.map(image => uploadFile(image.file));
-                    const uploadedFiles = await Promise.all(uploadPromises);
+                    // 複数ファイルを順次アップロード
+                    const uploadPromises = uploadedFiles.map(filePreview => uploadFile(filePreview.file));
+                    const uploadedFileResults = await Promise.all(uploadPromises);
                     setIsUploading(false);
 
-                    // 画像付きノートを作成
+                    // ファイル付きノートを作成
                     await createNoteWithMedia(
                         text,
-                        uploadedFiles.map(file => file.id),
+                        uploadedFileResults.map(file => file.id),
                         visibility,
                         cwText
                     );
@@ -285,7 +379,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
             setText('');
             setCw('');
             setEnableCw(false);
-            setImageFiles([]);
+            setUploadedFiles([]);
 
             notifications.show({
                 title: '投稿成功',
@@ -304,7 +398,6 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
             setIsSubmitting(false);
         }
     };
-
 
     return (
         <Paper
@@ -340,7 +433,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                 >
                     <Stack align="center" gap="xs">
                         <IconPhoto size={32} />
-                        <Text>画像をドロップして添付</Text>
+                        <Text>ファイルをドロップして添付</Text>
                     </Stack>
                 </Box>
             )}
@@ -372,37 +465,15 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                     ref={textareaRef}
                 />
 
-                {/* 画像プレビュー - 複数画像対応 */}
-                {imageFiles.length > 0 && (
+                {/* ファイルプレビュー */}
+                {uploadedFiles.length > 0 && (
                     <Group gap="xs" style={{ flexWrap: 'wrap' }}>
-                        {imageFiles.map((image, index) => (
-                            <Box key={index} style={{ position: 'relative', display: 'inline-block' }}>
-                                <ActionIcon
-                                    color="red"
-                                    variant="filled"
-                                    radius="xl"
-                                    size="sm"
-                                    style={{ position: 'absolute', top: 5, right: 5, zIndex: 10 }}
-                                    onClick={() => removeImage(index)}
-                                    disabled={isSubmitting || isUploading}
-                                >
-                                    <IconX size={16} />
-                                </ActionIcon>
-                                <Image
-                                    src={image.preview}
-                                    alt={`添付画像${index + 1}`}
-                                    fit="cover"
-                                    h={100}
-                                    w={100}
-                                    radius="sm"
-                                />
-                            </Box>
-                        ))}
-                        {imageFiles.length < MAX_IMAGES && (
+                        {uploadedFiles.map((file, index) => renderFilePreview(file, index))}
+                        {uploadedFiles.length < MAX_FILES && (
                             <FileButton
                                 resetRef={resetRef}
                                 onChange={handleFileChange}
-                                accept="image/png,image/jpeg,image/gif,image/webp"
+                                accept={getAcceptedFileTypes()}
                                 disabled={isSubmitting || isUploading}
                             >
                                 {(props) => (
@@ -429,25 +500,25 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
                 <Group justify="space-between">
                     <Group>
-                        {/* 画像添付ボタン */}
+                        {/* ファイル添付ボタン */}
                         <FileButton
                             resetRef={resetRef}
                             onChange={handleFileChange}
-                            accept="image/png,image/jpeg,image/gif,image/webp"
-                            disabled={isSubmitting || isUploading || imageFiles.length >= MAX_IMAGES}
+                            accept={getAcceptedFileTypes()}
+                            disabled={isSubmitting || isUploading || uploadedFiles.length >= MAX_FILES}
                         >
                             {(props) => (
                                 <Tooltip
-                                    label={imageFiles.length >= MAX_IMAGES
-                                        ? `最大${MAX_IMAGES}枚まで`
-                                        : "画像を添付（ドラッグ&ドロップ、クリップボードからも可能）"}
+                                    label={uploadedFiles.length >= MAX_FILES
+                                        ? `最大${MAX_FILES}個まで`
+                                        : "ファイルを添付（ドラッグ&ドロップ、クリップボードからも可能）"}
                                 >
                                     <ActionIcon
                                         {...props}
                                         variant="subtle"
                                         color="gray"
-                                        aria-label="画像を添付"
-                                        disabled={isSubmitting || isUploading || imageFiles.length >= MAX_IMAGES}
+                                        aria-label="ファイルを添付"
+                                        disabled={isSubmitting || isUploading || uploadedFiles.length >= MAX_FILES}
                                     >
                                         <IconPhoto size={20} />
                                     </ActionIcon>
@@ -496,7 +567,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                             <Button
                                 onClick={handleSubmit}
                                 loading={isSubmitting || apiState.loading}
-                                disabled={(!text.trim() && imageFiles.length === 0) || isSubmitting || isUploading}
+                                disabled={(!text.trim() && uploadedFiles.length === 0) || isSubmitting || isUploading}
                             >
                                 <IconSend size={16} />
                             </Button>
@@ -504,10 +575,10 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                     </Group>
                 </Group>
 
-                {/* 文字数カウンターと添付画像数 */}
+                {/* 文字数カウンターと添付ファイル数 */}
                 <Group justify="space-between">
                     <Text size="xs" c="dimmed">
-                        {imageFiles.length > 0 ? `画像: ${imageFiles.length}/${MAX_IMAGES}` : ''}
+                        {uploadedFiles.length > 0 ? `ファイル: ${uploadedFiles.length}/${MAX_FILES}` : ''}
                     </Text>
                     <Text size="xs" c="dimmed">
                         {text.length} 文字
