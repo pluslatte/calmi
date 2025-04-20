@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { api, Endpoints } from 'misskey-js';
-import { Note, User } from 'misskey-js/entities.js';
+import { Note, User, UserDetailed } from 'misskey-js/entities.js';
 import { notifications } from '@mantine/notifications';
 
 // エラータイプを定義
@@ -62,6 +62,10 @@ interface MisskeyApiActions {
     // リアクション関連のアクション
     createReaction: (noteId: string, reaction: string) => Promise<void>;
     deleteReaction: (noteId: string, reaction: string) => Promise<void>;
+
+    // ユーザー関連のアクション
+    getUserProfile: (userId: string) => Promise<UserDetailed>;
+    getUserNotes: (userId: string, params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
 }
 
 // デフォルト値
@@ -385,6 +389,24 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 'notes/reactions/delete',
                 { noteId },
                 'リアクションの削除に失敗しました'
+            );
+        },
+
+        // ユーザー情報取得
+        getUserProfile: async (userId: string) => {
+            return await get().executeApiRequest<UserDetailed>(
+                'users/show',
+                { userId },
+                'ユーザー情報の取得に失敗しました'
+            );
+        },
+
+        // ユーザーの投稿を取得
+        getUserNotes: async (userId: string, params?: { limit?: number; untilId?: string }) => {
+            return await get().executeApiRequest<Note[]>(
+                'users/notes',
+                { userId, ...params },
+                'ユーザーの投稿の取得に失敗しました'
             );
         },
     }))

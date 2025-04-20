@@ -6,6 +6,7 @@ import * as mfm from 'mfm-js';
 import NoteAttachments from "./NoteAttachments";
 import { memo } from "react";
 import { IconRepeat } from "@tabler/icons-react";
+import Link from "next/link";
 
 const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
     // ノートの種類を判別
@@ -85,13 +86,15 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                 <Flex justify="space-between" align="flex-start" mb={4}>
                     {/* ユーザー情報（2段表示） */}
                     <Box>
-                        {/* ユーザー名 */}
-                        <Text size="md" lineClamp={1}>
-                            <MfmObject
-                                mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
-                                assets={{ host: note.user.host, emojis: note.emojis }}
-                            />
-                        </Text>
+                        {/* ユーザー名をリンクに */}
+                        <Link href={`/user/${note.user.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <Text size="md" lineClamp={1} style={{ cursor: 'pointer' }}>
+                                <MfmObject
+                                    mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
+                                    assets={{ host: note.user.host, emojis: note.emojis }}
+                                />
+                            </Text>
+                        </Link>
                         {/* ユーザーID */}
                         <Text size="xs" c="dimmed" lineClamp={1}>
                             @{note.user.username}
