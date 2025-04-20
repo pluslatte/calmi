@@ -1,11 +1,11 @@
 // src/components/NoteComposer.tsx
 'use client';
 
-import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid, Tooltip } from "@mantine/core";
+import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid, Tooltip, Switch } from "@mantine/core";
 import { useState, useRef } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { notifications } from '@mantine/notifications';
-import { IconHome, IconLock, IconMail, IconPhoto, IconSend, IconUsers, IconWorld, IconX } from '@tabler/icons-react';
+import { IconAlertTriangle, IconHome, IconLock, IconMail, IconPhoto, IconSend, IconUsers, IconWorld, IconX } from '@tabler/icons-react';
 
 type VisibilityOption = 'public' | 'home' | 'followers' | 'specified';
 
@@ -15,6 +15,8 @@ interface NoteComposerProps {
 
 export default function NoteComposer({ onSuccess }: NoteComposerProps) {
     const [text, setText] = useState('');
+    const [cw, setCw] = useState('');
+    const [enableCw, setEnableCw] = useState(false);
     const [visibility, setVisibility] = useState<VisibilityOption>('home');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -55,6 +57,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
     };
 
     const handleSubmit = async () => {
+        // 本文もしくは画像がある場合のみ投稿可能
         if (!text.trim() && !imageFile) {
             notifications.show({
                 title: '投稿エラー',
@@ -64,10 +67,21 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
             return;
         }
 
+        // CWが有効なのに内容が空の場合はエラー
+        if (enableCw && !cw.trim()) {
+            notifications.show({
+                title: '投稿エラー',
+                message: 'CWを有効にする場合は、警告内容を入力してください',
+                color: 'red',
+            });
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
             let createdNote;
+            const cwText = enableCw ? cw : null;
 
             // 画像がある場合は先にアップロード
             if (imageFile) {
@@ -77,18 +91,29 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                     setIsUploading(false);
 
                     // 画像付きノートを作成
-                    createdNote = await createNoteWithMedia(text, [uploadedFile.id], visibility);
+                    createdNote = await createNoteWithMedia(
+                        text,
+                        [uploadedFile.id],
+                        visibility,
+                        cwText
+                    );
                 } catch (error) {
                     setIsUploading(false);
                     throw error; // エラー処理を統一
                 }
             } else {
                 // テキストのみのノートを作成
-                createdNote = await createNote(text, visibility);
+                createdNote = await createNote(
+                    text,
+                    visibility,
+                    cwText
+                );
             }
 
             // 成功したらフォームをクリア
             setText('');
+            setCw('');
+            setEnableCw(false);
             clearImage();
 
             notifications.show({
@@ -112,6 +137,33 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
     return (
         <Paper p="md" withBorder>
             <Stack gap="sm">
+                {/* CWトグル */}
+                <Group justify="space-between">
+                    <Group gap="xs">
+                        <IconAlertTriangle size={16} color={enableCw ? 'orange' : 'gray'} />
+                        <Text size="sm">CW（閲覧注意）</Text>
+                    </Group>
+                    <Switch
+                        checked={enableCw}
+                        onChange={() => setEnableCw(!enableCw)}
+                        size="sm"
+                    />
+                </Group>
+
+                {/* CW入力エリア（CWが有効な場合のみ表示） */}
+                {enableCw && (
+                    <Textarea
+                        placeholder="ここに警告内容を入力（必須）"
+                        value={cw}
+                        onChange={(e) => setCw(e.target.value)}
+                        autosize
+                        minRows={1}
+                        maxRows={2}
+                        disabled={isSubmitting}
+                    />
+                )}
+
+                {/* 本文入力エリア */}
                 <Textarea
                     placeholder="今何してる？"
                     value={text}

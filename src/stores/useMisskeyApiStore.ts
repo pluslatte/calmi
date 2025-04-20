@@ -48,7 +48,11 @@ interface MisskeyApiActions {
     getLocalTimeline: (params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
     getGlobalTimeline: (params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
     getNote: (noteId: string) => Promise<Note>;
-    createNote: (text: string, visibility?: 'public' | 'home' | 'followers' | 'specified') => Promise<{ createdNote: Note }>;
+    createNote: (
+        text: string,
+        visibility?: 'public' | 'home' | 'followers' | 'specified',
+        cw?: string | null
+    ) => Promise<{ createdNote: Note }>;
     getEmoji: (name: string) => Promise<{ url: string; name: string }>;
     getUserInfo: () => Promise<User>;
 
@@ -56,7 +60,8 @@ interface MisskeyApiActions {
     createNoteWithMedia: (
         text: string,
         fileIds: string[],
-        visibility?: 'public' | 'home' | 'followers' | 'specified'
+        visibility?: 'public' | 'home' | 'followers' | 'specified',
+        cw?: string | null
     ) => Promise<{ createdNote: Note }>;
 
     // リアクション関連のアクション
@@ -262,10 +267,14 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
             );
         },
 
-        createNote: async (text, visibility = 'home') => {
+        createNote: async (
+            text,
+            visibility = 'home',
+            cw = null
+        ) => {
             return await get().executeApiRequest<{ createdNote: Note }>(
                 'notes/create',
-                { text, visibility },
+                { text, visibility, cw },
                 'ノートの投稿に失敗しました'
             );
         },
@@ -362,13 +371,19 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
             }
         },
 
-        createNoteWithMedia: async (text, fileIds, visibility = 'home') => {
+        createNoteWithMedia: async (
+            text,
+            fileIds,
+            visibility = 'home',
+            cw = null
+        ) => {
             return await get().executeApiRequest(
                 'notes/create',
                 {
                     text,
                     visibility,
-                    fileIds // ドライブにアップロードしたファイルのID配列
+                    fileIds,
+                    cw
                 },
                 'ノートの投稿に失敗しました'
             );
