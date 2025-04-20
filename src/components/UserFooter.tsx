@@ -1,12 +1,14 @@
-import { Avatar, Box, Group, Menu, ActionIcon, Text, Skeleton, Paper, Flex } from '@mantine/core';
+import { Avatar, Box, Group, Menu, ActionIcon, Text, Skeleton, Paper, Flex, Switch } from '@mantine/core';
 import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react';
 import { useMisskeyApiStore } from '@/stores/useMisskeyApiStore';
 import { useEffect, useState } from 'react';
 import { User } from 'misskey-js/entities.js';
 import { useRouter } from "next/navigation";
+import { useUserSettingsStore } from "@/stores/useUserSettingsStore";
 
 export default function UserFooter() {
     const { getUserInfo, logout, isLoggedIn } = useMisskeyApiStore();
+    const { autoExpandCw, toggleAutoExpandCw } = useUserSettingsStore();
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -77,7 +79,7 @@ export default function UserFooter() {
                 )}
 
                 <Group>
-                    <Menu shadow="md" width={200} position="top-end">
+                    <Menu shadow="md" width={240} position="top-end">
                         <Menu.Target>
                             <ActionIcon variant="outline">
                                 <IconUser size={18} />
@@ -88,9 +90,18 @@ export default function UserFooter() {
                             <Menu.Label>アカウント</Menu.Label>
                             <Menu.Item
                                 leftSection={<IconSettings size={14} />}
-                                disabled
                             >
                                 設定
+                                <Box mt="xs">
+                                    <Group justify="space-between">
+                                        <Text size="sm">CWを自動的に展開</Text>
+                                        <Switch
+                                            checked={autoExpandCw}
+                                            onChange={toggleAutoExpandCw}
+                                            size="sm"
+                                        />
+                                    </Group>
+                                </Box>
                             </Menu.Item>
                             <Menu.Divider />
                             <Menu.Item

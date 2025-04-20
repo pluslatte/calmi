@@ -1,14 +1,24 @@
-import { Avatar, Box, Flex, Paper, Text } from "@mantine/core";
+import { Avatar, Box, Button, Collapse, Flex, Paper, Text } from "@mantine/core";
 import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
 import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
 import NoteAttachments from "./NoteAttachments";
-import { memo } from "react";
-import { IconRepeat } from "@tabler/icons-react";
+import { memo, useState } from "react";
+import { IconAlertTriangle, IconRepeat } from "@tabler/icons-react";
 import Link from "next/link";
+import { useUserSettingsStore } from "@/stores/useUserSettingsStore";
 
 const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
+    // ユーザー設定からCW自動展開設定を取得
+    const { autoExpandCw } = useUserSettingsStore();
+
+    // CWの展開状態を管理するstate
+    const [cwExpanded, setCwExpanded] = useState(autoExpandCw);
+
+    // CWがあるかどうかをチェック
+    const hasCw = note.cw !== null && note.cw !== undefined && note.cw !== '';
+
     // ノートの種類を判別
     const isRepost = note.renote && !note.text;
     const isQuote = note.renote && note.text;
@@ -131,32 +141,58 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                     </Box>
                 </Flex>
 
-                {/* ノート本文 - 引用ブロックを含む可能性があるためdivでラップ */}
-                <Box
-                    maw="100%"
-                    style={{
-                        wordBreak: 'break-word',
-                        overflowWrap: 'break-word'
-                    }}
-                >
-                    <MfmObject
-                        mfmNodes={mfm.parse(note.text ? note.text : "<small>（本文なし）</small>")}
-                        assets={{
-                            host: note.user.host,
-                            emojis: note.user.emojis
+                {/* CW表示部分 - ここから新規追加 */}
+                {hasCw && (
+                    <Paper
+                        withBorder
+                        p="xs"
+                        mb="xs"
+                    >
+                        <Flex align="center" gap="xs">
+                            <IconAlertTriangle size={16} />
+                            <Text size="sm" fw={500} style={{ flex: 1 }}>
+                                {note.cw}
+                            </Text>
+                            <Button
+                                size="xs"
+                                variant="subtle"
+                                c="dimmed"
+                                onClick={() => setCwExpanded(!cwExpanded)}
+                            >
+                                {cwExpanded ? '隠す' : '表示する'}
+                            </Button>
+                        </Flex>
+                    </Paper>
+                )}
+
+                {/* ノート本文 - CW対応に修正 */}
+                <Collapse in={!hasCw || cwExpanded}>
+                    <Box
+                        maw="100%"
+                        style={{
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word'
                         }}
-                    />
-                </Box>
+                    >
+                        <MfmObject
+                            mfmNodes={mfm.parse(note.text ? note.text : "<small>（本文なし）</small>")}
+                            assets={{
+                                host: note.user.host,
+                                emojis: note.user.emojis
+                            }}
+                        />
+                    </Box>
 
-                {/* 添付ファイル - 画像や動画、音声など*/}
-                {note.files && note.files.length > 0 && (
-                    <NoteAttachments files={note.files} />
-                )}
+                    {/* 添付ファイル - CW対応 */}
+                    {note.files && note.files.length > 0 && (
+                        <NoteAttachments files={note.files} />
+                    )}
 
-                {/* 引用ノート */}
-                {isQuote && note.renote && (
-                    <QuotedNote quotedNote={note.renote} />
-                )}
+                    {/* 引用ノート */}
+                    {isQuote && note.renote && (
+                        <QuotedNote quotedNote={note.renote} />
+                    )}
+                </Collapse>
             </Box>
         </Flex>
     );
