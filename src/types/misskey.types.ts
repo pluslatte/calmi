@@ -7,3 +7,5 @@
  * - global: グローバルタイムライン（連合されたすべての投稿）
  */
 export type TimelineType = 'home' | 'social' | 'local' | 'global';
+
+export type TabType = TimelineType | 'notifications';

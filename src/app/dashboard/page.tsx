@@ -1,11 +1,12 @@
 'use client';
 
-import { Box, Container, Grid, Modal, ActionIcon } from "@mantine/core";
+import { Box, Container, Grid, Modal, ActionIcon, Flex } from "@mantine/core";
 import { useRef, useState, useEffect } from "react";
 import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
 import UserHeader from "@/components/UserHeader";
 import { IconPencil } from '@tabler/icons-react';
 import NoteComposer from "@/components/NoteComposer";
+import NotificationList from "@/components/NotificationList";
 
 export default function Dashboard() {
     const [isMobile, setIsMobile] = useState(false);
@@ -75,8 +76,13 @@ export default function Dashboard() {
             ) : (
                 // デスクトップレイアウト
                 <Grid>
-                    <Grid.Col span="content">
-                        <NoteComposer />
+                    <Grid.Col span="content" maw="300px">
+                        <Flex h="calc(100vh - 70px)" direction="column" gap="xs">
+                            <NoteComposer />
+                            <Box flex={1}>
+                                <NotificationList />
+                            </Box>
+                        </Flex>
                     </Grid.Col>
                     <Grid.Col span="auto">
                         <Box h="calc(100vh - 70px)"> {/* ヘッダーの高さ分を引く */}
