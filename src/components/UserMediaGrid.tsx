@@ -52,7 +52,7 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                     >
                         <AspectRatio ratio={1}>
                             <Image
-                                src={file.thumbnailUrl || file.url}
+                                src={file.thumbnailUrl}
                                 alt=""
                                 fit="cover"
                             />
