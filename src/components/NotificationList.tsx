@@ -120,11 +120,6 @@ export default function NotificationList() {
         return notification.type === 'mention' || notification.type === 'reply' || notification.type === 'quote';
     };
 
-    // 通知がノートに関連しているかを判定
-    const hasRelatedNote = (notification: Notification) => {
-        return ['mention', 'reply', 'renote', 'quote', 'reaction'].includes(notification.type) && 'note' in notification && notification.note;
-    };
-
     // ノートリンクをクリックしたときの処理
     const handleViewNote = (noteId: string, event: React.MouseEvent) => {
         event.stopPropagation(); // 親要素のクリックイベントを停止
