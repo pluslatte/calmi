@@ -137,9 +137,10 @@ export default function NotificationList() {
                             </Text>
                         ) : (
                             notifications.map((notification) => (
-                                <Box key={notification.id}>
+                                <Box key={notification.id} w="100%">
                                     <UnstyledButton
                                         onClick={() => {/* ノートへの遷移などの処理 */ }}
+                                        w="100%"
                                     >
                                         <Paper
                                             p="xs"
@@ -148,7 +149,9 @@ export default function NotificationList() {
                                             style={{
                                                 borderLeft: lastReadAt && new Date(notification.createdAt) > lastReadAt
                                                     ? '3px solid #3498db'
-                                                    : '1px solid #e0e0e0'
+                                                    : '1px solid #e0e0e0',
+                                                width: '100%',
+                                                overflow: 'hidden'
                                             }}
                                         >
                                             <Group wrap="nowrap" align="flex-start">
@@ -163,26 +166,28 @@ export default function NotificationList() {
                                                         {getNotificationIcon(notification)}
                                                     </Box>
                                                 )}
-                                                <Box style={{ flex: 1 }}>
+                                                <Box style={{ flex: 1, minWidth: 0 }}>
                                                     <Group justify="space-between" mb={4}>
-                                                        <Text size="sm" fw={500}>
+                                                        <Text size="sm" fw={500} lineClamp={1}>
                                                             {/* 通知タイプによって表示を分岐 */}
                                                             {hasUserAvatar(notification) && 'user' in notification
                                                                 ? (notification.user?.name || notification.user?.username)
                                                                 : '通知'}
                                                         </Text>
-                                                        <Text size="xs" c="dimmed">
+                                                        <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
                                                             {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ja })}
                                                         </Text>
                                                     </Group>
-                                                    <Group gap="xs">
-                                                        {getNotificationIcon(notification)}
-                                                        <Text size="sm">
+                                                    <Group gap="xs" style={{ flexWrap: 'nowrap' }}>
+                                                        <Box style={{ flexShrink: 0 }}>
+                                                            {getNotificationIcon(notification)}
+                                                        </Box>
+                                                        <Text size="sm" style={{ wordBreak: 'break-word', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                             {getNotificationContent(notification)}
                                                         </Text>
                                                     </Group>
                                                     {hasNoteText(notification) && notification.note && (
-                                                        <Text size="xs" c="dimmed" mt={4} lineClamp={2}>
+                                                        <Text size="xs" c="dimmed" mt={4} lineClamp={2} style={{ wordBreak: 'break-word' }}>
                                                             {notification.note.text}
                                                         </Text>
                                                     )}
