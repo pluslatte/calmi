@@ -1,21 +1,23 @@
+// src/app/user/[userId]/page.tsx
 'use client';
 
-import { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";
-import { Container, Tabs, LoadingOverlay, Text, Box, ScrollArea } from "@mantine/core";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Container, Tabs, LoadingOverlay, Text, Box, ScrollArea, Button } from "@mantine/core";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { User, Note, UserDetailed } from "misskey-js/entities.js";
 import UserProfile from "@/components/UserProfile";
 import MisskeyNote from "@/components/MisskeyNote";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { useInfiniteScrollStore } from "@/stores/useInfiniteScrollStore";
-import { IconNotes, IconPhoto, IconFile } from "@tabler/icons-react";
+import { IconNotes, IconPhoto, IconFile, IconArrowLeft } from "@tabler/icons-react";
 import UserMediaGrid from "@/components/UserMediaGrid";
 
 export default function UserPage() {
     const params = useParams();
+    const router = useRouter();
     const userId = params.userId as string;
-    const { getUserProfile, getUserNotes } = useMisskeyApiStore();
+    const { getUserProfile, getUserNotes, client } = useMisskeyApiStore();
     const [user, setUser] = useState<UserDetailed | null>(null);
     const [notes, setNotes] = useState<Note[]>([]);
     const [mediaNotes, setMediaNotes] = useState<Note[]>([]);
@@ -25,54 +27,64 @@ export default function UserPage() {
     const [activeTab, setActiveTab] = useState<string | null>("notes");
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const previousUserIdRef = useRef<string | null>(null);
 
     const { isLoading: isLoadingMore, initialize, useInfiniteScroll } = useInfiniteScrollStore();
 
-    // ユーザー情報の取得
+    // データ取得関数をuseCallbackでメモ化
+    const fetchUserData = useCallback(async (id: string) => {
+        if (!client) {
+            setError('APIクライアントが初期化されていません');
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        try {
+            const userInfo = await getUserProfile(id);
+            setUser(userInfo);
+
+            // 最初のノート一覧をロード
+            const userNotes = await getUserNotes(id, { limit: 20 });
+            setNotes(userNotes);
+
+            // メディア付きのノートをフィルタリング
+            const withMedia = userNotes.filter(note =>
+                note.files && note.files.length > 0 &&
+                note.files.some(file => file.type.startsWith('image/'))
+            );
+            setMediaNotes(withMedia);
+
+            // ファイル付きのノートをフィルタリング
+            const withFiles = userNotes.filter(note => note.files && note.files.length > 0);
+            setFilesNotes(withFiles);
+
+        } catch (error) {
+            console.error('Failed to fetch user data:', error);
+            setError('ユーザー情報の取得に失敗しました');
+        } finally {
+            setLoading(false);
+        }
+    }, [getUserProfile, getUserNotes, client]);
+
+    // ユーザーIDが変更されたときのデータ再取得
     useEffect(() => {
-        const fetchUserData = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const userInfo = await getUserProfile(userId);
-                setUser(userInfo);
-
-                // 最初のノート一覧をロード
-                const userNotes = await getUserNotes(userId, { limit: 20 });
-                setNotes(userNotes);
-
-                // メディア付きのノートをフィルタリング
-                const withMedia = userNotes.filter(note =>
-                    note.files && note.files.length > 0 &&
-                    note.files.some(file => file.type.startsWith('image/'))
-                );
-                setMediaNotes(withMedia);
-
-                // ファイル付きのノートをフィルタリング
-                const withFiles = userNotes.filter(note => note.files && note.files.length > 0);
-                setFilesNotes(withFiles);
-
-            } catch (error) {
-                console.error('Failed to fetch user data:', error);
-                setError('ユーザー情報の取得に失敗しました');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (userId) {
-            fetchUserData();
+        // userIdが変わった場合、または前回の取得時にクライアントがなかった場合に再取得
+        if (userId && (userId !== previousUserIdRef.current || (client && !previousUserIdRef.current))) {
+            fetchUserData(userId);
+            previousUserIdRef.current = userId;
         }
 
         // クリーンアップ
         return () => {
             initialize();
         };
-    }, [userId, getUserProfile, getUserNotes, initialize]);
+    }, [userId, fetchUserData, initialize, client]);
 
     // 通常ノートの無限スクロール
     const loadMoreNotes = async () => {
-        if (notes.length === 0) return [];
+        if (notes.length === 0 || !userId || !client) return [];
 
         const lastNoteId = notes[notes.length - 1].id;
         try {
@@ -102,28 +114,67 @@ export default function UserPage() {
     const displayNotes = () => {
         switch (activeTab) {
             case 'media':
-                return <UserMediaGrid notes={mediaNotes} />;
+                return mediaNotes.length > 0 ? (
+                    <UserMediaGrid notes={mediaNotes} />
+                ) : (
+                    <Text ta="center" py="md" c="dimmed">メディア付きの投稿はありません</Text>
+                );
             case 'files':
-                return filesNotes.map(note => (
-                    <Box key={note.id} mb="md">
-                        <MisskeyNote note={note} />
-                        <MisskeyNoteActions note={note} />
-                    </Box>
-                ));
+                return filesNotes.length > 0 ? (
+                    filesNotes.map(note => (
+                        <Box key={note.id} mb="md">
+                            <MisskeyNote note={note} />
+                            <MisskeyNoteActions note={note} />
+                        </Box>
+                    ))
+                ) : (
+                    <Text ta="center" py="md" c="dimmed">ファイル付きの投稿はありません</Text>
+                );
             default:
-                return notes.map(note => (
-                    <Box key={note.id} mb="md">
-                        <MisskeyNote note={note} />
-                        <MisskeyNoteActions note={note} />
-                    </Box>
-                ));
+                return notes.length > 0 ? (
+                    notes.map(note => (
+                        <Box key={note.id} mb="md">
+                            <MisskeyNote note={note} />
+                            <MisskeyNoteActions note={note} />
+                        </Box>
+                    ))
+                ) : (
+                    <Text ta="center" py="md" c="dimmed">投稿はありません</Text>
+                );
         }
     };
 
+    // エラー時の表示
     if (error) {
         return (
             <Container size="sm" py="lg">
+                <Button
+                    variant="subtle"
+                    leftSection={<IconArrowLeft size={16} />}
+                    onClick={() => router.back()}
+                    mb="md"
+                >
+                    戻る
+                </Button>
                 <Text c="red">{error}</Text>
+                {client ? (
+                    <Button
+                        onClick={() => fetchUserData(userId)}
+                        variant="outline"
+                        color="red"
+                        mt="md"
+                    >
+                        再試行
+                    </Button>
+                ) : (
+                    <Button
+                        onClick={() => router.push('/dashboard')}
+                        variant="outline"
+                        mt="md"
+                    >
+                        ダッシュボードへ戻る
+                    </Button>
+                )}
             </Container>
         );
     }
@@ -131,6 +182,15 @@ export default function UserPage() {
     return (
         <Container size="md" py="lg" style={{ position: 'relative' }}>
             <LoadingOverlay visible={loading} overlayProps={{ radius: "sm", blur: 2 }} />
+
+            <Button
+                variant="subtle"
+                leftSection={<IconArrowLeft size={16} />}
+                onClick={() => router.back()}
+                mb="md"
+            >
+                戻る
+            </Button>
 
             {user && <UserProfile user={user} />}
 
@@ -148,7 +208,7 @@ export default function UserPage() {
                 </Tabs.List>
             </Tabs>
 
-            <ScrollArea viewportRef={scrollAreaRef} h="calc(100vh - 80px)" type="scroll">
+            <ScrollArea viewportRef={scrollAreaRef} h="calc(100vh - 90px - 70px)" type="scroll">
                 {displayNotes()}
                 <div ref={observerRef} style={{ height: 1 }} />
 
@@ -158,9 +218,9 @@ export default function UserPage() {
                     </Text>
                 )}
 
-                {!isLoadingMore && !loading && (
+                {!isLoadingMore && !loading && notes.length > 0 && (
                     <Text size="sm" c="dimmed" ta="center" py="sm">
-                        {notes.length > 0 ? 'これ以上の投稿はありません' : '投稿がありません'}
+                        これ以上の投稿はありません
                     </Text>
                 )}
             </ScrollArea>

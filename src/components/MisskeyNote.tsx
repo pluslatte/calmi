@@ -73,7 +73,17 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
     return (
         <Flex gap="sm" wrap="nowrap">
             {/* アバター */}
-            <Link href={`/user/${note.user.id}`} style={{ textDecoration: 'none' }}>
+            <Link
+                href={`/user/${note.user.id}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (note.user.id === window.location.pathname.split('/').pop()) {
+                        e.preventDefault();
+                        window.scrollTo(0, 0);
+                    }
+                }}
+            >
                 <Avatar
                     src={note.user.avatarUrl}
                     radius="md"
@@ -90,7 +100,17 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                     {/* ユーザー情報（2段表示） */}
                     <Box>
                         {/* ユーザー名をリンクに */}
-                        <Link href={`/user/${note.user.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <Link
+                            href={`/user/${note.user.id}`}
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (note.user.id === window.location.pathname.split('/').pop()) {
+                                    e.preventDefault();
+                                    window.scrollTo(0, 0);
+                                }
+                            }}
+                        >
                             <Text size="md" lineClamp={1} style={{ cursor: 'pointer' }}>
                                 <MfmObject
                                     mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
