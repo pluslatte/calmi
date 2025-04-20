@@ -1,13 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import MisskeyNote from '../MisskeyNote';
+import { render, screen } from '@/test/utils'; // カスタムレンダー関数をインポート
+import MisskeyNote from '@/components/MisskeyNote';
 import { Note } from 'misskey-js/entities.js';
-import '@testing-library/jest-dom';
 import { MantineProvider } from "@mantine/core";
 
-// モックの作成
+// 改善したモック
 vi.mock('mfm-js', () => ({
-    parse: vi.fn(() => [{ type: 'text', props: { text: 'これはテストノートです' } }])
+    parse: vi.fn((text) => {
+        // ユーザー名の場合（パターンマッチング）
+        if (text && text.includes('**テストユーザー**')) {
+            return [{ type: 'bold', children: [{ type: 'text', props: { text: 'テストユーザー' } }] }];
+        }
+        // 通常のテキスト
+        return [{ type: 'text', props: { text: text || '' } }];
+    })
 }));
 
 describe('MisskeyNote', () => {
