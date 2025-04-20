@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { User } from 'misskey-js/entities.js';
 import { useRouter } from "next/navigation";
 
-export default function UserHeader() {
+export default function UserFooter() {
     const { getUserInfo, logout, isLoggedIn } = useMisskeyApiStore();
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -36,7 +36,21 @@ export default function UserHeader() {
     };
 
     return (
-        <Paper m="xs">
+        <Paper
+            withBorder
+            p="xs"
+            style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 100,
+                borderRadius: 0,
+                borderLeft: 'none',
+                borderRight: 'none',
+                borderBottom: 'none'
+            }}
+        >
             <Flex justify="space-between" align="center">
                 {loading ? (
                     <Group>
@@ -52,6 +66,8 @@ export default function UserHeader() {
                             src={userInfo?.avatarUrl}
                             size="md"
                             radius="md"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => userInfo && router.push(`/user/${userInfo.id}`)}
                         />
                         <Box>
                             <Text fw={600}>{userInfo?.name || userInfo?.username}</Text>
@@ -61,7 +77,7 @@ export default function UserHeader() {
                 )}
 
                 <Group>
-                    <Menu shadow="md" width={200} position="bottom-end">
+                    <Menu shadow="md" width={200} position="top-end">
                         <Menu.Target>
                             <ActionIcon variant="outline">
                                 <IconUser size={18} />

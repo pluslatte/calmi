@@ -3,10 +3,10 @@
 import { Box, Container, Grid, Modal, ActionIcon, Flex } from "@mantine/core";
 import { useRef, useState, useEffect } from "react";
 import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
-import UserHeader from "@/components/UserHeader";
 import { IconPencil } from '@tabler/icons-react';
 import NoteComposer from "@/components/NoteComposer";
 import NotificationList from "@/components/NotificationList";
+import UserFooter from "@/components/UserFooter";
 
 export default function Dashboard() {
     const [isMobile, setIsMobile] = useState(false);
@@ -92,7 +92,7 @@ export default function Dashboard() {
                 </Grid>
             )}
 
-            <UserHeader />
+            <UserFooter />
         </Container>
     );
 }
