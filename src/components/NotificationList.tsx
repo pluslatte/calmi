@@ -1,10 +1,11 @@
-import { Box, Paper, Title, Divider, Text, Loader, Avatar, Group, UnstyledButton, ActionIcon, ScrollArea, Flex } from "@mantine/core";
+// src/components/NotificationList.tsx
+import { Box, Paper, Title, Divider, Text, Loader, Avatar, Group, UnstyledButton, ActionIcon, ScrollArea, Flex, Badge } from "@mantine/core";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
-import { IconBell, IconCheck, IconUser, IconHeart, IconRepeat, IconMessageCircle, IconHash, IconInfoCircle } from "@tabler/icons-react";
+import { IconBell, IconCheck, IconUser, IconHeart, IconRepeat, IconMessageCircle, IconHash, IconInfoCircle, IconArrowRight } from "@tabler/icons-react";
 import { Notification } from "misskey-js/entities.js";
 
 export default function NotificationList() {
@@ -88,6 +89,19 @@ export default function NotificationList() {
     // ノートテキストを表示するかどうかを判定
     const hasNoteText = (notification: Notification) => {
         return notification.type === 'mention' || notification.type === 'reply' || notification.type === 'quote';
+    };
+
+    // 通知がノートに関連しているかを判定
+    const hasRelatedNote = (notification: Notification) => {
+        return ['mention', 'reply', 'renote', 'quote', 'reaction'].includes(notification.type) && 'note' in notification && notification.note;
+    };
+
+    // ノートリンクをクリックしたときの処理
+    const handleViewNote = (noteId: string, event: React.MouseEvent) => {
+        event.stopPropagation(); // 親要素のクリックイベントを停止
+        // ノート表示機能（今後実装予定）
+        console.log('View note:', noteId);
+        // 例：window.open(`${client?.origin}/notes/${noteId}`, '_blank');
     };
 
     if (isLoading && notifications.length === 0) {
@@ -186,10 +200,50 @@ export default function NotificationList() {
                                                             {getNotificationContent(notification)}
                                                         </Text>
                                                     </Group>
+
+                                                    {/* リアクション対象ノートの表示 */}
+                                                    {notification.type === 'reaction' && notification.note && (
+                                                        <Box mt={4} p="xs" style={{
+                                                            background: 'rgba(0,0,0,0.03)',
+                                                            borderRadius: '4px',
+                                                            borderLeft: '2px solid rgba(231, 76, 60, 0.5)'
+                                                        }}>
+                                                            <Group justify="space-between" mb={2}>
+                                                                <Badge
+                                                                    size="xs"
+                                                                    variant="outline"
+                                                                    color="gray"
+                                                                    style={{ cursor: 'pointer' }}
+                                                                    rightSection={<IconArrowRight size={10} />}
+                                                                    onClick={(e) => handleViewNote(notification.note!.id, e)}
+                                                                >
+                                                                    ノートを表示
+                                                                </Badge>
+                                                            </Group>
+                                                            <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
+                                                                {notification.note.text || '(内容なし)'}
+                                                            </Text>
+                                                        </Box>
+                                                    )}
+
+                                                    {/* 返信・メンションノートの表示（リアクション以外） */}
                                                     {hasNoteText(notification) && notification.note && (
-                                                        <Text size="xs" c="dimmed" mt={4} lineClamp={2} style={{ wordBreak: 'break-word' }}>
-                                                            {notification.note.text}
-                                                        </Text>
+                                                        <Box mt={4}>
+                                                            <Group justify="space-between" mb={2}>
+                                                                <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
+                                                                    {notification.note.text}
+                                                                </Text>
+                                                                {hasRelatedNote(notification) && (
+                                                                    <ActionIcon
+                                                                        size="xs"
+                                                                        variant="subtle"
+                                                                        onClick={(e) => handleViewNote(notification.note!.id, e)}
+                                                                    >
+                                                                        <IconArrowRight size={14} />
+                                                                    </ActionIcon>
+                                                                )}
+                                                            </Group>
+                                                        </Box>
                                                     )}
                                                 </Box>
                                             </Group>
