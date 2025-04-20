@@ -62,37 +62,37 @@ const NotificationContent = ({ notification }: { notification: Notification }) =
         case 'follow':
             return (
                 <Text size="sm" style={{ wordBreak: 'break-word' }}>
-                    {renderUserName()} さんにフォローされました
+                    フォローされました
                 </Text>
             );
         case 'mention':
             return (
                 <Text size="sm" style={{ wordBreak: 'break-word' }}>
-                    {renderUserName()} さんからメンションされました
+                    メンションされました
                 </Text>
             );
         case 'reply':
             return (
                 <Text size="sm" style={{ wordBreak: 'break-word' }}>
-                    {renderUserName()} さんから返信がありました
+                    返信がありました
                 </Text>
             );
         case 'renote':
             return (
                 <Text size="sm" style={{ wordBreak: 'break-word' }}>
-                    {renderUserName()} さんがリノートしました
+                    リノートされました
                 </Text>
             );
         case 'quote':
             return (
                 <Text size="sm" style={{ wordBreak: 'break-word' }}>
-                    {renderUserName()} さんが引用リノートしました
+                    引用リノートされました
                 </Text>
             );
         case 'reaction':
             return (
                 <Text size="sm" style={{ wordBreak: 'break-word', display: 'flex', alignItems: 'center' }}>
-                    {renderUserName()} さんがリアクションしました: <ReactionEmoji />
+                    リアクションしました: <ReactionEmoji />
                 </Text>
             );
         case 'roleAssigned':
