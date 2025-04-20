@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Tabs, LoadingOverlay, Text, Box, ScrollArea, Button } from "@mantine/core";
+import { Container, Tabs, LoadingOverlay, Text, Box, ScrollArea, Button, Divider } from "@mantine/core";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { User, Note, UserDetailed } from "misskey-js/entities.js";
 import UserProfile from "@/components/UserProfile";
@@ -125,6 +125,7 @@ export default function UserPage() {
                         <Box key={note.id} mb="md">
                             <MisskeyNote note={note} />
                             <MisskeyNoteActions note={note} />
+                            <Divider mt="xs" />
                         </Box>
                     ))
                 ) : (
@@ -136,6 +137,7 @@ export default function UserPage() {
                         <Box key={note.id} mb="md">
                             <MisskeyNote note={note} />
                             <MisskeyNoteActions note={note} />
+                            <Divider mt="xs" />
                         </Box>
                     ))
                 ) : (
