@@ -498,7 +498,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                     </Group>
                 )}
 
-                <Group justify="space-between">
+                <Group justify="right">
                     <Group>
                         {/* ファイル添付ボタン */}
                         <FileButton
