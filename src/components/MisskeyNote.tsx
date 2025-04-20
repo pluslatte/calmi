@@ -121,7 +121,9 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                                 }
                             }}
                         >
-                            <Text size="md" lineClamp={1} style={{ cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                            <Text size="md" lineClamp={1} style={{
+                                cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word'
+                            }}>
                                 <MfmObject
                                     mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
                                     assets={{ host: note.user.host, emojis: note.emojis }}

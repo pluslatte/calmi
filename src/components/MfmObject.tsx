@@ -114,13 +114,26 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                 return <Box component="span" style={{ color: 'cyan' }}>{`#${node.props.hashtag}`}</Box>;
             case "url":
                 return (
-                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer">
+                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer" inline={true} style={{
+                        wordBreak: "break-all",
+                        overflowWrap: "break-word",
+                        wordWrap: "break-word",
+                        lineBreak: "anywhere",
+                        whiteSpace: "pre-wrap break-spaces"
+                    }
+                    }>
                         {node.props.url}
-                    </Anchor>
+                    </Anchor >
                 );
             case "link":
                 return (
-                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer">
+                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer" inline={true} style={{
+                        wordBreak: "break-all",
+                        overflowWrap: "break-word",
+                        wordWrap: "break-word",
+                        lineBreak: "anywhere",
+                        whiteSpace: "pre-wrap break-spaces"
+                    }}>
                         {renderNodes(node.children)}
                     </Anchor>
                 );
