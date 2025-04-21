@@ -215,7 +215,7 @@ export default function UserPage() {
             </Tabs>
 
             <ScrollArea viewportRef={scrollAreaRef} h="calc(100vh - 90px - 70px)" type="scroll">
-                <Box pr="xs"> {/* 右側のパディングを追加してコンテンツが横にはみ出すのを防ぐ */}
+                <Box maw="calc(100vw - 38px)">
                     {displayNotes()}
                     <div ref={observerRef} style={{ height: 1 }} />
 
