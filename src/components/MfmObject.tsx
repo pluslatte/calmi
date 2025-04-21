@@ -117,23 +117,22 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                     <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer" inline={true} style={{
                         wordBreak: "break-all",
                         overflowWrap: "break-word",
-                        display: "inline-block",
-                        maxWidth: "100%",
-                        whiteSpace: "normal",
-                        lineBreak: "anywhere"
-                    }}>
+                        wordWrap: "break-word",
+                        lineBreak: "anywhere",
+                        whiteSpace: "pre-wrap break-spaces"
+                    }
+                    }>
                         {node.props.url}
-                    </Anchor>
+                    </Anchor >
                 );
             case "link":
                 return (
                     <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer" inline={true} style={{
                         wordBreak: "break-all",
                         overflowWrap: "break-word",
-                        display: "inline-block",
-                        maxWidth: "100%",
-                        whiteSpace: "normal",
-                        lineBreak: "anywhere"
+                        wordWrap: "break-word",
+                        lineBreak: "anywhere",
+                        whiteSpace: "pre-wrap break-spaces"
                     }}>
                         {renderNodes(node.children)}
                     </Anchor>
