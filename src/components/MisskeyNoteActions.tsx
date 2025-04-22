@@ -14,7 +14,7 @@ interface MisskeyNoteActionsProps {
 export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const theme = useMantineTheme();
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
-    const { createReaction, deleteReaction, apiState } = useMisskeyApiStore();
+    const { createReaction, deleteReaction, apiState, createRenote } = useMisskeyApiStore();
     const [localNote, setLocalNote] = useState<Note>(note);
     const [copySuccess, setCopySuccess] = useState(false);
 
@@ -26,7 +26,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     // リノートチェック：リノートかつテキストがない場合は純粋なリノート（リポストのみ）と判断
     const isPlainRepost = localNote.renote && !localNote.text;
 
-    // リアクション対象のノートID
+    // 操作対象のノートID
     const targetNoteId = isPlainRepost ? localNote.renote!.id : localNote.id;
 
     // リノート先であるかどうかにあわせた、描画するノートの絵文字データ
@@ -252,6 +252,26 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
             });
     };
 
+    const renoteNote = async () => {
+        try {
+            await createRenote(targetNoteId);
+
+            // リノート成功時の処理
+            notifications.show({
+                title: 'リノート成功',
+                message: 'リノートが成功しました',
+                color: 'green',
+            });
+        } catch (error) {
+            console.error("リノートエラー:", error);
+            notifications.show({
+                title: 'リノート失敗',
+                message: 'リノートに失敗しました',
+                color: 'red'
+            });
+        }
+    }
+
 
     return (
         <Box>
@@ -266,13 +286,28 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                     <IconArrowBackUp size="70%" />
                 </ActionIcon>
 
-                <ActionIcon
-                    variant="subtle"
-                    aria-label="renote"
-                    c={theme.colors.dark[0]}
-                >
-                    <IconRepeat size="70%" />
-                </ActionIcon>
+                <Menu shadow="md" width={200} position="bottom-end" withinPortal>
+                    <Menu.Target>
+                        <ActionIcon
+                            variant="subtle"
+                            aria-label="renote"
+                            c={theme.colors.dark[0]}
+                            loading={apiState.loading}
+                        >
+                            <IconRepeat size="70%" />
+                        </ActionIcon>
+                    </Menu.Target>
+
+                    <Menu.Dropdown>
+                        <Menu.Item
+                            leftSection={<IconRepeat size={14} />}
+                            onClick={renoteNote}
+                        >
+                            リノート
+                        </Menu.Item>
+                        {/* 将来的に他のアクションをここに追加できます */}
+                    </Menu.Dropdown>
+                </Menu>
 
                 <Popover
                     opened={reactionPickerOpen}

@@ -53,6 +53,10 @@ interface MisskeyApiActions {
         visibility?: 'public' | 'home' | 'followers' | 'specified',
         cw?: string | null
     ) => Promise<{ createdNote: Note }>;
+    createRenote: (
+        noteId: string,
+        visibility?: 'public' | 'home' | 'followers' | 'specified'
+    ) => Promise<{ createdNote: Note }>;
     getEmoji: (name: string) => Promise<{ url: string; name: string }>;
     getUserInfo: () => Promise<User>;
 
@@ -276,6 +280,17 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 'notes/create',
                 { text, visibility, cw },
                 'ノートの投稿に失敗しました'
+            );
+        },
+
+        createRenote: async (
+            noteId,
+            visibility = 'public',
+        ) => {
+            return await get().executeApiRequest<{ createdNote: Note }>(
+                'notes/create',
+                { renoteId: noteId, visibility },
+                'リノートの実行に失敗しました'
             );
         },
 
