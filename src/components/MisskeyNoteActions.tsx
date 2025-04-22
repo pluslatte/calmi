@@ -1,42 +1,97 @@
 import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rgba, Menu } from "@mantine/core";
 import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile, IconCheck, IconLink } from "@tabler/icons-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
 import EmojiNode from "./EmojiNode";
+import { useTimelineStore } from '@/stores/timeline/useTimelineStore'; // 追加
 
 interface MisskeyNoteActionsProps {
     note: Note;
+    onReactionUpdate?: (updatedNote: Note) => void; // 追加: コンポーネント外部からの更新ハンドラー
 }
 
-export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
+export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNoteActionsProps) {
     const theme = useMantineTheme();
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
-    const { createReaction, deleteReaction, apiState } = useMisskeyApiStore();
+    const { createReaction, deleteReaction, apiState, getNote } = useMisskeyApiStore();
+    const timelineStore = useTimelineStore();
+    const [localNote, setLocalNote] = useState<Note>(note);
     const [copySuccess, setCopySuccess] = useState(false);
 
+    // noteプロップが変更されたら内部状態を更新
+    useEffect(() => {
+        setLocalNote(note);
+    }, [note]);
+
     // リノートチェック：リノートかつテキストがない場合は純粋なリノート（リポストのみ）と判断
-    const isPlainRepost = note.renote && !note.text;
+    const isPlainRepost = localNote.renote && !localNote.text;
 
     // リアクション対象のノートID
     // 純粋なリノートの場合は元のノートID、そうでない場合は現在のノートID
-    const targetNoteId = isPlainRepost ? note.renote!.id : note.id;
-
-    // リノート先であるかどうかに合わせた、描画するノートのホスト情報
-    const targetNoteHost = isPlainRepost ? note.renote!.user.host : note.user.host;
+    const targetNoteId = isPlainRepost ? localNote.renote!.id : localNote.id;
 
     // リノート先であるかどうかにあわせた、描画するノートの絵文字データ
-    const targetNoteEmojis = isPlainRepost ? note.renote!.emojis : note.emojis;
+    const targetNoteEmojis = isPlainRepost ? localNote.renote!.emojis : localNote.emojis;
 
     // よく使われるリアクション絵文字のリスト
     const popularEmojis = ["👍", "❤️", "😆", "🎉", "🤔", "👏", "🙏", "🥺", "😮", "🫡"];
+
+    // 更新処理の共通化
+    const updateNoteState = (updatedNote: Note) => {
+        try {
+            // 1. タイムラインストアが利用可能ならそこで更新
+            if (timelineStore.notes.length > 0) {
+                if (isPlainRepost) {
+                    // リノート元を更新（ディープコピーして置き換え）
+                    const noteToUpdate = { ...localNote };
+                    noteToUpdate.renote = updatedNote;
+                    timelineStore.updateNoteInTimeline(noteToUpdate);
+                } else {
+                    // 通常のノートを更新
+                    timelineStore.updateNoteInTimeline(updatedNote);
+                }
+            }
+
+            // 2. コンポーネントの内部状態を更新
+            if (isPlainRepost) {
+                const updatedLocalNote = { ...localNote };
+                updatedLocalNote.renote = updatedNote;
+                setLocalNote(updatedLocalNote);
+            } else {
+                setLocalNote(updatedNote);
+            }
+
+            // 3. 外部から渡されたコールバックがあれば呼び出し
+            if (onReactionUpdate) {
+                if (isPlainRepost) {
+                    const callbackNote = { ...localNote };
+                    callbackNote.renote = updatedNote;
+                    onReactionUpdate(callbackNote);
+                } else {
+                    onReactionUpdate(updatedNote);
+                }
+            }
+        } catch (error) {
+            console.error("ノート状態更新エラー:", error);
+        }
+    };
 
     // リアクション追加
     const handleAddReaction = async (emoji: string) => {
         try {
             await createReaction(targetNoteId, emoji);
             setReactionPickerOpen(false);
+
+            // リアクション追加後、ノートを直接取得して更新
+            try {
+                const updatedNote = await getNote(targetNoteId);
+                updateNoteState(updatedNote);
+            } catch (error) {
+                console.error("ノート更新エラー:", error);
+            }
+
             notifications.show({
                 title: 'リアクション成功',
                 message: `${emoji} を追加しました`,
@@ -56,6 +111,15 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const handleRemoveReaction = async (emoji: string) => {
         try {
             await deleteReaction(targetNoteId, emoji);
+
+            // リアクション削除後、ノートを直接取得して更新
+            try {
+                const updatedNote = await getNote(targetNoteId);
+                updateNoteState(updatedNote);
+            } catch (error) {
+                console.error("ノート更新エラー:", error);
+            }
+
             notifications.show({
                 title: 'リアクション削除',
                 message: `${emoji} を削除しました`,
@@ -72,8 +136,9 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     };
 
     // ノートのリアクション情報を取得（純粋なリノートの場合は元のノートのリアクション情報を使用）
-    const noteReactions = isPlainRepost ? note.renote!.reactions : note.reactions;
-    const myReaction = isPlainRepost ? note.renote!.myReaction : note.myReaction;
+    // localNoteを使用するように変更
+    const noteReactions = isPlainRepost ? localNote.renote!.reactions : localNote.reactions;
+    const myReaction = isPlainRepost ? localNote.renote!.myReaction : localNote.myReaction;
 
     // リアクション表示部分
     const renderReactions = () => {

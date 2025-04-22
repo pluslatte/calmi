@@ -133,13 +133,48 @@ export default function UserPage() {
                 );
             default:
                 return notes.length > 0 ? (
-                    notes.map(note => (
-                        <Box key={note.id} mb="md">
-                            <MisskeyNote note={note} />
-                            <MisskeyNoteActions note={note} />
-                            <Divider mt="xs" />
-                        </Box>
-                    ))
+                    notes.map((note, index) => {
+                        // 各ノートの状態を管理するための配列参照
+                        const handleNoteUpdate = (updatedNote: Note) => {
+                            // ノートの配列をコピー
+                            const updatedNotes = [...notes];
+                            // 該当のノートを更新
+                            updatedNotes[index] = updatedNote;
+                            // 状態を更新
+                            setNotes(updatedNotes);
+
+                            // メディアやファイルのリストも必要に応じて更新
+                            if (activeTab === 'media' || activeTab === 'files') {
+                                // ファイル有無に基づいてフィルタリング
+                                const hasImages = updatedNote.files && updatedNote.files.length > 0 && updatedNote.files.some(file => file.type.startsWith('image/'));
+
+                                if (activeTab === 'media' && hasImages) {
+                                    const updatedMediaNotes = mediaNotes.map(n =>
+                                        n.id === updatedNote.id ? updatedNote : n
+                                    );
+                                    setMediaNotes(updatedMediaNotes);
+                                }
+
+                                if (activeTab === 'files' && updatedNote.files && updatedNote.files.length > 0) {
+                                    const updatedFilesNotes = filesNotes.map(n =>
+                                        n.id === updatedNote.id ? updatedNote : n
+                                    );
+                                    setFilesNotes(updatedFilesNotes);
+                                }
+                            }
+                        };
+
+                        return (
+                            <Box key={note.id} mb="md">
+                                <MisskeyNote note={note} />
+                                <MisskeyNoteActions
+                                    note={note}
+                                    onReactionUpdate={handleNoteUpdate}
+                                />
+                                <Divider mt="xs" />
+                            </Box>
+                        );
+                    })
                 ) : (
                     <Text ta="center" py="md" c="dimmed">投稿はありません</Text>
                 );
