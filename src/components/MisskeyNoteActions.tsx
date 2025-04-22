@@ -6,12 +6,12 @@ import { Note } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
 import EmojiNode from "./EmojiNode";
 
+// プロップからonReactionUpdateを削除
 interface MisskeyNoteActionsProps {
     note: Note;
-    onReactionUpdate?: (updatedNote: Note) => void;
 }
 
-export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNoteActionsProps) {
+export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const theme = useMantineTheme();
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
     const { createReaction, deleteReaction, apiState } = useMisskeyApiStore();
@@ -27,7 +27,6 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
     const isPlainRepost = localNote.renote && !localNote.text;
 
     // リアクション対象のノートID
-    // 純粋なリノートの場合は元のノートID、そうでない場合は現在のノートID
     const targetNoteId = isPlainRepost ? localNote.renote!.id : localNote.id;
 
     // リノート先であるかどうかにあわせた、描画するノートの絵文字データ
@@ -36,10 +35,10 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
     // よく使われるリアクション絵文字のリスト
     const popularEmojis = ["👍", "❤️", "😆", "🎉", "🤔", "👏", "🙏", "🥺", "😮", "🫡"];
 
-    // 更新処理の共通化
+    // 更新処理の簡素化（onReactionUpdateを削除）
     const updateNoteState = (updatedNote: Note) => {
         try {
-            // 1. コンポーネントの内部状態を更新
+            // コンポーネントの内部状態のみを更新
             if (isPlainRepost) {
                 const updatedLocalNote = { ...localNote };
                 updatedLocalNote.renote = updatedNote;
@@ -47,23 +46,12 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
             } else {
                 setLocalNote(updatedNote);
             }
-
-            // 2. 外部から渡されたコールバックがあれば呼び出し
-            if (onReactionUpdate) {
-                if (isPlainRepost) {
-                    const callbackNote = { ...localNote };
-                    callbackNote.renote = updatedNote;
-                    onReactionUpdate(callbackNote);
-                } else {
-                    onReactionUpdate(updatedNote);
-                }
-            }
         } catch (error) {
             console.error("ノート状態更新エラー:", error);
         }
     };
 
-    // オプティミスティックUI用のヘルパー関数 - 重要な最適化ポイント
+    // オプティミスティックUI用のヘルパー関数
     const generateOptimisticReactionNote = (emoji: string, isAdding: boolean) => {
         // 元のノートをコピー
         const noteToUpdate = isPlainRepost ? { ...localNote.renote! } : { ...localNote };
@@ -157,8 +145,7 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
         handleReaction(emoji, false);
     };
 
-    // ノートのリアクション情報を取得（純粋なリノートの場合は元のノートのリアクション情報を使用）
-    // localNoteを使用するように変更
+    // ノートのリアクション情報を取得
     const noteReactions = isPlainRepost ? localNote.renote!.reactions : localNote.reactions;
     const myReaction = isPlainRepost ? localNote.renote!.myReaction : localNote.myReaction;
 

@@ -48,7 +48,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         setAutoUpdateEnabled,
         loadSkippedNotes,
         loadTrimmedNotes,
-        updateNoteInTimeline,
     } = useTimelineStore();
     const {
         showScrollToTop,
@@ -258,10 +257,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                     {relatedIndicators}
                     <Box p="xs">
                         <MisskeyNote note={note} />
-                        <MisskeyNoteActions
-                            note={note}
-                            onReactionUpdate={updateNoteInTimeline} // この行を追加
-                        />
+                        <MisskeyNoteActions note={note} />
                         <Divider mt="xs" />
                     </Box>
                 </React.Fragment>
