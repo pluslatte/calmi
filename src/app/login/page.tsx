@@ -133,6 +133,9 @@ export default function Login() {
                             style={{ width: '100%' }}
                         />
 
+                        <Text c="red" ta="left" size="sm">
+                            *calmi は開発のきわめて初期の段階にあり、深刻な不具合が存在する可能性が大いにあります。あなたがこのアプリを使用することで発生した問題や損害について、開発者は責任を負いません。
+                        </Text>
                         <Button
                             onClick={handleLogin}
                             loading={isLoading}
