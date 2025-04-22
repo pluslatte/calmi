@@ -4,7 +4,7 @@ import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
 import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
 import NoteAttachments from "./NoteAttachments";
-import { memo, useState } from "react";
+import React, { memo, useState } from "react";
 import { IconAlertTriangle, IconRepeat, IconLock, IconWorld, IconHome, IconMail, IconServer } from "@tabler/icons-react";
 import Link from "next/link";
 import { useUserSettingsStore } from "@/stores/useUserSettingsStore";
@@ -30,11 +30,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
         switch (note.visibility) {
             case 'public':
                 return (
-                    <Tooltip label="パブリック" position="top">
-                        <Box component="span" mr={6} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                            <IconWorld size={iconSize} color="#7CFC00" />
-                        </Box>
-                    </Tooltip>
+                    <React.Fragment />
                 );
             case 'home':
                 return (
@@ -69,7 +65,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
     const getLocalOnlyIcon = () => {
         if (note.localOnly) {
             return (
-                <Tooltip label="ローカルのみ" position="top">
+                <Tooltip label="連合なし" position="top">
                     <Box component="span" mr={6} style={{ display: 'inline-flex', alignItems: 'center' }}>
                         <IconServer size={14} color="#9370DB" />
                     </Box>
@@ -160,7 +156,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
             </Link>
 
             {/* ノートの本文エリア */}
-            <Box miw={0} flex={1} style={{ maxWidth: '100%' }}>
+            <Box miw={0} flex={1} pos="relative" style={{ maxWidth: '100%' }}>
                 {/* ユーザー情報とタイムスタンプ */}
                 <Flex justify="space-between" align="flex-start" mb={4}>
                     {/* ユーザー情報（2段表示） */}
@@ -253,10 +249,10 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                 </Collapse>
 
                 {/* 公開範囲アイコン表示 - 右下に配置 */}
-                <Flex justify="flex-end" mt={8} mb={2}>
+                <Box pos="absolute" bottom={-30} right={0}>
                     {getLocalOnlyIcon()}
                     {getVisibilityIcon()}
-                </Flex>
+                </Box>
             </Box>
         </Flex>
     );
