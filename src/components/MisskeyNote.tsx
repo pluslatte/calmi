@@ -1,11 +1,11 @@
-import { Avatar, Box, Button, Collapse, Flex, Paper, Text } from "@mantine/core";
+import { Avatar, Box, Button, Collapse, Flex, Paper, Text, Tooltip } from "@mantine/core";
 import { Note } from "misskey-js/entities.js";
 import AutoRefreshTimestamp from "./AutoRefreshTimestamp";
 import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
 import NoteAttachments from "./NoteAttachments";
 import { memo, useState } from "react";
-import { IconAlertTriangle, IconRepeat } from "@tabler/icons-react";
+import { IconAlertTriangle, IconHome, IconLock, IconMail, IconRepeat, IconServer, IconWorld } from "@tabler/icons-react";
 import Link from "next/link";
 import { useUserSettingsStore } from "@/stores/useUserSettingsStore";
 
@@ -71,6 +71,62 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
         </Paper>
     );
 
+    // 公開範囲を判別しアイコンと色を取得する関数
+    const getVisibilityIcon = () => {
+        const iconSize = 14;
+
+        switch (note.visibility) {
+            case 'public':
+                return (
+                    <Tooltip label="パブリック" position="top">
+                        <Box component="span" mr={6} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                            <IconWorld size={iconSize} color="#7CFC00" />
+                        </Box>
+                    </Tooltip>
+                );
+            case 'home':
+                return (
+                    <Tooltip label="ホーム" position="top">
+                        <Box component="span" mr={6} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                            <IconHome size={iconSize} color="#1E90FF" />
+                        </Box>
+                    </Tooltip>
+                );
+            case 'followers':
+                return (
+                    <Tooltip label="フォロワー" position="top">
+                        <Box component="span" mr={6} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                            <IconLock size={iconSize} color="#FFA500" />
+                        </Box>
+                    </Tooltip>
+                );
+            case 'specified':
+                return (
+                    <Tooltip label="ダイレクト" position="top">
+                        <Box component="span" mr={6} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                            <IconMail size={iconSize} color="#FF69B4" />
+                        </Box>
+                    </Tooltip>
+                );
+            default:
+                return null;
+        }
+    };
+
+    // ローカルのみフラグを表示する関数
+    const getLocalOnlyIcon = () => {
+        if (note.localOnly) {
+            return (
+                <Tooltip label="ローカルのみ" position="top">
+                    <Box component="span" mr={6} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        <IconServer size={14} color="#9370DB" />
+                    </Box>
+                </Tooltip>
+            );
+        }
+        return null;
+    };
+
     if (isRepost && note.renote) {
         return (
             <>
@@ -104,6 +160,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
             </Link>
 
             {/* ノートの本文エリア */}
+            {/* ノートの本文エリア */}
             <Box miw={0} flex={1} style={{ maxWidth: '100%' }}>
                 {/* ユーザー情報とタイムスタンプ */}
                 <Flex justify="space-between" align="flex-start" mb={4}>
@@ -121,23 +178,31 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                                 }
                             }}
                         >
-                            <Text size="md" lineClamp={1} style={{
-                                cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word'
-                            }}>
-                                <MfmObject
-                                    mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
-                                    assets={{ host: note.user.host, emojis: note.emojis }}
-                                />
-                            </Text>
+                            <Flex align="center">
+                                {/* 公開範囲アイコン */}
+                                {getVisibilityIcon()}
+                                {/* ローカルのみアイコン */}
+                                {getLocalOnlyIcon()}
+                                {/* ユーザー名 */}
+                                <Text size="md" lineClamp={1} style={{
+                                    cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word'
+                                }}>
+                                    <MfmObject
+                                        mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
+                                        assets={{ host: note.user.host, emojis: note.emojis }}
+                                    />
+                                </Text>
+                            </Flex>
                         </Link>
-                        {/* ユーザーID */}
+
+                        {/* ユーザーID - 変更なし */}
                         <Text size="xs" c="dimmed" lineClamp={1} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                             @{note.user.username}
                             {note.user.host ? `@${note.user.host}` : ''}
                         </Text>
                     </Box>
 
-                    {/* タイムスタンプ */}
+                    {/* タイムスタンプ - 変更なし */}
                     <Box>
                         <AutoRefreshTimestamp iso={note.createdAt} />
                     </Box>
