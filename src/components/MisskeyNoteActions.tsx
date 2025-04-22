@@ -16,7 +16,6 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
     const theme = useMantineTheme();
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
     const { createReaction, deleteReaction, apiState, getNote } = useMisskeyApiStore();
-    const timelineStore = useTimelineStore();
     const [localNote, setLocalNote] = useState<Note>(note);
     const [copySuccess, setCopySuccess] = useState(false);
 
@@ -41,20 +40,7 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
     // 更新処理の共通化
     const updateNoteState = (updatedNote: Note) => {
         try {
-            // 1. タイムラインストアが利用可能ならそこで更新
-            if (timelineStore.notes.length > 0) {
-                if (isPlainRepost) {
-                    // リノート元を更新（ディープコピーして置き換え）
-                    const noteToUpdate = { ...localNote };
-                    noteToUpdate.renote = updatedNote;
-                    timelineStore.updateNoteInTimeline(noteToUpdate);
-                } else {
-                    // 通常のノートを更新
-                    timelineStore.updateNoteInTimeline(updatedNote);
-                }
-            }
-
-            // 2. コンポーネントの内部状態を更新
+            // 1. コンポーネントの内部状態を更新
             if (isPlainRepost) {
                 const updatedLocalNote = { ...localNote };
                 updatedLocalNote.renote = updatedNote;
@@ -63,7 +49,7 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
                 setLocalNote(updatedNote);
             }
 
-            // 3. 外部から渡されたコールバックがあれば呼び出し
+            // 2. 外部から渡されたコールバックがあれば呼び出し
             if (onReactionUpdate) {
                 if (isPlainRepost) {
                     const callbackNote = { ...localNote };

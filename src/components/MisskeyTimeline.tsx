@@ -48,6 +48,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         setAutoUpdateEnabled,
         loadSkippedNotes,
         loadTrimmedNotes,
+        updateNoteInTimeline,
     } = useTimelineStore();
     const {
         showScrollToTop,
@@ -224,11 +225,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
             const boundary = showBoundary ? (
                 <React.Fragment key={`boundary-container-${lastSwitchToAutoUpdateTime?.getTime()}`}>
-                    {/* これ厄介なのでいったん保留で issue #1 */}
-                    {/* <TimelineUpdateBoundary
-                        key={`boundary-${lastSwitchToAutoUpdateTime.getTime()}`}
-                        timestamp={lastSwitchToAutoUpdateTime}
-                    /> */}
                     {trimmedIndicator}
                 </React.Fragment>
             ) : null;
@@ -255,13 +251,17 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                     );
                 });
 
+            // updateNoteInTimeline を onReactionUpdate プロップとして渡す
             return (
                 <React.Fragment key={note.id}>
                     {boundary}
                     {relatedIndicators}
                     <Box p="xs">
                         <MisskeyNote note={note} />
-                        <MisskeyNoteActions note={note} />
+                        <MisskeyNoteActions
+                            note={note}
+                            onReactionUpdate={updateNoteInTimeline} // この行を追加
+                        />
                         <Divider mt="xs" />
                     </Box>
                 </React.Fragment>
