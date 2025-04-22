@@ -5,7 +5,7 @@ import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
 import NoteAttachments from "./NoteAttachments";
 import { memo, useState } from "react";
-import { IconAlertTriangle, IconHome, IconLock, IconMail, IconRepeat, IconServer, IconWorld } from "@tabler/icons-react";
+import { IconAlertTriangle, IconRepeat, IconLock, IconWorld, IconHome, IconMail, IconServer } from "@tabler/icons-react";
 import Link from "next/link";
 import { useUserSettingsStore } from "@/stores/useUserSettingsStore";
 
@@ -22,54 +22,6 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
     // ノートの種類を判別
     const isRepost = note.renote && !note.text;
     const isQuote = note.renote && note.text;
-
-    // リノートヘッダー コンポーネント
-    const RepostHeader = () => (
-        <Flex align="center" gap="xs" mb={6}>
-            <IconRepeat size={16} opacity={0.7} />
-            <Text size="xs" c="dimmed">
-                {note.user.name || note.user.username} がリノート
-            </Text>
-        </Flex>
-    );
-
-    // 引用ノートコンポーネント
-    const QuotedNote = ({ quotedNote }: { quotedNote: Note }) => (
-        <Paper withBorder p="xs" mt="xs" bg="rgba(0,0,0,0.03)" style={{ borderRadius: '6px' }}>
-            <Flex gap="sm" wrap="nowrap">
-                <Avatar
-                    src={quotedNote.user.avatarUrl}
-                    radius="md"
-                    size="sm"
-                    mt={3}
-                />
-                <Box miw={0} flex={1}>
-                    <Flex justify="space-between" align="center" mb={2}>
-                        <Text size="sm" fw={600} lineClamp={1}>
-                            {quotedNote.user.name || quotedNote.user.username}
-                        </Text>
-                        <AutoRefreshTimestamp iso={quotedNote.createdAt} />
-                    </Flex>
-                    <Text size="xs" c="dimmed" mb={4} lineClamp={1}>
-                        @{quotedNote.user.username}
-                        {quotedNote.user.host ? `@${quotedNote.user.host}` : ''}
-                    </Text>
-                    <Box>
-                        <MfmObject
-                            mfmNodes={mfm.parse(quotedNote.text ? quotedNote.text : "")}
-                            assets={{
-                                host: quotedNote.user.host,
-                                emojis: quotedNote.user.emojis
-                            }}
-                        />
-                    </Box>
-                    {quotedNote.files && quotedNote.files.length > 0 && (
-                        <NoteAttachments files={quotedNote.files} />
-                    )}
-                </Box>
-            </Flex>
-        </Paper>
-    );
 
     // 公開範囲を判別しアイコンと色を取得する関数
     const getVisibilityIcon = () => {
@@ -127,6 +79,54 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
         return null;
     };
 
+    // リノートヘッダー コンポーネント
+    const RepostHeader = () => (
+        <Flex align="center" gap="xs" mb={6}>
+            <IconRepeat size={16} opacity={0.7} />
+            <Text size="xs" c="dimmed">
+                {note.user.name || note.user.username} がリノート
+            </Text>
+        </Flex>
+    );
+
+    // 引用ノートコンポーネント
+    const QuotedNote = ({ quotedNote }: { quotedNote: Note }) => (
+        <Paper withBorder p="xs" mt="xs" bg="rgba(0,0,0,0.03)" style={{ borderRadius: '6px' }}>
+            <Flex gap="sm" wrap="nowrap">
+                <Avatar
+                    src={quotedNote.user.avatarUrl}
+                    radius="md"
+                    size="sm"
+                    mt={3}
+                />
+                <Box miw={0} flex={1}>
+                    <Flex justify="space-between" align="center" mb={2}>
+                        <Text size="sm" fw={600} lineClamp={1}>
+                            {quotedNote.user.name || quotedNote.user.username}
+                        </Text>
+                        <AutoRefreshTimestamp iso={quotedNote.createdAt} />
+                    </Flex>
+                    <Text size="xs" c="dimmed" mb={4} lineClamp={1}>
+                        @{quotedNote.user.username}
+                        {quotedNote.user.host ? `@${quotedNote.user.host}` : ''}
+                    </Text>
+                    <Box>
+                        <MfmObject
+                            mfmNodes={mfm.parse(quotedNote.text ? quotedNote.text : "")}
+                            assets={{
+                                host: quotedNote.user.host,
+                                emojis: quotedNote.user.emojis
+                            }}
+                        />
+                    </Box>
+                    {quotedNote.files && quotedNote.files.length > 0 && (
+                        <NoteAttachments files={quotedNote.files} />
+                    )}
+                </Box>
+            </Flex>
+        </Paper>
+    );
+
     if (isRepost && note.renote) {
         return (
             <>
@@ -160,7 +160,6 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
             </Link>
 
             {/* ノートの本文エリア */}
-            {/* ノートの本文エリア */}
             <Box miw={0} flex={1} style={{ maxWidth: '100%' }}>
                 {/* ユーザー情報とタイムスタンプ */}
                 <Flex justify="space-between" align="flex-start" mb={4}>
@@ -178,37 +177,29 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                                 }
                             }}
                         >
-                            <Flex align="center">
-                                {/* 公開範囲アイコン */}
-                                {getVisibilityIcon()}
-                                {/* ローカルのみアイコン */}
-                                {getLocalOnlyIcon()}
-                                {/* ユーザー名 */}
-                                <Text size="md" lineClamp={1} style={{
-                                    cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word'
-                                }}>
-                                    <MfmObject
-                                        mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
-                                        assets={{ host: note.user.host, emojis: note.emojis }}
-                                    />
-                                </Text>
-                            </Flex>
+                            <Text size="md" lineClamp={1} style={{
+                                cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word'
+                            }}>
+                                <MfmObject
+                                    mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
+                                    assets={{ host: note.user.host, emojis: note.emojis }}
+                                />
+                            </Text>
                         </Link>
-
-                        {/* ユーザーID - 変更なし */}
+                        {/* ユーザーID */}
                         <Text size="xs" c="dimmed" lineClamp={1} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                             @{note.user.username}
                             {note.user.host ? `@${note.user.host}` : ''}
                         </Text>
                     </Box>
 
-                    {/* タイムスタンプ - 変更なし */}
+                    {/* タイムスタンプ */}
                     <Box>
                         <AutoRefreshTimestamp iso={note.createdAt} />
                     </Box>
                 </Flex>
 
-                {/* CW表示部分 - ここから新規追加 */}
+                {/* CW表示部分 */}
                 {hasCw && (
                     <Paper
                         withBorder
@@ -232,7 +223,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                     </Paper>
                 )}
 
-                {/* ノート本文 - CW対応に修正 */}
+                {/* ノート本文 - CW対応 */}
                 <Collapse in={!hasCw || cwExpanded}>
                     <Box
                         maw="100%"
@@ -260,6 +251,12 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                         <QuotedNote quotedNote={note.renote} />
                     )}
                 </Collapse>
+
+                {/* 公開範囲アイコン表示 - 右下に配置 */}
+                <Flex justify="flex-end" mt={8} mb={2}>
+                    {getLocalOnlyIcon()}
+                    {getVisibilityIcon()}
+                </Flex>
             </Box>
         </Flex>
     );
