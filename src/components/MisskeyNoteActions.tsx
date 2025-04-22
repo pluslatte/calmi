@@ -5,17 +5,16 @@ import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
 import EmojiNode from "./EmojiNode";
-import { useTimelineStore } from '@/stores/timeline/useTimelineStore'; // 追加
 
 interface MisskeyNoteActionsProps {
     note: Note;
-    onReactionUpdate?: (updatedNote: Note) => void; // 追加: コンポーネント外部からの更新ハンドラー
+    onReactionUpdate?: (updatedNote: Note) => void;
 }
 
 export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNoteActionsProps) {
     const theme = useMantineTheme();
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
-    const { createReaction, deleteReaction, apiState, getNote } = useMisskeyApiStore();
+    const { createReaction, deleteReaction, apiState } = useMisskeyApiStore();
     const [localNote, setLocalNote] = useState<Note>(note);
     const [copySuccess, setCopySuccess] = useState(false);
 
@@ -64,7 +63,51 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
         }
     };
 
-    // リアクション追加
+    // オプティミスティックUI用のヘルパー関数 - 重要な最適化ポイント
+    const generateOptimisticReactionNote = (emoji: string, isAdding: boolean) => {
+        // 元のノートをコピー
+        const noteToUpdate = isPlainRepost ? { ...localNote.renote! } : { ...localNote };
+
+        // リアクションを更新
+        if (isAdding) {
+            // リアクション追加のシミュレーション
+            if (noteToUpdate.reactions && noteToUpdate.reactions[emoji]) {
+                noteToUpdate.reactions = {
+                    ...noteToUpdate.reactions,
+                    [emoji]: noteToUpdate.reactions[emoji] + 1
+                };
+            } else {
+                noteToUpdate.reactions = {
+                    ...noteToUpdate.reactions || {},
+                    [emoji]: 1
+                };
+            }
+            noteToUpdate.myReaction = emoji;
+        } else {
+            // リアクション削除のシミュレーション
+            if (noteToUpdate.reactions && noteToUpdate.reactions[emoji]) {
+                if (noteToUpdate.reactions[emoji] > 1) {
+                    noteToUpdate.reactions = {
+                        ...noteToUpdate.reactions,
+                        [emoji]: noteToUpdate.reactions[emoji] - 1
+                    };
+                } else {
+                    const { [emoji]: _, ...restReactions } = noteToUpdate.reactions;
+                    noteToUpdate.reactions = restReactions;
+                }
+            }
+            noteToUpdate.myReaction = null;
+        }
+
+        // リノートの場合は元のノートを更新
+        if (isPlainRepost) {
+            return { ...localNote, renote: noteToUpdate };
+        }
+
+        return noteToUpdate;
+    };
+
+    // 統合されたリアクション処理関数
     const handleReaction = async (emoji: string, isAdding: boolean) => {
         try {
             // UI応答を即座に返す（オプティミスティックUI）
@@ -104,38 +147,6 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
         }
     };
 
-    const generateOptimisticReactionNote = (emoji: string, isAdding: boolean) => {
-        // 元のノートをコピー
-        const noteToUpdate = isPlainRepost ? { ...localNote.renote! } : { ...localNote };
-
-        // リアクションを更新
-        if (isAdding) {
-            // リアクション追加のシミュレーション
-            if (noteToUpdate.reactions[emoji]) {
-                noteToUpdate.reactions[emoji]++;
-            } else {
-                noteToUpdate.reactions = { ...noteToUpdate.reactions, [emoji]: 1 };
-            }
-            noteToUpdate.myReaction = emoji;
-        } else {
-            // リアクション削除のシミュレーション
-            if (noteToUpdate.reactions[emoji] > 1) {
-                noteToUpdate.reactions[emoji]--;
-            } else {
-                const { [emoji]: _, ...restReactions } = noteToUpdate.reactions;
-                noteToUpdate.reactions = restReactions;
-            }
-            noteToUpdate.myReaction = null;
-        }
-
-        // リノートの場合は元のノートを更新
-        if (isPlainRepost) {
-            return { ...localNote, renote: noteToUpdate };
-        }
-
-        return noteToUpdate;
-    };
-
     // リアクション追加関数（シンプル化）
     const handleAddReaction = async (emoji: string) => {
         handleReaction(emoji, true);
@@ -172,7 +183,6 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
                             localStorage.getItem('misskey_server')?.slice(8) // ここはローカルサーバーのドメイン
                         :
                         '';
-                    // console.log("fetching: " + emojiName + " from " + emojiHost);
 
                     return (
                         <Paper
