@@ -65,60 +65,85 @@ export default function MisskeyNoteActions({ note, onReactionUpdate }: MisskeyNo
     };
 
     // リアクション追加
-    const handleAddReaction = async (emoji: string) => {
+    const handleReaction = async (emoji: string, isAdding: boolean) => {
         try {
-            await createReaction(targetNoteId, emoji);
-            setReactionPickerOpen(false);
+            // UI応答を即座に返す（オプティミスティックUI）
+            const optimisticNote = generateOptimisticReactionNote(emoji, isAdding);
+            updateNoteState(optimisticNote);
 
-            // リアクション追加後、ノートを直接取得して更新
-            try {
-                const updatedNote = await getNote(targetNoteId);
-                updateNoteState(updatedNote);
-            } catch (error) {
-                console.error("ノート更新エラー:", error);
+            // ポップオーバーを閉じる（追加時のみ）
+            if (isAdding) {
+                setReactionPickerOpen(false);
             }
 
+            // 実際のAPI呼び出し
+            if (isAdding) {
+                await createReaction(targetNoteId, emoji);
+            } else {
+                await deleteReaction(targetNoteId, emoji);
+            }
+
+            // APIコールが成功すれば通知表示
             notifications.show({
-                title: 'リアクション成功',
-                message: `${emoji} を追加しました`,
-                color: 'green'
+                title: isAdding ? 'リアクション成功' : 'リアクション削除',
+                message: isAdding ? `${emoji} を追加しました` : `${emoji} を削除しました`,
+                color: isAdding ? 'green' : 'gray'
             });
         } catch (error) {
-            console.error("リアクション追加エラー:", error);
+            console.error(isAdding ? "リアクション追加エラー:" : "リアクション削除エラー:", error);
+
+            // エラーの場合は元の状態に戻す
+            const revertedNote = generateOptimisticReactionNote(emoji, !isAdding);
+            updateNoteState(revertedNote);
+
             notifications.show({
-                title: 'リアクション失敗',
-                message: 'リアクションの追加に失敗しました',
+                title: isAdding ? 'リアクション失敗' : 'リアクション削除失敗',
+                message: isAdding ? 'リアクションの追加に失敗しました' : 'リアクションの削除に失敗しました',
                 color: 'red'
             });
         }
     };
 
-    // リアクション削除
-    const handleRemoveReaction = async (emoji: string) => {
-        try {
-            await deleteReaction(targetNoteId, emoji);
+    const generateOptimisticReactionNote = (emoji: string, isAdding: boolean) => {
+        // 元のノートをコピー
+        const noteToUpdate = isPlainRepost ? { ...localNote.renote! } : { ...localNote };
 
-            // リアクション削除後、ノートを直接取得して更新
-            try {
-                const updatedNote = await getNote(targetNoteId);
-                updateNoteState(updatedNote);
-            } catch (error) {
-                console.error("ノート更新エラー:", error);
+        // リアクションを更新
+        if (isAdding) {
+            // リアクション追加のシミュレーション
+            if (noteToUpdate.reactions[emoji]) {
+                noteToUpdate.reactions[emoji]++;
+            } else {
+                noteToUpdate.reactions = { ...noteToUpdate.reactions, [emoji]: 1 };
             }
-
-            notifications.show({
-                title: 'リアクション削除',
-                message: `${emoji} を削除しました`,
-                color: 'gray'
-            });
-        } catch (error) {
-            console.error("リアクション削除エラー:", error);
-            notifications.show({
-                title: 'リアクション削除失敗',
-                message: 'リアクションの削除に失敗しました',
-                color: 'red'
-            });
+            noteToUpdate.myReaction = emoji;
+        } else {
+            // リアクション削除のシミュレーション
+            if (noteToUpdate.reactions[emoji] > 1) {
+                noteToUpdate.reactions[emoji]--;
+            } else {
+                const { [emoji]: _, ...restReactions } = noteToUpdate.reactions;
+                noteToUpdate.reactions = restReactions;
+            }
+            noteToUpdate.myReaction = null;
         }
+
+        // リノートの場合は元のノートを更新
+        if (isPlainRepost) {
+            return { ...localNote, renote: noteToUpdate };
+        }
+
+        return noteToUpdate;
+    };
+
+    // リアクション追加関数（シンプル化）
+    const handleAddReaction = async (emoji: string) => {
+        handleReaction(emoji, true);
+    };
+
+    // リアクション削除関数（シンプル化）
+    const handleRemoveReaction = async (emoji: string) => {
+        handleReaction(emoji, false);
     };
 
     // ノートのリアクション情報を取得（純粋なリノートの場合は元のノートのリアクション情報を使用）
