@@ -1,5 +1,5 @@
-import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rgba } from "@mantine/core";
-import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile } from "@tabler/icons-react";
+import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rgba, Menu } from "@mantine/core";
+import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile, IconCheck, IconLink } from "@tabler/icons-react";
 import { useState } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note } from "misskey-js/entities.js";
@@ -14,6 +14,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const theme = useMantineTheme();
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
     const { createReaction, deleteReaction, apiState } = useMisskeyApiStore();
+    const [copySuccess, setCopySuccess] = useState(false);
 
     // リノートチェック：リノートかつテキストがない場合は純粋なリノート（リポストのみ）と判断
     const isPlainRepost = note.renote && !note.text;
@@ -143,6 +144,42 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
         );
     };
 
+    // ノートURLをコピーする機能を追加
+    const copyNoteUrl = () => {
+        // サーバーのURLを取得
+        const serverUrl = localStorage.getItem('misskey_server') || 'https://virtualkemomimi.net';
+
+        // ノートURLを生成（実際のノートIDを使用）
+        const noteUrl = `${serverUrl}/notes/${targetNoteId}`;
+
+        // クリップボードにコピー
+        navigator.clipboard.writeText(noteUrl)
+            .then(() => {
+                setCopySuccess(true);
+                notifications.show({
+                    title: 'コピー成功',
+                    message: 'ノートのURLをクリップボードにコピーしました',
+                    color: 'green',
+                    icon: <IconCheck size={16} />,
+                    autoClose: 2000,
+                });
+
+                // 2秒後にチェックマークを元に戻す
+                setTimeout(() => {
+                    setCopySuccess(false);
+                }, 2000);
+            })
+            .catch(err => {
+                notifications.show({
+                    title: 'コピー失敗',
+                    message: 'URLのコピーに失敗しました',
+                    color: 'red',
+                });
+                console.error('URLのコピーに失敗しました:', err);
+            });
+    };
+
+
     return (
         <Box>
             <Group gap="xl" mt={4} mb={4}>
@@ -199,13 +236,29 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                     </Popover.Dropdown>
                 </Popover>
 
-                <ActionIcon
-                    variant="subtle"
-                    aria-label="other"
-                    c={theme.colors.dark[0]}
-                >
-                    <IconDots size="70%" />
-                </ActionIcon>
+                {/* ドロップダウンメニュー */}
+                <Menu shadow="md" width={200} position="bottom-end" withinPortal>
+                    <Menu.Target>
+                        <ActionIcon
+                            variant="subtle"
+                            aria-label="other"
+                            c={theme.colors.dark[0]}
+                        >
+                            <IconDots size="70%" />
+                        </ActionIcon>
+                    </Menu.Target>
+
+                    <Menu.Dropdown>
+                        <Menu.Label>ノートアクション</Menu.Label>
+                        <Menu.Item
+                            leftSection={copySuccess ? <IconCheck size={14} /> : <IconLink size={14} />}
+                            onClick={copyNoteUrl}
+                        >
+                            URLをコピー
+                        </Menu.Item>
+                        {/* 将来的に他のアクションをここに追加できます */}
+                    </Menu.Dropdown>
+                </Menu>
             </Group>
 
             {renderReactions()}
