@@ -230,58 +230,6 @@ export default function NoteComposer({
         }
     };
 
-    // クリップボードからのペースト処理
-    useEffect(() => {
-        const handlePaste = async (e: ClipboardEvent) => {
-            if (!e.clipboardData) return;
-
-            const items = e.clipboardData.items;
-
-            // クリップボードに画像があるかチェック
-            for (let i = 0; i < items.length; i++) {
-                // 画像のみペースト対応
-                if (items[i].type.startsWith('image/')) {
-                    // 画像データを取得
-                    const file = items[i].getAsFile();
-                    if (file) {
-                        e.preventDefault(); // テキストエリアへのデフォルトのペーストを防止
-
-                        if (uploadedFiles.length >= MAX_FILES) {
-                            notifications.show({
-                                title: 'ファイルエラー',
-                                message: `ファイルは最大${MAX_FILES}個までです`,
-                                color: 'red',
-                            });
-                            return;
-                        }
-
-                        const preview = await processFile(file);
-                        if (preview) {
-                            setUploadedFiles(prev => [...prev, preview]);
-
-                            notifications.show({
-                                title: '画像追加',
-                                message: 'クリップボードから画像を追加しました',
-                                color: 'green',
-                            });
-                        }
-
-                        // 一つの画像を処理したら終了
-                        break;
-                    }
-                }
-            }
-        };
-
-        // イベントリスナーを追加
-        document.addEventListener('paste', handlePaste);
-
-        // クリーンアップ
-        return () => {
-            document.removeEventListener('paste', handlePaste);
-        };
-    }, [uploadedFiles]);
-
     // 許可されるファイルタイプをaccept属性用に整形
     const getAcceptedFileTypes = () => {
         return [
@@ -411,6 +359,89 @@ export default function NoteComposer({
             setIsSubmitting(false);
         }
     };
+
+    // キーボードショートカット（Ctrl+Enter）で送信
+    useEffect(() => {
+        const textareaElement = textareaRef.current;
+        if (!textareaElement) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ctrl+Enterで送信（Macの場合はCommandキー）
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault(); // デフォルトの改行を防止
+
+                // 投稿可能な状態であれば実行
+                if (
+                    (!isSubmitting && !isUploading) &&
+                    (text.trim() || uploadedFiles.length > 0) &&
+                    !(enableCw && !cw.trim())
+                ) {
+                    handleSubmit();
+                }
+            }
+        };
+
+        // textareaエレメント自体にイベントリスナーを追加
+        // これにより、そのtextareaにフォーカスがあるときのみイベントが発火します
+        textareaElement.addEventListener('keydown', handleKeyDown);
+
+        // クリーンアップ
+        return () => {
+            textareaElement.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [text, cw, enableCw, uploadedFiles, isSubmitting, isUploading]);
+
+    // クリップボードからのメディアペースト処理
+    useEffect(() => {
+        const handlePaste = async (e: ClipboardEvent) => {
+            if (!e.clipboardData) return;
+
+            const items = e.clipboardData.items;
+
+            // クリップボードに画像があるかチェック
+            for (let i = 0; i < items.length; i++) {
+                // 画像のみペースト対応
+                if (items[i].type.startsWith('image/')) {
+                    // 画像データを取得
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        e.preventDefault(); // テキストエリアへのデフォルトのペーストを防止
+
+                        if (uploadedFiles.length >= MAX_FILES) {
+                            notifications.show({
+                                title: 'ファイルエラー',
+                                message: `ファイルは最大${MAX_FILES}個までです`,
+                                color: 'red',
+                            });
+                            return;
+                        }
+
+                        const preview = await processFile(file);
+                        if (preview) {
+                            setUploadedFiles(prev => [...prev, preview]);
+
+                            notifications.show({
+                                title: '画像追加',
+                                message: 'クリップボードから画像を追加しました',
+                                color: 'green',
+                            });
+                        }
+
+                        // 一つの画像を処理したら終了
+                        break;
+                    }
+                }
+            }
+        };
+
+        // イベントリスナーを追加
+        document.addEventListener('paste', handlePaste);
+
+        // クリーンアップ
+        return () => {
+            document.removeEventListener('paste', handlePaste);
+        };
+    }, [uploadedFiles]);
 
     return (
         <Paper
@@ -576,7 +607,7 @@ export default function NoteComposer({
                             </Group>
                         )}
 
-                        <Tooltip label="送信">
+                        <Tooltip label="送信（Ctrl+Enter）">
                             <Button
                                 onClick={handleSubmit}
                                 loading={isSubmitting || apiState.loading}
