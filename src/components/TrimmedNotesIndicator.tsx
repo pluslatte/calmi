@@ -66,11 +66,17 @@ export default function TrimmedNotesIndicator({
                 borderRight: `1px solid ${theme.colors.dark[4]}`,
                 borderBottom: `1px solid ${theme.colors.dark[4]}`,
                 opacity: 0.7,
-                cursor: isLoading ? 'default' : 'pointer',
             }}
-            onClick={isLoading ? undefined : handleClick}
         >
-            <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: isLoading ? 'default' : 'pointer',
+                }}
+                onClick={isLoading ? undefined : handleClick}
+            >
                 <Text size="sm" ta="center" c={textColor}>
                     <Text span fw="bold" c={highlightColor}>{count}件</Text>
                     {"の表示範囲から外れたノートがあります "}

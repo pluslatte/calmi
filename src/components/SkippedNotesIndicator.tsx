@@ -70,12 +70,18 @@ export default function SkippedNotesIndicator({
                 borderTop: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
                 borderRight: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
                 borderBottom: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-                opacity: 0.7, // 少し透明に
-                cursor: isLoading ? 'default' : 'pointer',
+                opacity: 0.7,
             }}
-            onClick={isLoading ? undefined : handleClick}
         >
-            <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: isLoading ? 'default' : 'pointer',
+                }}
+                onClick={isLoading ? undefined : handleClick}
+            >
                 <Text size="sm" ta="center" c={textColor}>
                     <Text span fw="bold" c={highlightColor}>{count}件</Text>
                     {"のノートがスキップされました "}
