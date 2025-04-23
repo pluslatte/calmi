@@ -4,7 +4,6 @@ import { Anchor, Blockquote, Code, Text, Box } from "@mantine/core";
 import * as mfm from 'mfm-js';
 import React, { ReactElement, ReactNode } from "react";
 import EmojiNode from "./EmojiNode";
-import DOMPurify from 'dompurify';
 
 export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[]; assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
     const preserveLineBreaks = (text: string): React.ReactNode[] => {
@@ -21,20 +20,19 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
     // テキストコンテンツのみを再帰的に取得する補助関数
     const getTextContent = (node: mfm.MfmNode): string => {
         if (node.type === 'text') {
-            // テキストノードの内容をDOMPurifyでサニタイズ
-            return DOMPurify.sanitize(node.props.text, { ALLOWED_TAGS: [] }); // タグを全て除去し、プレーンテキストのみ許可
+            return node.props.text;
         } else if ('children' in node && Array.isArray(node.children)) {
             return node.children.map(getTextContent).join('');
         } else if (node.type === 'unicodeEmoji') {
             return node.props.emoji;
         } else if (node.type === 'mention') {
-            return `@${DOMPurify.sanitize(node.props.username, { ALLOWED_TAGS: [] })}`;
+            return `@${node.props.username}`;
         } else if (node.type === 'hashtag') {
-            return `#${DOMPurify.sanitize(node.props.hashtag, { ALLOWED_TAGS: [] })}`;
+            return `#${node.props.hashtag}`;
         } else if (node.type === 'inlineCode') {
-            return DOMPurify.sanitize(node.props.code, { ALLOWED_TAGS: [] });
+            return node.props.code;
         } else if (node.type === 'search') {
-            return `🔍 ${DOMPurify.sanitize(node.props.query, { ALLOWED_TAGS: [] })}`;
+            return `🔍 ${node.props.query}`;
         }
         return '';
     }
@@ -101,57 +99,35 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                 const fullText = getTextContent(node);
                 return <Box component="span" style={{ fontSize: '0.75em' }}>{fullText}</Box>;
             }
-            case "inlineCode": {
-                // インラインコードもサニタイズ
-                const sanitizedCode = DOMPurify.sanitize(node.props.code, { ALLOWED_TAGS: [] });
-                return <Code>{sanitizedCode}</Code>;
-            }
-            case "text": {
-                // テキストノードをサニタイズ
-                const sanitizedText = DOMPurify.sanitize(node.props.text, { ALLOWED_TAGS: [] });
-                return <React.Fragment>{preserveLineBreaks(sanitizedText)}</React.Fragment>;
-            }
+            case "inlineCode":
+                return <Code>{node.props.code}</Code>;
+            case "text":
+                return <React.Fragment>{preserveLineBreaks(node.props.text)}</React.Fragment>;
             case "emojiCode":
                 // ここが重要：絵文字ノードは必ず専用コンポーネントを使用する
                 return <EmojiNode name={node.props.name} assets={assets} />;
             case "unicodeEmoji":
                 return node.props.emoji;
-            case "mention": {
-                const sanitizedUsername = DOMPurify.sanitize(node.props.username, { ALLOWED_TAGS: [] });
-                return <Box component="span" style={{ color: 'cyan' }}>{`@${sanitizedUsername}`}</Box>;
-            }
-            case "hashtag": {
-                const sanitizedHashtag = DOMPurify.sanitize(node.props.hashtag, { ALLOWED_TAGS: [] });
-                return <Box component="span" style={{ color: 'cyan' }}>{`#${sanitizedHashtag}`}</Box>;
-            }
-            case "url": {
-                // URLをサニタイズして、JavaScriptプロトコルなどの危険なURLを防止
-                const sanitizedUrl = DOMPurify.sanitize(node.props.url);
-                // さらに、javascriptなどの危険なプロトコルを明示的に拒否
-                const url = sanitizedUrl.startsWith('javascript:') || sanitizedUrl.startsWith('data:') 
-                    ? '#' : sanitizedUrl;
-                
+            case "mention":
+                return <Box component="span" style={{ color: 'cyan' }}>{`@${node.props.username}`}</Box>;
+            case "hashtag":
+                return <Box component="span" style={{ color: 'cyan' }}>{`#${node.props.hashtag}`}</Box>;
+            case "url":
                 return (
-                    <Anchor href={url} target="_blank" rel="noopener noreferrer" inline={true} style={{
+                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer" inline={true} style={{
                         wordBreak: "break-all",
                         overflowWrap: "break-word",
                         wordWrap: "break-word",
                         lineBreak: "anywhere",
                         whiteSpace: "pre-wrap break-spaces"
-                    }}>
-                        {DOMPurify.sanitize(node.props.url, { ALLOWED_TAGS: [] })}
+                    }
+                    }>
+                        {node.props.url}
                     </Anchor >
                 );
-            }
-            case "link": {
-                // リンクURLもサニタイズ
-                const sanitizedUrl = DOMPurify.sanitize(node.props.url);
-                // 危険なプロトコルを拒否
-                const url = sanitizedUrl.startsWith('javascript:') || sanitizedUrl.startsWith('data:') 
-                    ? '#' : sanitizedUrl;
-                
+            case "link":
                 return (
-                    <Anchor href={url} target="_blank" rel="noopener noreferrer" inline={true} style={{
+                    <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer" inline={true} style={{
                         wordBreak: "break-all",
                         overflowWrap: "break-word",
                         wordWrap: "break-word",
@@ -161,7 +137,6 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                         {renderNodes(node.children)}
                     </Anchor>
                 );
-            }
             case "quote":
                 // 引用ブロックを直接返すのではなく、div要素でラップする
                 return (
@@ -171,10 +146,8 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                         </Blockquote>
                     </Box>
                 );
-            case "search": {
-                const sanitizedQuery = DOMPurify.sanitize(node.props.query, { ALLOWED_TAGS: [] });
-                return <Box component="span">{`🔍 ${sanitizedQuery}`}</Box>;
-            }
+            case "search":
+                return <Box component="span">{`🔍 ${node.props.query}`}</Box>;
             case "plain":
                 return renderNodes(node.children);
             case "blockCode":
