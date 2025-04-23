@@ -51,7 +51,8 @@ interface MisskeyApiActions {
     createNote: (
         text: string,
         visibility?: 'public' | 'home' | 'followers' | 'specified',
-        cw?: string | null
+        cw?: string | null,
+        renoteId?: string | null // 引用リノート用のパラメータ
     ) => Promise<{ createdNote: Note }>;
     createRenote: (
         noteId: string,
@@ -65,7 +66,8 @@ interface MisskeyApiActions {
         text: string,
         fileIds: string[],
         visibility?: 'public' | 'home' | 'followers' | 'specified',
-        cw?: string | null
+        cw?: string | null,
+        renoteId?: string | null // 引用リノート用のパラメータ
     ) => Promise<{ createdNote: Note }>;
 
     // リアクション関連のアクション
@@ -274,11 +276,12 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         createNote: async (
             text,
             visibility = 'home',
-            cw = null
+            cw = null,
+            renoteId = null // 引用リノート用のパラメータ
         ) => {
             return await get().executeApiRequest<{ createdNote: Note }>(
                 'notes/create',
-                { text, visibility, cw },
+                { text, visibility, cw, renoteId },
                 'ノートの投稿に失敗しました'
             );
         },
@@ -390,7 +393,8 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
             text,
             fileIds,
             visibility = 'home',
-            cw = null
+            cw = null,
+            renoteId = null // 引用リノート用のパラメータ
         ) => {
             return await get().executeApiRequest(
                 'notes/create',
@@ -398,7 +402,8 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                     text,
                     visibility,
                     fileIds,
-                    cw
+                    cw,
+                    renoteId
                 },
                 'ノートの投稿に失敗しました'
             );

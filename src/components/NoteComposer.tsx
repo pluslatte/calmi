@@ -14,6 +14,8 @@ type VisibilityOption = 'public' | 'home' | 'followers' | 'specified';
 
 interface NoteComposerProps {
     onSuccess?: () => void; // 投稿成功時のコールバック
+    initialQuoteNoteId?: string; // 引用リノート用のノートID
+    placeholder?: string; // プレースホルダーテキスト
 }
 
 interface FilePreview {
@@ -37,7 +39,11 @@ const ALLOWED_FILE_TYPES = {
     other: ['application/pdf', 'text/plain', 'application/zip', 'application/x-zip-compressed', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 };
 
-export default function NoteComposer({ onSuccess }: NoteComposerProps) {
+export default function NoteComposer({
+    onSuccess,
+    initialQuoteNoteId,
+    placeholder = "今何してる？"
+}: NoteComposerProps) {
     const [text, setText] = useState('');
     const [cw, setCw] = useState('');
     const [enableCw, setEnableCw] = useState(false);
@@ -46,6 +52,8 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [quoteNoteId, setQuoteNoteId] = useState<string | null>(initialQuoteNoteId || null);
+
     const resetRef = useRef<() => void>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -360,7 +368,8 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                         text,
                         uploadedFileResults.map(file => file.id),
                         visibility,
-                        cwText
+                        cwText,
+                        quoteNoteId // 引用リノート用のパラメータ
                     );
                 } catch (error) {
                     setIsUploading(false);
@@ -371,7 +380,8 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
                 await createNote(
                     text,
                     visibility,
-                    cwText
+                    cwText,
+                    quoteNoteId // 引用リノート用のパラメータ
                 );
             }
 
@@ -455,7 +465,7 @@ export default function NoteComposer({ onSuccess }: NoteComposerProps) {
 
                 {/* 本文入力エリア */}
                 <Textarea
-                    placeholder="今何してる？"
+                    placeholder={placeholder}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     autosize

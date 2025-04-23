@@ -1,10 +1,11 @@
 import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rgba, Menu } from "@mantine/core";
-import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile, IconCheck, IconLink } from "@tabler/icons-react";
+import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile, IconCheck, IconLink, IconMessageCircle } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
 import EmojiNode from "./EmojiNode";
+import QuoteNoteModal from "./QuoteNoteModal";
 
 // プロップからonReactionUpdateを削除
 interface MisskeyNoteActionsProps {
@@ -12,11 +13,13 @@ interface MisskeyNoteActionsProps {
 }
 
 export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
-    const theme = useMantineTheme();
-    const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
-    const { createReaction, deleteReaction, apiState, createRenote } = useMisskeyApiStore();
     const [localNote, setLocalNote] = useState<Note>(note);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
+    const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+
+    const { createReaction, deleteReaction, apiState, createRenote } = useMisskeyApiStore();
+    const theme = useMantineTheme();
 
     // noteプロップが変更されたら内部状態を更新
     useEffect(() => {
@@ -306,6 +309,12 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                         >
                             リノート
                         </Menu.Item>
+                        <Menu.Item
+                            leftSection={<IconMessageCircle size={14} />}
+                            onClick={() => setQuoteModalOpen(true)}
+                        >
+                            引用リノート
+                        </Menu.Item>
                         {/* 将来的に他のアクションをここに追加できます */}
                     </Menu.Dropdown>
                 </Menu>
@@ -371,6 +380,13 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
             </Group>
 
             {renderReactions()}
+
+            {/* 引用リノートモーダル */}
+            <QuoteNoteModal
+                note={note}
+                opened={quoteModalOpen}
+                onClose={() => setQuoteModalOpen(false)}
+            />
         </Box>
     );
 }
