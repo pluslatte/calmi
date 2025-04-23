@@ -5,6 +5,15 @@ import * as mfm from 'mfm-js';
 import React, { ReactElement, ReactNode } from "react";
 import EmojiNode from "./EmojiNode";
 
+// 安全でないURLをチェックする関数
+const isSafeUrl = (url: string): boolean => {
+    // JavaScriptプロトコルなどの危険なプロトコルをブロック
+    const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
+    const lowerUrl = url.toLowerCase().trim();
+    
+    return !dangerousProtocols.some(protocol => lowerUrl.startsWith(protocol));
+};
+
 export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[]; assets: { host: string | null; emojis?: { [key: string]: string | undefined } } }) {
     const preserveLineBreaks = (text: string): React.ReactNode[] => {
         return text.split('\n').map((line, i, arr) => {
@@ -113,6 +122,14 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
             case "hashtag":
                 return <Box component="span" style={{ color: 'cyan' }}>{`#${node.props.hashtag}`}</Box>;
             case "url":
+                // URLの安全性チェック
+                if (!isSafeUrl(node.props.url)) {
+                    return (
+                        <Box component="span" style={{ color: 'red' }}>
+                            {`安全でないURL: ${node.props.url}`}
+                        </Box>
+                    );
+                }
                 return (
                     <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer" inline={true} style={{
                         wordBreak: "break-all",
@@ -126,6 +143,14 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                     </Anchor >
                 );
             case "link":
+                // URLの安全性チェック
+                if (!isSafeUrl(node.props.url)) {
+                    return (
+                        <Box component="span" style={{ color: 'red' }}>
+                            {`安全でないリンク: `}{renderNodes(node.children)}
+                        </Box>
+                    );
+                }
                 return (
                     <Anchor href={node.props.url} target="_blank" rel="noopener noreferrer" inline={true} style={{
                         wordBreak: "break-all",
