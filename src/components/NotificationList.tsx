@@ -1,4 +1,4 @@
-import { Box, Paper, Title, Divider, Text, Loader, Avatar, Group, UnstyledButton, ActionIcon, ScrollArea, Flex, Badge } from "@mantine/core";
+import { Box, Paper, Title, Divider, Text, Loader, Avatar, Group, UnstyledButton, ActionIcon, ScrollArea, Flex, Badge, Anchor } from "@mantine/core";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useEffect } from "react";
@@ -279,39 +279,39 @@ export default function NotificationList() {
                         ) : (
                             notifications.map((notification) => (
                                 <Box key={notification.id} w="100%">
-                                    <UnstyledButton
-                                        onClick={() => {/* ノートへの遷移などの処理 */ }}
-                                        w="100%"
+                                    <Paper
+                                        p="xs"
+                                        withBorder
+                                        mb="xs"
+                                        style={{
+                                            borderLeft: lastReadAt && new Date(notification.createdAt) > lastReadAt
+                                                ? '3px solid #3498db'
+                                                : '1px solid #e0e0e0',
+                                            width: '100%',
+                                            overflow: 'hidden'
+                                        }}
                                     >
-                                        <Paper
-                                            p="xs"
-                                            withBorder
-                                            mb="xs"
-                                            style={{
-                                                borderLeft: lastReadAt && new Date(notification.createdAt) > lastReadAt
-                                                    ? '3px solid #3498db'
-                                                    : '1px solid #e0e0e0',
-                                                width: '100%',
-                                                overflow: 'hidden'
-                                            }}
-                                        >
-                                            <Group wrap="nowrap" align="flex-start">
-                                                {hasUserAvatar(notification) && 'user' in notification && notification.user ? (
+                                        <Group wrap="nowrap" align="flex-start">
+                                            {hasUserAvatar(notification) && 'user' in notification && notification.user ? (
+                                                <Anchor href={`/user/${notification.user.id}`}>
                                                     <Avatar
                                                         src={notification.user?.avatarUrl}
                                                         radius="md"
                                                         size="md"
+                                                        style={{ cursor: 'pointer' }}
                                                     />
-                                                ) : (
-                                                    <Box w={40} h={40} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        {getNotificationIcon(notification)}
-                                                    </Box>
-                                                )}
-                                                <Box style={{ flex: 1, minWidth: 0 }}>
-                                                    <Group justify="space-between" mb={4}>
-                                                        <Text size="sm" fw={500} lineClamp={1}>
-                                                            {/* ユーザー名をMfmObjectで表示 */}
-                                                            {hasUserAvatar(notification) && 'user' in notification && notification.user ? (
+                                                </Anchor>
+                                            ) : (
+                                                <Box w={40} h={40} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    {getNotificationIcon(notification)}
+                                                </Box>
+                                            )}
+                                            <Box style={{ flex: 1, minWidth: 0 }}>
+                                                <Group justify="space-between" mb={4}>
+                                                    <Text size="sm" fw={500} lineClamp={1}>
+                                                        {/* ユーザー名をリンク化 */}
+                                                        {hasUserAvatar(notification) && 'user' in notification && notification.user ? (
+                                                            <Anchor href={`/user/${notification.user.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                                                 <MfmObject
                                                                     mfmNodes={mfm.parse(notification.user.name || notification.user.username)}
                                                                     assets={{
@@ -319,63 +319,99 @@ export default function NotificationList() {
                                                                         emojis: notification.user.emojis
                                                                     }}
                                                                 />
-                                                            ) : (
-                                                                '通知'
-                                                            )}
-                                                        </Text>
-                                                        <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
-                                                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ja })}
-                                                        </Text>
-                                                    </Group>
-                                                    <Group gap="xs" style={{ flexWrap: 'nowrap' }}>
-                                                        <Box style={{ flexShrink: 0 }}>
-                                                            {getNotificationIcon(notification)}
-                                                        </Box>
-                                                        {/* 通知内容コンポーネントに置き換え */}
-                                                        <NotificationContent notification={notification} />
-                                                    </Group>
+                                                            </Anchor>
+                                                        ) : (
+                                                            '通知'
+                                                        )}
+                                                    </Text>
+                                                    <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+                                                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: ja })}
+                                                    </Text>
+                                                </Group>
+                                                <Group gap="xs" style={{ flexWrap: 'nowrap' }}>
+                                                    <Box style={{ flexShrink: 0 }}>
+                                                        {getNotificationIcon(notification)}
+                                                    </Box>
+                                                    {/* 通知内容コンポーネントに置き換え */}
+                                                    <NotificationContent notification={notification} />
+                                                </Group>
 
-                                                    {/* リアクション対象ノートの表示 */}
-                                                    {notification.type === 'reaction' && notification.note && (
-                                                        <Box mt={4} p="xs" style={{
-                                                            background: getNotificationStyle('reaction').bg,
-                                                            borderRadius: '4px',
-                                                            borderLeft: `2px solid ${getNotificationStyle('reaction').border}`
-                                                        }}>
-                                                            <Group justify="space-between" mb={2}>
-                                                                <Text size="xs" fw={500}>リアクション対象のノート:</Text>
-                                                                <Badge
-                                                                    size="xs"
-                                                                    variant="outline"
-                                                                    color="red"
-                                                                    style={{ cursor: 'pointer' }}
-                                                                    rightSection={<IconArrowRight size={10} />}
-                                                                    onClick={(e) => handleViewNote(notification.note!.id, e)}
-                                                                >
-                                                                    ノートを表示
-                                                                </Badge>
-                                                            </Group>
-                                                            <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
-                                                                {notification.note.text || '(内容なし)'}
+                                                {/* リアクション対象ノートの表示 */}
+                                                {notification.type === 'reaction' && notification.note && (
+                                                    <Box mt={4} p="xs" style={{
+                                                        background: getNotificationStyle('reaction').bg,
+                                                        borderRadius: '4px',
+                                                        borderLeft: `2px solid ${getNotificationStyle('reaction').border}`
+                                                    }}>
+                                                        <Group justify="space-between" mb={2}>
+                                                            <Text size="xs" fw={500}>リアクション対象のノート:</Text>
+                                                            <Badge
+                                                                size="xs"
+                                                                variant="outline"
+                                                                color="red"
+                                                                style={{ cursor: 'pointer' }}
+                                                                rightSection={<IconArrowRight size={10} />}
+                                                                onClick={(e) => handleViewNote(notification.note!.id, e)}
+                                                            >
+                                                                ノートを表示
+                                                            </Badge>
+                                                        </Group>
+                                                        <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
+                                                            {notification.note.text || '(内容なし)'}
+                                                        </Text>
+                                                    </Box>
+                                                )}
+
+                                                {/* リノート対象ノートの表示 */}
+                                                {(notification.type === 'renote' || notification.type === 'quote') && notification.note && (
+                                                    <Box mt={4} p="xs" style={{
+                                                        background: getNotificationStyle('renote').bg,
+                                                        borderRadius: '4px',
+                                                        borderLeft: `2px solid ${getNotificationStyle('renote').border}`
+                                                    }}>
+                                                        <Group justify="space-between" mb={2}>
+                                                            <Text size="xs" fw={500}>
+                                                                {notification.type === 'renote' ? 'リノートされたノート:' : '引用リノートされたノート:'}
                                                             </Text>
-                                                        </Box>
-                                                    )}
+                                                            <Badge
+                                                                size="xs"
+                                                                variant="outline"
+                                                                color="violet"
+                                                                style={{ cursor: 'pointer' }}
+                                                                rightSection={<IconArrowRight size={10} />}
+                                                                onClick={(e) => handleViewNote(notification.note!.id, e)}
+                                                            >
+                                                                ノートを表示
+                                                            </Badge>
+                                                        </Group>
+                                                        <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
+                                                            {notification.note.text || '(内容なし)'}
+                                                        </Text>
+                                                        {notification.note.files && notification.note.files.length > 0 && (
+                                                            <Text size="xs" c="dimmed" mt={2}>
+                                                                <IconPhoto size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                                                                {notification.note.files.length}個のメディア
+                                                            </Text>
+                                                        )}
+                                                    </Box>
+                                                )}
 
-                                                    {/* リノート対象ノートの表示 */}
-                                                    {(notification.type === 'renote' || notification.type === 'quote') && notification.note && (
+                                                {/* 返信・メンションノートの表示 */}
+                                                {hasNoteText(notification) && notification.note &&
+                                                    !['reaction', 'renote'].includes(notification.type) && (
                                                         <Box mt={4} p="xs" style={{
-                                                            background: getNotificationStyle('renote').bg,
+                                                            background: getNotificationStyle('mention').bg,
                                                             borderRadius: '4px',
-                                                            borderLeft: `2px solid ${getNotificationStyle('renote').border}`
+                                                            borderLeft: `2px solid ${getNotificationStyle('mention').border}`
                                                         }}>
                                                             <Group justify="space-between" mb={2}>
                                                                 <Text size="xs" fw={500}>
-                                                                    {notification.type === 'renote' ? 'リノートされたノート:' : '引用リノートされたノート:'}
+                                                                    {notification.type === 'reply' ? '返信内容:' : 'メンション内容:'}
                                                                 </Text>
                                                                 <Badge
                                                                     size="xs"
                                                                     variant="outline"
-                                                                    color="violet"
+                                                                    color="green"
                                                                     style={{ cursor: 'pointer' }}
                                                                     rightSection={<IconArrowRight size={10} />}
                                                                     onClick={(e) => handleViewNote(notification.note!.id, e)}
@@ -386,47 +422,11 @@ export default function NotificationList() {
                                                             <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
                                                                 {notification.note.text || '(内容なし)'}
                                                             </Text>
-                                                            {notification.note.files && notification.note.files.length > 0 && (
-                                                                <Text size="xs" c="dimmed" mt={2}>
-                                                                    <IconPhoto size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                                                                    {notification.note.files.length}個のメディア
-                                                                </Text>
-                                                            )}
                                                         </Box>
                                                     )}
-
-                                                    {/* 返信・メンションノートの表示 */}
-                                                    {hasNoteText(notification) && notification.note &&
-                                                        !['reaction', 'renote'].includes(notification.type) && (
-                                                            <Box mt={4} p="xs" style={{
-                                                                background: getNotificationStyle('mention').bg,
-                                                                borderRadius: '4px',
-                                                                borderLeft: `2px solid ${getNotificationStyle('mention').border}`
-                                                            }}>
-                                                                <Group justify="space-between" mb={2}>
-                                                                    <Text size="xs" fw={500}>
-                                                                        {notification.type === 'reply' ? '返信内容:' : 'メンション内容:'}
-                                                                    </Text>
-                                                                    <Badge
-                                                                        size="xs"
-                                                                        variant="outline"
-                                                                        color="green"
-                                                                        style={{ cursor: 'pointer' }}
-                                                                        rightSection={<IconArrowRight size={10} />}
-                                                                        onClick={(e) => handleViewNote(notification.note!.id, e)}
-                                                                    >
-                                                                        ノートを表示
-                                                                    </Badge>
-                                                                </Group>
-                                                                <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: 'break-word' }}>
-                                                                    {notification.note.text || '(内容なし)'}
-                                                                </Text>
-                                                            </Box>
-                                                        )}
-                                                </Box>
-                                            </Group>
-                                        </Paper>
-                                    </UnstyledButton>
+                                            </Box>
+                                        </Group>
+                                    </Paper>
                                 </Box>
                             ))
                         )}
