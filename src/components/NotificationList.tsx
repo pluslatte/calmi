@@ -9,6 +9,7 @@ import { Notification } from "misskey-js/entities.js";
 import MfmObject from "@/components/MfmObject";
 import * as mfm from 'mfm-js';
 import EmojiNode from "@/components/EmojiNode";
+import { useRouter } from "next/navigation";
 
 // 通知内容のコンポーネント
 const NotificationContent = ({ notification }: { notification: Notification }) => {
@@ -111,6 +112,7 @@ const NotificationContent = ({ notification }: { notification: Notification }) =
 };
 
 export default function NotificationList() {
+    const router = useRouter();
     const { client } = useMisskeyApiStore();
     const {
         notifications,
@@ -226,9 +228,8 @@ export default function NotificationList() {
     // ノートリンクをクリックしたときの処理
     const handleViewNote = (noteId: string, event: React.MouseEvent) => {
         event.stopPropagation(); // 親要素のクリックイベントを停止
-        // ノート表示機能（今後実装予定）
-        console.log('View note:', noteId);
-        // 例：window.open(`${client?.origin}/notes/${noteId}`, '_blank');
+        // Next.jsのルーターを使ってノート表示ページに遷移
+        router.push(`/note/${noteId}`);
     };
 
     if (isLoading && notifications.length === 0) {
