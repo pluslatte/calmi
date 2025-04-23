@@ -6,6 +6,7 @@ import { Note } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
 import EmojiNode from "./EmojiNode";
 import QuoteNoteModal from "./QuoteNoteModal";
+import ReplyNoteModal from "./ReplyNoteModal";
 
 // プロップからonReactionUpdateを削除
 interface MisskeyNoteActionsProps {
@@ -17,6 +18,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const [copySuccess, setCopySuccess] = useState(false);
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
     const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+    const [replyModalOpen, setReplyModalOpen] = useState(false);
 
     const { createReaction, deleteReaction, apiState, createRenote } = useMisskeyApiStore();
     const theme = useMantineTheme();
@@ -285,6 +287,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                     variant="subtle"
                     aria-label="reply"
                     c={theme.colors.dark[0]}
+                    onClick={() => setReplyModalOpen(true)}
                 >
                     <IconArrowBackUp size="70%" />
                 </ActionIcon>
@@ -386,6 +389,13 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                 note={note}
                 opened={quoteModalOpen}
                 onClose={() => setQuoteModalOpen(false)}
+            />
+
+            {/* 返信モーダル */}
+            <ReplyNoteModal
+                note={note}
+                opened={replyModalOpen}
+                onClose={() => setReplyModalOpen(false)}
             />
         </Box>
     );

@@ -15,6 +15,7 @@ type VisibilityOption = 'public' | 'home' | 'followers' | 'specified';
 interface NoteComposerProps {
     onSuccess?: () => void; // 投稿成功時のコールバック
     initialQuoteNoteId?: string; // 引用リノート用のノートID
+    initialReplyId?: string; // 返信用のノートID
     placeholder?: string; // プレースホルダーテキスト
 }
 
@@ -42,6 +43,7 @@ const ALLOWED_FILE_TYPES = {
 export default function NoteComposer({
     onSuccess,
     initialQuoteNoteId,
+    initialReplyId,
     placeholder = "今何してる？"
 }: NoteComposerProps) {
     const [text, setText] = useState('');
@@ -52,7 +54,6 @@ export default function NoteComposer({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
-    const [quoteNoteId, setQuoteNoteId] = useState<string | null>(initialQuoteNoteId || null);
 
     const resetRef = useRef<() => void>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -369,7 +370,8 @@ export default function NoteComposer({
                         uploadedFileResults.map(file => file.id),
                         visibility,
                         cwText,
-                        quoteNoteId // 引用リノート用のパラメータ
+                        initialQuoteNoteId, // 引用リノート用のパラメータ
+                        initialReplyId, // 返信用のノートID
                     );
                 } catch (error) {
                     setIsUploading(false);
@@ -381,7 +383,8 @@ export default function NoteComposer({
                     text,
                     visibility,
                     cwText,
-                    quoteNoteId // 引用リノート用のパラメータ
+                    initialQuoteNoteId, // 引用リノート用のパラメータ
+                    initialReplyId, // 返信用のノートID
                 );
             }
 

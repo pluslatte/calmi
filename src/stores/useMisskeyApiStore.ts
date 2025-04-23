@@ -52,7 +52,8 @@ interface MisskeyApiActions {
         text: string,
         visibility?: 'public' | 'home' | 'followers' | 'specified',
         cw?: string | null,
-        renoteId?: string | null // 引用リノート用のパラメータ
+        renoteId?: string | null, // 引用リノート用のパラメータ
+        replyId?: string | null // 返信用のパラメータ
     ) => Promise<{ createdNote: Note }>;
     createRenote: (
         noteId: string,
@@ -67,7 +68,8 @@ interface MisskeyApiActions {
         fileIds: string[],
         visibility?: 'public' | 'home' | 'followers' | 'specified',
         cw?: string | null,
-        renoteId?: string | null // 引用リノート用のパラメータ
+        renoteId?: string | null, // 引用リノート用のパラメータ
+        replyId?: string | null // 返信用のパラメータ
     ) => Promise<{ createdNote: Note }>;
 
     // リアクション関連のアクション
@@ -277,11 +279,12 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
             text,
             visibility = 'home',
             cw = null,
-            renoteId = null // 引用リノート用のパラメータ
+            renoteId = null, // 引用リノート用のパラメータ
+            replyId = null, // 返信用のパラメータ
         ) => {
             return await get().executeApiRequest<{ createdNote: Note }>(
                 'notes/create',
-                { text, visibility, cw, renoteId },
+                { text, visibility, cw, renoteId, replyId },
                 'ノートの投稿に失敗しました'
             );
         },
