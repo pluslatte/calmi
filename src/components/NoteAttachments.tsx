@@ -82,7 +82,10 @@ export default function NoteAttachments({ files }: NoteAttachmentsProps) {
                                         borderRadius: '4px',
                                         height: gridSpan === 12 ? 300 : 150,
                                     }}
-                                    onClick={() => openImageModal(file.url)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openImageModal(file.url);
+                                    }}
                                 >
                                     <Image
                                         src={file.thumbnailUrl || file.url}
@@ -129,7 +132,10 @@ export default function NoteAttachments({ files }: NoteAttachmentsProps) {
                                         borderRadius: '4px',
                                         height: gridSpan === 12 ? 300 : 150,
                                     }}
-                                    onClick={() => window.open(file.url, '_blank')}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.open(file.url, '_blank');
+                                    }}
                                 >
                                     <Image
                                         src={file.thumbnailUrl || file.url}
@@ -173,7 +179,10 @@ export default function NoteAttachments({ files }: NoteAttachmentsProps) {
                                         borderRadius: '4px',
                                         height: gridSpan === 12 ? 300 : 150,
                                     }}
-                                    onClick={() => openVideoModal(file)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openVideoModal(file);
+                                    }}
                                 >
                                     {file.thumbnailUrl ? (
                                         <Image
@@ -256,7 +265,10 @@ export default function NoteAttachments({ files }: NoteAttachmentsProps) {
                                     height: '100%',
                                     minHeight: 70
                                 }}
-                                onClick={() => window.open(file.url, '_blank')}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(file.url, '_blank');
+                                }}
                             >
                                 <Group>
                                     <IconFile size={24} />

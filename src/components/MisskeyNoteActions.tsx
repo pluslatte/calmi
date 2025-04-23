@@ -377,6 +377,21 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                         >
                             URLをコピー
                         </Menu.Item>
+                        <Menu.Item
+                            leftSection={<IconMessageCircle size={14} />}
+                            component="a"
+                            href={`/note/${targetNoteId}`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                // 既に同じノートページにいる場合はページ遷移をキャンセル
+                                if (window.location.pathname === `/note/${targetNoteId}`) {
+                                    e.preventDefault();
+                                    window.scrollTo(0, 0);
+                                }
+                            }}
+                        >
+                            ノートを表示
+                        </Menu.Item>
                         {/* 将来的に他のアクションをここに追加できます */}
                     </Menu.Dropdown>
                 </Menu>

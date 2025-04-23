@@ -87,19 +87,57 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
 
     // 引用ノートコンポーネント
     const QuotedNote = ({ quotedNote }: { quotedNote: Note }) => (
-        <Paper withBorder p="xs" mt="xs" bg="rgba(0,0,0,0.03)" style={{ borderRadius: '6px' }}>
+        <Paper
+            withBorder
+            p="xs"
+            mt="xs"
+            bg="rgba(0,0,0,0.03)"
+            style={{
+                borderRadius: '6px',
+                cursor: 'pointer',
+                position: 'relative',
+                zIndex: 2
+            }}
+        >
             <Flex gap="sm" wrap="nowrap">
-                <Avatar
-                    src={quotedNote.user.avatarUrl}
-                    radius="md"
-                    size="sm"
-                    mt={3}
-                />
+                <Link
+                    href={`/user/${quotedNote.user.id}`}
+                    style={{ textDecoration: 'none', color: 'inherit', zIndex: 3, position: 'relative' }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        // 既に同じユーザーページにいる場合はページ遷移をキャンセル
+                        if (quotedNote.user.id === window.location.pathname.split('/').pop()) {
+                            e.preventDefault();
+                            window.scrollTo(0, 0);
+                        }
+                    }}
+                >
+                    <Avatar
+                        src={quotedNote.user.avatarUrl}
+                        radius="md"
+                        size="sm"
+                        mt={3}
+                        style={{ cursor: 'pointer' }}
+                    />
+                </Link>
                 <Box miw={0} flex={1}>
                     <Flex justify="space-between" align="center" mb={2}>
-                        <Text size="sm" fw={600} lineClamp={1}>
-                            {quotedNote.user.name || quotedNote.user.username}
-                        </Text>
+                        <Link
+                            href={`/user/${quotedNote.user.id}`}
+                            style={{ textDecoration: 'none', color: 'inherit', zIndex: 3, position: 'relative' }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                // 既に同じユーザーページにいる場合はページ遷移をキャンセル
+                                if (quotedNote.user.id === window.location.pathname.split('/').pop()) {
+                                    e.preventDefault();
+                                    window.scrollTo(0, 0);
+                                }
+                            }}
+                        >
+                            <Text size="sm" fw={600} lineClamp={1} style={{ cursor: 'pointer' }}>
+                                {quotedNote.user.name || quotedNote.user.username}
+                            </Text>
+                        </Link>
                         <AutoRefreshTimestamp iso={quotedNote.createdAt} />
                     </Flex>
                     <Text size="xs" c="dimmed" mb={4} lineClamp={1}>
@@ -116,7 +154,9 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                         />
                     </Box>
                     {quotedNote.files && quotedNote.files.length > 0 && (
-                        <NoteAttachments files={quotedNote.files} />
+                        <Box onClick={(e) => e.stopPropagation()}>
+                            <NoteAttachments files={quotedNote.files} />
+                        </Box>
                     )}
                 </Box>
             </Flex>
@@ -137,7 +177,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
             {/* アバター */}
             <Link
                 href={`/user/${note.user.id}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
+                style={{ textDecoration: 'none', color: 'inherit', zIndex: 2 }}
                 onClick={(e) => {
                     e.stopPropagation();
                     if (note.user.id === window.location.pathname.split('/').pop()) {
@@ -164,7 +204,7 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                         {/* ユーザー名をリンクに */}
                         <Link
                             href={`/user/${note.user.id}`}
-                            style={{ textDecoration: 'none', color: 'inherit' }}
+                            style={{ textDecoration: 'none', color: 'inherit', zIndex: 2, position: 'relative' }}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 if (note.user.id === window.location.pathname.split('/').pop()) {
@@ -211,7 +251,10 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                                 size="xs"
                                 variant="subtle"
                                 c="dimmed"
-                                onClick={() => setCwExpanded(!cwExpanded)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setCwExpanded(!cwExpanded);
+                                }}
                             >
                                 {cwExpanded ? '隠す' : '表示する'}
                             </Button>
