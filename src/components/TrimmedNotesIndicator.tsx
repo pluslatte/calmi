@@ -1,4 +1,4 @@
-import { Box, Collapse, Divider, Loader, Paper, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { Box, Collapse, Divider, Loader, Paper, Text, useMantineTheme } from "@mantine/core";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";

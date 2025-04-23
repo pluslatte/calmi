@@ -1,4 +1,4 @@
-import { Box, Divider, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { Box, Divider, Text, useMantineTheme } from "@mantine/core";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 

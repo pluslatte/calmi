@@ -5,7 +5,7 @@ import React, { memo, useEffect, useRef } from 'react';
 import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
-import { IconArrowUp, IconRefreshOff } from "@tabler/icons-react";
+import { IconArrowUp } from "@tabler/icons-react";
 import SkippedNotesIndicator from "./SkippedNotesIndicator";
 import TrimmedNotesIndicator from "./TrimmedNotesIndicator";
 import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
