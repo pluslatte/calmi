@@ -291,8 +291,9 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                         <ActionIcon
                             variant="subtle"
                             aria-label="renote"
-                            c={theme.colors.dark[0]}
+                            c={note.visibility === "followers" || note.visibility === "specified" ? theme.colors.dark[3] : theme.colors.dark[0]}
                             loading={apiState.loading}
+                            disabled={note.visibility === "followers" || note.visibility === "specified"}
                         >
                             <IconRepeat size="70%" />
                         </ActionIcon>
