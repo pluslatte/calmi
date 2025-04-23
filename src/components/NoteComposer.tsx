@@ -4,13 +4,12 @@
 import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid, Tooltip, Switch, Collapse } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
+import { useUserSettingsStore, NoteVisibility } from "@/stores/useUserSettingsStore";
 import { notifications } from '@mantine/notifications';
 import {
     IconAlertTriangle, IconHome, IconLock, IconMail, IconPhoto, IconPlus, IconSend,
     IconUsers, IconWorld, IconX, IconFile, IconFileMusic, IconVideo
 } from '@tabler/icons-react';
-
-type VisibilityOption = 'public' | 'home' | 'followers' | 'specified';
 
 interface NoteComposerProps {
     onSuccess?: () => void; // 投稿成功時のコールバック
@@ -49,11 +48,14 @@ export default function NoteComposer({
     const [text, setText] = useState('');
     const [cw, setCw] = useState('');
     const [enableCw, setEnableCw] = useState(false);
-    const [visibility, setVisibility] = useState<VisibilityOption>('home');
     const [uploadedFiles, setUploadedFiles] = useState<FilePreview[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+
+    // ユーザー設定ストアから公開範囲設定を取得
+    const { defaultNoteVisibility, setDefaultNoteVisibility } = useUserSettingsStore();
+    const [visibility, setVisibility] = useState<NoteVisibility>(defaultNoteVisibility);
 
     const resetRef = useRef<() => void>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -586,7 +588,12 @@ export default function NoteComposer({
                         <Box>
                             <SegmentedControl
                                 value={visibility}
-                                onChange={(value) => setVisibility(value as VisibilityOption)}
+                                onChange={(value) => {
+                                    const newVisibility = value as NoteVisibility;
+                                    setVisibility(newVisibility);
+                                    // 設定を保存
+                                    setDefaultNoteVisibility(newVisibility);
+                                }}
                                 data={[
                                     { value: 'public', label: <Tooltip label="パブリック"><IconWorld size={18} /></Tooltip> },
                                     { value: 'home', label: <Tooltip label="ホーム"><IconHome size={18} /></Tooltip> },
