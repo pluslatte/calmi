@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="128" fill="#282828" />
+  
+  <!-- 円形の「整理」パス -->
+  <path d="M256 96C167.6 96 96 167.6 96 256s71.6 160 160 160 160-71.6 160-160S344.4 96 256 96z" fill="none" stroke="#4ECDC4" stroke-width="16" stroke-dasharray="12,8" />
+  
+  <!-- 中央の「バイパス」線 -->
+  <path d="M128 256h256" stroke="#4ECDC4" stroke-width="24" stroke-linecap="round" />
+  
+  <!-- シンボル（シンプルな点） -->
+  <circle cx="256" cy="256" r="48" fill="#F7FFF7" />
+  
+  <!-- 小さなアクセント円 -->
+  <circle cx="360" cy="152" r="24" fill="#FF6B6B" opacity="0.9" />
+  <circle cx="152" cy="360" r="24" fill="#FFE66D" opacity="0.9" />
+</svg>
