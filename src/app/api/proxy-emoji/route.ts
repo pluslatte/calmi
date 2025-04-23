@@ -17,9 +17,18 @@ export async function GET(request: NextRequest) {
         }
 
         // ホスト名のバリデーション（セキュリティ対策）
-        if (!/^[a-z0-9][a-z0-9-_.]+\.[a-z0-9]+$/.test(host)) {
+        // 開発環境ではlocalhostを許可、本番環境では制限
+        if (
+            !/^[a-z0-9][a-z0-9-_.]+\.[a-z0-9]+$/.test(host) && !/^localhost(:[0-9]+)?$/.test(host) || 
+            /^(10|172\.(1[6-9]|2[0-9]|3[0-1])|192\.168)\./.test(host) || 
+            /^127\./.test(host) || 
+            /^0\./.test(host) || 
+            /^::1$/.test(host) || 
+            /^fc00:/.test(host) || 
+            /\.local$/.test(host)
+        ) {
             return NextResponse.json(
-                { error: 'Invalid host format' },
+                { error: 'Invalid or restricted host' },
                 { status: 400 }
             );
         }

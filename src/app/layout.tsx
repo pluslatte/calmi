@@ -35,6 +35,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="theme-color" content="#282828" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      {/* CSP設定 - 環境に応じたポリシーをメタタグでも設定 */}
+      <meta
+        httpEquiv="Content-Security-Policy"
+        content={process.env.NODE_ENV === 'development' 
+          ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; connect-src 'self' http://localhost:* https: wss:; font-src 'self'; object-src 'none'; frame-src 'none';" 
+          : "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; connect-src 'self' https: wss:; font-src 'self'; object-src 'none'; frame-src 'none';"
+        }
+      />
 
       <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       <link rel="icon" href="/favicon.ico" />
