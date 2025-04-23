@@ -1,7 +1,7 @@
 'use client';
 
 import { api } from "misskey-js";
-import React, { PropsWithChildren, useEffect } from "react";
+import React, { PropsWithChildren, useEffect, useState } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 
 /**
@@ -16,15 +16,54 @@ export function MisskeyApiProvider({
 }: PropsWithChildren<{
     initialClient?: api.APIClient | null
 }>) {
-    const { setClient } = useMisskeyApiStore();
+    const { client, setClient } = useMisskeyApiStore();
+    const [initialized, setInitialized] = useState(false);
 
-    // 初期クライアントの設定
+    // クライアント自動初期化
     useEffect(() => {
-        if (initialClient) {
-            setClient(initialClient);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialClient]);
+        const initClient = async () => {
+            // すでに初期化済みならスキップ
+            if (client) {
+                setInitialized(true);
+                return;
+            }
+
+            try {
+                // ブラウザ環境でなければスキップ
+                if (typeof window === 'undefined') {
+                    return;
+                }
+
+                const token = localStorage.getItem('misskey_token');
+                const serverUrl = localStorage.getItem('misskey_server') || 'https://virtualkemomimi.net';
+
+                if (!token) {
+                    // トークンがない場合は初期化スキップ
+                    setInitialized(true);
+                    return;
+                }
+
+                // APIクライアントを初期化
+                const misskeyApiClient = new api.APIClient({
+                    origin: serverUrl,
+                    credential: token,
+                });
+
+                setClient(misskeyApiClient);
+            } catch (error) {
+                console.error('Failed to initialize API client:', error);
+            } finally {
+                setInitialized(true);
+            }
+        };
+
+        initClient();
+    }, [client, setClient]);
+
+    // 初期化完了まで子要素を表示しない
+    if (!initialized && typeof window !== 'undefined') {
+        return null;
+    }
 
     return <>{children}</>;
 }

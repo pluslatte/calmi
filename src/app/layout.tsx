@@ -5,6 +5,8 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css'
 import ThemeProvider from "@/theme-provider";
 import { useEffect, useState } from "react";
+import { MisskeyApiProvider } from "./MisskeyApiProvider";
+import { EmojiCacheProvider } from "@/lib/emoji/EmojiCacheProvider";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -39,7 +41,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="shortcut icon" href="/favicon.ico" />
       <body>
         <ThemeProvider>
-          {children}
+          <MisskeyApiProvider>
+            <EmojiCacheProvider>
+              {children}
+            </EmojiCacheProvider>
+          </MisskeyApiProvider>
         </ThemeProvider>
       </body>
     </html>
