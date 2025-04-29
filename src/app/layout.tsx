@@ -47,9 +47,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
         <link rel="shortcut icon" href="/icons/favicon.ico" type="image/x-icon" />
-
-        {/* iOS Safari workaround */}
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
       </head>
       <body>
         <ThemeProvider>

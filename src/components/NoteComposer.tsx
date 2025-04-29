@@ -504,6 +504,7 @@ export default function NoteComposer({
                     placeholder={placeholder}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
+                    size="md"
                     autosize
                     minRows={3}
                     maxRows={8}
