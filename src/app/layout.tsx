@@ -32,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <title>calmi</title>
+        {/* for PWA */}
         <meta name="application-name" content="calmi" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -40,12 +41,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#282828" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="manifest" href="/manifest.json" />
 
+        {/* Icons */}
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
         <link rel="shortcut icon" href="/icons/favicon.ico" type="image/x-icon" />
-        <link rel="manifest" href="/manifest.json" />
+
+        {/* iOS Safari workaround */}
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
       </head>
       <body>
         <ThemeProvider>
