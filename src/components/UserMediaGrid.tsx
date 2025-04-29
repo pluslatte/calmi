@@ -231,31 +231,14 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                 }}
                             >
                                 <AspectRatio ratio={1} style={{ flex: 1 }} bg="#f0f0f0">
-                                    <Box
-                                        w="100%"
-                                        h="100%"
-                                        display="flex"
-                                        style={{
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            flexDirection: 'column',
-                                            gap: '8px',
-                                            padding: '10px'
-                                        }}
-                                    >
-                                        <IconVolume size={40} color="#555" />
-                                        <Text size="xs" ta="center" fw={500} lineClamp={2}>
-                                            {file.name}
-                                        </Text>
+                                    <Box pt={"xl"} py={8} px={8} bg="white">
+                                        <AudioPlayer
+                                            key={file.id}
+                                            file={file}
+                                            compact={true}
+                                        />
                                     </Box>
                                 </AspectRatio>
-                                <Box mt="auto" py={8} px={8} bg="white">
-                                    <AudioPlayer
-                                        key={file.id}
-                                        file={file}
-                                        compact={true}
-                                    />
-                                </Box>
                                 <Text
                                     size="xs"
                                     px="xs"
