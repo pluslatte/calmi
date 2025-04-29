@@ -79,12 +79,9 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                 key={file.id}
                                 withBorder
                                 p={0}
-                                style={{
-                                    overflow: 'hidden',
-                                    cursor: 'pointer',
-                                    borderRadius: '4px',
-                                    position: 'relative'
-                                }}
+                                radius="sm"
+                                pos="relative"
+                                style={{ overflow: 'hidden', cursor: 'pointer' }}
                                 onClick={() => openImageModal(file.url)}
                             >
                                 <AspectRatio ratio={1}>
@@ -123,12 +120,9 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                 key={file.id}
                                 withBorder
                                 p={0}
-                                style={{
-                                    overflow: 'hidden',
-                                    cursor: 'pointer',
-                                    borderRadius: '4px',
-                                    position: 'relative'
-                                }}
+                                radius="sm"
+                                pos="relative"
+                                style={{ overflow: 'hidden', cursor: 'pointer' }}
                                 onClick={() => window.open(file.url, '_blank')}
                             >
                                 <AspectRatio ratio={1}>
@@ -144,12 +138,10 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                     py="3px"
                                     bg="rgba(0,0,0,0.6)"
                                     c="white"
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0
-                                    }}
+                                    pos="absolute"
+                                    bottom={0}
+                                    left={0}
+                                    right={0}
                                 >
                                     GIF
                                 </Text>
@@ -164,12 +156,9 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                 key={file.id}
                                 withBorder
                                 p={0}
-                                style={{
-                                    overflow: 'hidden',
-                                    cursor: 'pointer',
-                                    borderRadius: '4px',
-                                    position: 'relative'
-                                }}
+                                radius="sm"
+                                pos="relative"
+                                style={{ overflow: 'hidden', cursor: 'pointer' }}
                                 onClick={() => openVideoModal(file)}
                             >
                                 <AspectRatio ratio={1}>
@@ -215,12 +204,10 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                     py="3px"
                                     bg="rgba(0,0,0,0.6)"
                                     c="white"
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0
-                                    }}
+                                    pos="absolute"
+                                    bottom={0}
+                                    left={0}
+                                    right={0}
                                 >
                                     Video
                                 </Text>
@@ -235,27 +222,20 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                 key={file.id}
                                 withBorder
                                 p={0}
+                                radius="sm"
+                                pos="relative"
                                 style={{
                                     overflow: 'hidden',
-                                    cursor: 'pointer',
-                                    borderRadius: '4px',
-                                    position: 'relative',
                                     display: 'flex',
                                     flexDirection: 'column'
                                 }}
                             >
-                                <AspectRatio ratio={1} style={{
-                                    flex: 1,
-                                    background: '#f0f0f0',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
+                                <AspectRatio ratio={1} style={{ flex: 1 }} bg="#f0f0f0">
                                     <Box
+                                        w="100%"
+                                        h="100%"
+                                        display="flex"
                                         style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             flexDirection: 'column',
@@ -269,7 +249,7 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                         </Text>
                                     </Box>
                                 </AspectRatio>
-                                <Box mt="auto" py={8} px={8} style={{ background: '#fff' }}>
+                                <Box mt="auto" py={8} px={8} bg="white">
                                     <AudioPlayer
                                         key={file.id}
                                         file={file}
@@ -301,20 +281,17 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                             key={file.id}
                             withBorder
                             p={0}
-                            style={{
-                                overflow: 'hidden',
-                                cursor: 'pointer',
-                                borderRadius: '4px',
-                                position: 'relative',
-                            }}
+                            radius="sm"
+                            pos="relative"
+                            style={{ overflow: 'hidden', cursor: 'pointer' }}
                             onClick={() => window.open(file.url, '_blank')}
                         >
                             <AspectRatio ratio={1}>
                                 <Box
+                                    w="100%"
+                                    h="100%"
+                                    display="flex"
                                     style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         flexDirection: 'column',
