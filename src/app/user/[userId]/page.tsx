@@ -49,15 +49,21 @@ export default function UserPage() {
             const userNotes = await getUserNotes(id, { limit: 20 });
             setNotes(userNotes);
 
-            // メディア付きのノートをフィルタリング
-            const withMedia = userNotes.filter(note =>
+            // メディア付きのノートを取得（withFiles=trueを使用）
+            const mediaNotesData = await getUserNotes(id, {
+                limit: 20,
+                withFiles: true
+            });
+
+            // 画像ファイルのみのノートをフィルタリング
+            const withMedia = mediaNotesData.filter(note =>
                 note.files && note.files.length > 0 &&
                 note.files.some(file => file.type.startsWith('image/'))
             );
             setMediaNotes(withMedia);
 
-            // ファイル付きのノートをフィルタリング
-            const withFiles = userNotes.filter(note => note.files && note.files.length > 0);
+            // ファイル付きのノートはすでにAPIから取得済み（withFiles=true）
+            const withFiles = mediaNotesData;
             setFilesNotes(withFiles);
 
         } catch (error) {
@@ -84,24 +90,70 @@ export default function UserPage() {
 
     // 通常ノートの無限スクロール
     const loadMoreNotes = async () => {
-        if (notes.length === 0 || !userId || !client) return [];
+        if (!userId || !client) return [];
 
-        const lastNoteId = notes[notes.length - 1].id;
         try {
-            const moreNotes = await getUserNotes(userId, { limit: 20, untilId: lastNoteId });
-            setNotes(prev => [...prev, ...moreNotes]);
+            // アクティブなタブに応じてロード処理を変更
+            switch (activeTab) {
+                case 'media': {
+                    if (mediaNotes.length === 0) return [];
+                    const lastNoteId = mediaNotes[mediaNotes.length - 1].id;
+                    // メディア付きノートを取得（画像がある前提）
+                    const moreNotes = await getUserNotes(userId, {
+                        limit: 20,
+                        untilId: lastNoteId,
+                        withFiles: true
+                    });
+                    // 画像ファイルのみをフィルタリング
+                    const newMediaNotes = moreNotes.filter(note =>
+                        note.files && note.files.length > 0 &&
+                        note.files.some(file => file.type.startsWith('image/'))
+                    );
+                    setMediaNotes(prev => [...prev, ...newMediaNotes]);
+                    return newMediaNotes;
+                }
+                case 'files': {
+                    if (filesNotes.length === 0) return [];
+                    const lastNoteId = filesNotes[filesNotes.length - 1].id;
+                    // ファイル付きノートを取得
+                    const moreNotes = await getUserNotes(userId, {
+                        limit: 20,
+                        untilId: lastNoteId,
+                        withFiles: true
+                    });
+                    setFilesNotes(prev => [...prev, ...moreNotes]);
+                    return moreNotes;
+                }
+                default: {
+                    // 通常のノート（全てのノート）
+                    if (notes.length === 0) return [];
+                    const lastNoteId = notes[notes.length - 1].id;
+                    const moreNotes = await getUserNotes(userId, {
+                        limit: 20,
+                        untilId: lastNoteId
+                    });
+                    setNotes(prev => [...prev, ...moreNotes]);
 
-            // メディア付きとファイル付きのリストも更新
-            const newMediaNotes = moreNotes.filter(note =>
-                note.files && note.files.length > 0 &&
-                note.files.some(file => file.type.startsWith('image/'))
-            );
-            setMediaNotes(prev => [...prev, ...newMediaNotes]);
+                    // メディア付きとファイル付きのノートリストも更新
+                    if (moreNotes.some(note => note.files && note.files.length > 0)) {
+                        // ファイル付きのノートがある場合のみ処理
+                        const newMediaNotes = moreNotes.filter(note =>
+                            note.files && note.files.length > 0 &&
+                            note.files.some(file => file.type.startsWith('image/'))
+                        );
+                        if (newMediaNotes.length > 0) {
+                            setMediaNotes(prev => [...prev, ...newMediaNotes]);
+                        }
 
-            const newFilesNotes = moreNotes.filter(note => note.files && note.files.length > 0);
-            setFilesNotes(prev => [...prev, ...newFilesNotes]);
+                        const newFilesNotes = moreNotes.filter(note => note.files && note.files.length > 0);
+                        if (newFilesNotes.length > 0) {
+                            setFilesNotes(prev => [...prev, ...newFilesNotes]);
+                        }
+                    }
 
-            return moreNotes;
+                    return moreNotes;
+                }
+            }
         } catch (error) {
             console.error('Failed to load more notes:', error);
             return [];
@@ -122,7 +174,7 @@ export default function UserPage() {
             case 'files':
                 return filesNotes.length > 0 ? (
                     filesNotes.map(note => (
-                        <Box key={note.id} mb="md">
+                        <Box key={"filenotes-" + note.id} mb="md">
                             <MisskeyNote note={note} />
                             <MisskeyNoteActions note={note} />
                             <Divider mt="xs" />
@@ -135,7 +187,7 @@ export default function UserPage() {
                 return notes.length > 0 ? (
                     notes.map((note, index) => {
                         return (
-                            <Box key={note.id} mb="md">
+                            <Box key={"defaultnotes-" + note.id} mb="md">
                                 <MisskeyNote note={note} />
                                 <MisskeyNoteActions note={note} />
                                 <Divider mt="xs" />

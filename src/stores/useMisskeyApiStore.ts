@@ -78,7 +78,7 @@ interface MisskeyApiActions {
 
     // ユーザー関連のアクション
     getUserProfile: (userId: string) => Promise<UserDetailed>;
-    getUserNotes: (userId: string, params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
+    getUserNotes: (userId: string, params?: { limit?: number; untilId?: string; withFiles?: boolean }) => Promise<Note[]>;
 }
 
 // デフォルト値
@@ -440,7 +440,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         },
 
         // ユーザーの投稿を取得
-        getUserNotes: async (userId: string, params?: { limit?: number; untilId?: string }) => {
+        getUserNotes: async (userId: string, params?: { limit?: number; untilId?: string; withFiles?: boolean }) => {
             return await get().executeApiRequest<Note[]>(
                 'users/notes',
                 { userId, ...params },

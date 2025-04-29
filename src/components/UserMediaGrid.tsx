@@ -40,7 +40,7 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
             <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }}>
                 {allImages.map((file) => (
                     <Paper
-                        key={file.id}
+                        key={"mediagrid-" + file.id}
                         withBorder
                         p={0}
                         style={{
