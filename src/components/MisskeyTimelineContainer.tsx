@@ -33,7 +33,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     };
 
     return (
-        <Flex direction="column" h="100%">
+        <Flex direction="column" h="100%" style={{ overflowX: 'hidden' }}>
             <Tabs
                 value={timelineType}
                 variant="default"

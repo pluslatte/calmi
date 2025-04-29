@@ -184,7 +184,7 @@ export default function UserPage() {
     }
 
     return (
-        <Container size="md" py="lg" style={{ position: 'relative' }}>
+        <Container size="md" py="lg" style={{ position: 'relative', overflowX: 'hidden' }}>
             <LoadingOverlay visible={loading} overlayProps={{ radius: "sm", blur: 2 }} />
 
             {user && <UserProfile user={user} />}

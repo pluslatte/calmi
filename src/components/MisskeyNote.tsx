@@ -121,29 +121,43 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                     />
                 </Link>
                 <Box miw={0} flex={1}>
-                    <Flex justify="space-between" align="center" mb={2}>
-                        <Link
-                            href={`/user/${quotedNote.user.id}`}
-                            style={{ textDecoration: 'none', color: 'inherit', zIndex: 3, position: 'relative' }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                // 既に同じユーザーページにいる場合はページ遷移をキャンセル
-                                if (quotedNote.user.id === window.location.pathname.split('/').pop()) {
-                                    e.preventDefault();
-                                    window.scrollTo(0, 0);
-                                }
-                            }}
-                        >
-                            <Text size="sm" fw={600} lineClamp={1} style={{ cursor: 'pointer' }}>
-                                {quotedNote.user.name || quotedNote.user.username}
+                    {/* ユーザー情報とタイムスタンプ */}
+                    <Flex justify="space-between" align="flex-start" mb={4}>
+                        {/* ユーザー情報（2段表示） */}
+                        <Box style={{ minWidth: 0, maxWidth: 'calc(100% - 80px)' }}>
+                            {/* ユーザー名をリンクに */}
+                            <Link
+                                href={`/user/${note.user.id}`}
+                                style={{ textDecoration: 'none', color: 'inherit', zIndex: 2, position: 'relative' }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (note.user.id === window.location.pathname.split('/').pop()) {
+                                        e.preventDefault();
+                                        window.scrollTo(0, 0);
+                                    }
+                                }}
+                            >
+                                <Text size="md" lineClamp={1} style={{
+                                    cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word'
+                                }}>
+                                    <MfmObject
+                                        mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
+                                        assets={{ host: note.user.host, emojis: note.emojis }}
+                                    />
+                                </Text>
+                            </Link>
+                            {/* ユーザーID */}
+                            <Text size="xs" c="dimmed" lineClamp={1} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                                @{note.user.username}
+                                {note.user.host ? `@${note.user.host}` : ''}
                             </Text>
-                        </Link>
-                        <AutoRefreshTimestamp iso={quotedNote.createdAt} />
+                        </Box>
+
+                        {/* タイムスタンプ */}
+                        <Box>
+                            <AutoRefreshTimestamp iso={note.createdAt} />
+                        </Box>
                     </Flex>
-                    <Text size="xs" c="dimmed" mb={4} lineClamp={1}>
-                        @{quotedNote.user.username}
-                        {quotedNote.user.host ? `@${quotedNote.user.host}` : ''}
-                    </Text>
                     <Box>
                         <MfmObject
                             mfmNodes={mfm.parse(quotedNote.text ? quotedNote.text : "")}
