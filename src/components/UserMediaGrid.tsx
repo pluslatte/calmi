@@ -1,4 +1,4 @@
-import { SimpleGrid, Image, AspectRatio, Box, Paper, Text, Group, ActionIcon, Tooltip } from "@mantine/core";
+import { SimpleGrid, Image, AspectRatio, Box, Paper, Text, Group, ActionIcon, Tooltip, Flex } from "@mantine/core";
 import { Note, DriveFile } from "misskey-js/entities.js";
 import { useState, useEffect } from "react";
 import ImageModal from "./ImageModal";
@@ -169,18 +169,15 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                             fit="cover"
                                         />
                                     ) : (
-                                        <Box
+                                        <Flex
                                             bg="dark"
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}
+                                            w="100%"
+                                            h="100%"
+                                            align="center"
+                                            justify="center"
                                         >
                                             <IconPlayerPlay size={40} color="#fff" />
-                                        </Box>
+                                        </Flex>
                                     )}
                                 </AspectRatio>
                                 <ActionIcon
@@ -270,17 +267,14 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                             onClick={() => window.open(file.url, '_blank')}
                         >
                             <AspectRatio ratio={1}>
-                                <Box
+                                <Flex
                                     w="100%"
                                     h="100%"
-                                    display="flex"
-                                    style={{
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'column',
-                                        gap: '10px',
-                                        padding: '15px'
-                                    }}
+                                    align="center"
+                                    justify="center"
+                                    direction="column"
+                                    gap="10px"
+                                    p="15px"
                                 >
                                     <IconFile size={40} color="#555" />
                                     <Tooltip label={file.name}>
@@ -291,7 +285,7 @@ export default function UserMediaGrid({ notes }: UserMediaGridProps) {
                                     <Text size="xs" c="dimmed">
                                         {file.type.split('/')[1] || 'File'}
                                     </Text>
-                                </Box>
+                                </Flex>
                             </AspectRatio>
                             <Text
                                 size="xs"
