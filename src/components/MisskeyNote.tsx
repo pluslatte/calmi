@@ -127,11 +127,11 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                         <Box style={{ minWidth: 0, maxWidth: 'calc(100% - 80px)' }}>
                             {/* ユーザー名をリンクに */}
                             <Link
-                                href={`/user/${note.user.id}`}
+                                href={`/user/${quotedNote.user.id}`}
                                 style={{ textDecoration: 'none', color: 'inherit', zIndex: 2, position: 'relative' }}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    if (note.user.id === window.location.pathname.split('/').pop()) {
+                                    if (quotedNote.user.id === window.location.pathname.split('/').pop()) {
                                         e.preventDefault();
                                         window.scrollTo(0, 0);
                                     }
@@ -141,21 +141,21 @@ const MisskeyNote = memo(function MisskeyNote({ note }: { note: Note }) {
                                     cursor: 'pointer', wordBreak: 'break-word', overflowWrap: 'break-word'
                                 }}>
                                     <MfmObject
-                                        mfmNodes={mfm.parse(note.user.name ? `**${note.user.name}**` : "")}
-                                        assets={{ host: note.user.host, emojis: note.emojis }}
+                                        mfmNodes={mfm.parse(quotedNote.user.name ? `**${quotedNote.user.name}**` : "")}
+                                        assets={{ host: quotedNote.user.host, emojis: quotedNote.emojis }}
                                     />
                                 </Text>
                             </Link>
                             {/* ユーザーID */}
                             <Text size="xs" c="dimmed" lineClamp={1} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                                @{note.user.username}
-                                {note.user.host ? `@${note.user.host}` : ''}
+                                @{quotedNote.user.username}
+                                {quotedNote.user.host ? `@${quotedNote.user.host}` : ''}
                             </Text>
                         </Box>
 
                         {/* タイムスタンプ */}
                         <Box>
-                            <AutoRefreshTimestamp iso={note.createdAt} />
+                            <AutoRefreshTimestamp iso={quotedNote.createdAt} />
                         </Box>
                     </Flex>
                     <Box>
