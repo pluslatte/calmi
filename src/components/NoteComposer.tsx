@@ -547,7 +547,7 @@ export default function NoteComposer({
                     </Group>
                 )}
 
-                <Group justify="right">
+                <Group justify="center" >
                     <Group>
                         {/* ファイル添付ボタン */}
                         <FileButton
@@ -609,16 +609,10 @@ export default function NoteComposer({
                         </Box>
                     </Group>
 
-                    <Group>
-                        {isUploading && (
-                            <Group gap="xs">
-                                <Loader size="xs" />
-                                <Text size="xs" c="dimmed">アップロード中...</Text>
-                            </Group>
-                        )}
-
+                    <Group flex={1}>
                         <Tooltip label="送信（Ctrl+Enter）">
                             <Button
+                                w="100%"
                                 onClick={handleSubmit}
                                 loading={isSubmitting || apiState.loading}
                                 disabled={(!text.trim() && uploadedFiles.length === 0) || isSubmitting || isUploading}
@@ -631,9 +625,17 @@ export default function NoteComposer({
 
                 {/* 文字数カウンターと添付ファイル数 */}
                 <Group justify="space-between">
-                    <Text size="xs" c="dimmed">
-                        {uploadedFiles.length > 0 ? `ファイル: ${uploadedFiles.length}/${MAX_FILES}` : ''}
-                    </Text>
+                    {isUploading ? (
+                        <Group gap="xs">
+                            <Loader size="xs" />
+                            <Text size="xs" c="dimmed">アップロード中...</Text>
+                        </Group>
+                    ) : (
+                        <Text size="xs" c="dimmed">
+                            {uploadedFiles.length > 0 ? `ファイル: ${uploadedFiles.length}/${MAX_FILES}` : ''}
+                        </Text>
+                    )}
+
                     <Text size="xs" c="dimmed">
                         {text.length} 文字
                     </Text>
