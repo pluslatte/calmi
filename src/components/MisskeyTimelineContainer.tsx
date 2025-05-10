@@ -2,7 +2,7 @@
 import { Box, Flex, ScrollArea, Tabs, Tooltip } from "@mantine/core";
 import React, { memo, useEffect, useRef } from "react";
 import MisskeyTimeline from "@/components/MisskeyTimeline";
-import NotificationList from "@/components/NotificationList";
+import TimelineNotifications from "@/components/timeline/TimelineNotifications";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer, IconBell } from "@tabler/icons-react";
 import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
 import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
@@ -80,10 +80,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
                             containerRef={containerRef}
                         />
                     ) : (
-                        <Box pt="xs">
-                            {/* 通知タブの表示 */}
-                            <NotificationList />
-                        </Box>
+                        <TimelineNotifications />
                     )}
                 </Box>
             </ScrollArea>
