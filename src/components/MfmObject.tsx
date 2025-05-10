@@ -42,6 +42,17 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
             return node.props.code;
         } else if (node.type === 'search') {
             return `🔍 ${node.props.query}`;
+        } else if (node.type === 'blockCode') {
+            return node.props.code;
+        } else if (node.type === 'mathBlock' || node.type === 'mathInline') {
+            return node.props.formula;
+        } else if (node.type === 'fn') {
+            // 関数記法のテキスト表現
+            const argsStr = Object.entries(node.props.args)
+                .map(([key, value]) => value === true ? key : `${key}=${value}`)
+                .join(' ');
+            const childContent = node.children.map(getTextContent).join('');
+            return `$[${node.props.name}${argsStr ? ' ' + argsStr : ''}(${childContent})]`;
         }
         return '';
     }
@@ -176,11 +187,19 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
             case "plain":
                 return renderNodes(node.children);
             case "blockCode":
+                return <Box component="span" c="dimmed" style={{ display: 'block', whiteSpace: 'pre-wrap' }}>{node.props.code}</Box>;
             case "mathBlock":
+                return <Box component="span" c="dimmed">{node.props.formula}</Box>;
             case "center":
+                return <Box component="span" c="dimmed">{renderNodes(node.children)}</Box>;
             case "mathInline":
+                return <Box component="span" c="dimmed">{node.props.formula}</Box>;
             case "fn":
-                return <Box component="span" style={{ color: 'red' }}>{`Unsupported node: ${node.type}`}</Box>;
+                // 関数名と引数の文字列表現を作成
+                const argsStr = Object.entries(node.props.args)
+                    .map(([key, value]) => value === true ? key : `${key}=${value}`)
+                    .join(' ');
+                return <Box component="span" c="dimmed">{`$[${node.props.name}${argsStr ? ' ' + argsStr : ''}(${renderNodes(node.children)})]`}</Box>;
             default:
                 return <Box component="span" style={{ color: 'red' }}>{`Unknown node: ${(node as any).type}`}</Box>;
         }
