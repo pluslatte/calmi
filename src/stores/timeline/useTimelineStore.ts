@@ -138,7 +138,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             };
 
             // ノート削除イベントのハンドラ
-            const handleNoteDeleted = (event: { id: string; type: 'deleted' }) => {
+            const handleNoteDeleted = (event: NoteUpdatedEvent) => {
                 // タイムラインからノートを削除
                 get().removeNoteFromTimeline(event.id);
                 console.log(`Note deleted from timeline: ${event.id}`);
@@ -595,7 +595,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                     // リノートの場合は関連マップも更新
                     if (noteToRemove.renote) {
                         const renoteId = noteToRemove.renote.id;
-                        
+
                         // 関連マップから削除
                         if (state.renoteRelationMap[renoteId]) {
                             state.renoteRelationMap[renoteId] = state.renoteRelationMap[renoteId]
