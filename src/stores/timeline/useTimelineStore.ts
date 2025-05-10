@@ -57,6 +57,7 @@ interface TimelineActions {
 
     // ノート管理
     addNoteOnTop: (note: Note) => void;
+    removeNoteFromTimeline: (noteId: string) => void;
 
     // 自動更新関連
     setAutoUpdateEnabled: (enabled: boolean) => void;
@@ -136,6 +137,13 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 }
             };
 
+            // ノート削除イベントのハンドラ
+            const handleNoteDeleted = (event: { id: string; type: 'deleted' }) => {
+                // タイムラインからノートを削除
+                get().removeNoteFromTimeline(event.id);
+                console.log(`Note deleted from timeline: ${event.id}`);
+            };
+
             // 状態のリセット
             set(state => {
                 state.notes = [];
@@ -165,6 +173,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                         },
                         handleNoteUpdated,
                         (updatedNote) => { get().updateRenoteSource(updatedNote); },
+                        handleNoteDeleted // 削除イベントハンドラを追加
                     );
                     state.stream.connect();
                 }
@@ -571,6 +580,58 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                     });
                 });
             }
+        },
+
+        // タイムラインからノートを削除するアクション
+        removeNoteFromTimeline: (noteId: string) => {
+            set(state => {
+                // ノートを配列から削除
+                const noteIndex = state.notes.findIndex(note => note.id === noteId);
+                if (noteIndex !== -1) {
+                    // ノートの購読を解除
+                    const noteToRemove = state.notes[noteIndex];
+                    state.stream?.unsubscribeFromNote(noteToRemove.id);
+
+                    // リノートの場合は関連マップも更新
+                    if (noteToRemove.renote) {
+                        const renoteId = noteToRemove.renote.id;
+                        
+                        // 関連マップから削除
+                        if (state.renoteRelationMap[renoteId]) {
+                            state.renoteRelationMap[renoteId] = state.renoteRelationMap[renoteId]
+                                .filter(id => id !== noteToRemove.id);
+
+                            // 空になったら項目自体を削除
+                            if (state.renoteRelationMap[renoteId].length === 0) {
+                                delete state.renoteRelationMap[renoteId];
+                                // リノート元の購読も解除（他に参照がなければ）
+                                state.stream?.unsubscribeFromNote(renoteId);
+                            }
+                        }
+                    }
+
+                    // スキップされたノートグループからも削除
+                    state.skippedNotesGroups.forEach(group => {
+                        const skipIndex = group.skippedNoteIds.indexOf(noteId);
+                        if (skipIndex !== -1) {
+                            group.skippedNoteIds.splice(skipIndex, 1);
+                            group.count -= 1;
+                        }
+                    });
+
+                    // 表示範囲外ノートからも削除
+                    if (state.trimmedNotesGroup) {
+                        const trimIndex = state.trimmedNotesGroup.trimmedNoteIds.indexOf(noteId);
+                        if (trimIndex !== -1) {
+                            state.trimmedNotesGroup.trimmedNoteIds.splice(trimIndex, 1);
+                            state.trimmedNotesGroup.count -= 1;
+                        }
+                    }
+
+                    // タイムラインから削除
+                    state.notes.splice(noteIndex, 1);
+                }
+            });
         }
     }))
 );

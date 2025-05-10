@@ -6,6 +6,12 @@ import { Connection } from "misskey-js/streaming.js";
 import { NoteUpdatedEvent } from "misskey-js/streaming.types.js";
 import { TimelineType } from "@/types/misskey.types";
 
+// 削除イベントの型を定義
+export interface NoteDeletedEvent {
+    id: string;
+    type: 'deleted';
+}
+
 export class MisskeyStream {
     private stream: Stream;
     private apiClient: api.APIClient;
@@ -22,6 +28,7 @@ export class MisskeyStream {
     private subscribedNoteIds: Set<string> = new Set();
     private onNoteUpdated: ((event: NoteUpdatedEvent) => void) | null = null;
     private updateRenoteSource: ((note: Note) => void) | null = null;
+    private onNoteDeleted: ((event: NoteDeletedEvent) => void) | null = null;
 
     constructor(
         misskeyApiClient: api.APIClient,
@@ -29,6 +36,7 @@ export class MisskeyStream {
         private onNewNote: (note: Note) => void,
         noteUpdateCallback?: (event: NoteUpdatedEvent) => void,
         renoteSourceUpdateCallback?: (note: Note) => void,
+        noteDeletedCallback?: (event: NoteDeletedEvent) => void,
     ) {
         if (misskeyApiClient.credential == null) {
             throw Error('misskeyApiClient must have credential');
@@ -40,6 +48,9 @@ export class MisskeyStream {
         }
         if (renoteSourceUpdateCallback) {
             this.updateRenoteSource = renoteSourceUpdateCallback;
+        }
+        if (noteDeletedCallback) {
+            this.onNoteDeleted = noteDeletedCallback;
         }
     }
 
@@ -77,9 +88,9 @@ export class MisskeyStream {
 
             // リアクションイベントの購読
             this.stream.on('noteUpdated', (data: { id: string; type: string; body: any }) => {
-                if (data.id === noteId && this.onNoteUpdated) {
+                if (data.id === noteId) {
                     // ノート更新時にコールバックを呼び出す
-                    if (data.type === 'reacted' || data.type === 'unreacted') {
+                    if ((data.type === 'reacted' || data.type === 'unreacted') && this.onNoteUpdated) {
                         // ノート情報を取得して更新
                         this.onNoteUpdated({
                             id: noteId,
@@ -98,6 +109,14 @@ export class MisskeyStream {
                                     console.error('Failed to fetch updated note:', err);
                                 });
                         }
+                    }
+                    
+                    // ノート削除イベントの処理
+                    if (data.type === 'deleted' && this.onNoteDeleted) {
+                        this.onNoteDeleted({
+                            id: noteId,
+                            type: 'deleted'
+                        });
                     }
                 }
             });

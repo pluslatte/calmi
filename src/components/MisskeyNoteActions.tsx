@@ -7,6 +7,7 @@ import { notifications } from "@mantine/notifications";
 import EmojiNode from "./EmojiNode";
 import QuoteNoteModal from "./QuoteNoteModal";
 import ReplyNoteModal from "./ReplyNoteModal";
+import { useTimelineStore } from "@/stores/timeline/useTimelineStore";
 
 // プロップからonReactionUpdateを削除
 interface MisskeyNoteActionsProps {
@@ -311,8 +312,19 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
             // モーダルを閉じる
             setDeleteModalOpen(false);
 
-            // ここで削除後の処理（例: タイムラインのリフレッシュなど）を行うことも可能
-            // 現在の実装ではページのリロードなどは行わない
+            // ノートはサブスクライブされているので、通常は自動的にタイムラインから削除される
+            // ただし、サブスクライブが切れている可能性もあるため、
+            // タイムラインストアからノートを削除するコードを明示的に追加
+            try {
+                // タイムラインストアから直接ノート削除処理を呼び出す
+                const { removeNoteFromTimeline } = useTimelineStore.getState();
+                if (typeof removeNoteFromTimeline === 'function') {
+                    removeNoteFromTimeline(localNote.id);
+                }
+            } catch (err) {
+                console.warn('タイムライン更新エラー:', err);
+                // エラーがあってもユーザーには通知しない（すでに削除は成功しているため）
+            }
         } catch (error) {
             console.error("ノート削除エラー:", error);
             notifications.show({
