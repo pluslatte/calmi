@@ -1,5 +1,5 @@
 import { Avatar, Box, Group, Menu, ActionIcon, Text, Skeleton, Paper, Flex, Switch, Modal, Button } from '@mantine/core';
-import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react';
+import { IconLogout, IconSettings, IconUser, IconPencil } from '@tabler/icons-react';
 import { useMisskeyApiStore } from '@/stores/useMisskeyApiStore';
 import { useEffect, useState } from 'react';
 import { User } from 'misskey-js/entities.js';
@@ -39,8 +39,8 @@ export default function UserFooter() {
         router.push("/");
     };
 
-    // モバイル用投稿モーダル
-    const renderMobileNoteModal = () => (
+    // ノート投稿モーダル
+    const renderNoteModal = () => (
         <Modal
             opened={isModalOpen}
             onClose={() => setIsModalOpen(false)}
@@ -96,6 +96,15 @@ export default function UserFooter() {
                     )}
 
                     <Group>
+                        {/* ノート投稿ボタン */}
+                        <ActionIcon 
+                            variant="outline" 
+                            onClick={() => setIsModalOpen(true)}
+                            title="ノートを投稿"
+                        >
+                            <IconPencil size={18} />
+                        </ActionIcon>
+                        
                         <Menu shadow="md" width={240} position="top-end" closeOnItemClick={false}>
                             <Menu.Target>
                                 <ActionIcon variant="outline">
@@ -132,8 +141,8 @@ export default function UserFooter() {
                 </Flex>
             </Paper>
 
-            {/* モバイル用投稿モーダル */}
-            {renderMobileNoteModal()}
+            {/* ノート投稿モーダル */}
+            {renderNoteModal()}
         </>
     );
 }
