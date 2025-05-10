@@ -1,10 +1,9 @@
 // src/components/notifications/NotificationList.tsx
-import { Box, Divider, Loader, Paper, Text, Title, ActionIcon, Group } from "@mantine/core";
+import { Box, Loader, Paper, ScrollArea, Text } from "@mantine/core";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { IconBell, IconCheck } from "@tabler/icons-react";
 import NotificationItem from "./NotificationItem";
 
 interface NotificationListProps {
@@ -81,9 +80,9 @@ const NotificationList: React.FC<NotificationListProps> = ({ withContainer = tru
             <>
                 {notifications.map((notification) => (
                     <Box key={notification.id} mb="xs">
-                        <NotificationItem 
-                            notification={notification} 
-                            lastReadAt={lastReadAt} 
+                        <NotificationItem
+                            notification={notification}
+                            lastReadAt={lastReadAt}
                             handleViewNote={handleViewNote}
                             withBorder={withContainer}
                         />
@@ -96,14 +95,10 @@ const NotificationList: React.FC<NotificationListProps> = ({ withContainer = tru
     // ラッパーの有無で分岐
     if (withContainer) {
         return (
-            <Paper p="md" withBorder h="100%">
-                <Box style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <Box style={{ flex: 1, overflow: 'hidden' }}>
-                        <Box style={{ height: '100%', overflowY: 'auto' }}>
-                            {renderContent()}
-                        </Box>
-                    </Box>
-                </Box>
+            <Paper p="md" withBorder style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <ScrollArea h="100%" type="scroll" style={{ flex: 1 }}>
+                    {renderContent()}
+                </ScrollArea>
             </Paper>
         );
     } else {
