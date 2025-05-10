@@ -81,6 +81,7 @@ export default function UserFooter() {
                         </Group>
                     ) : (
                         <Group>
+                            {/* ユーザー情報 */}
                             <Avatar
                                 src={userInfo?.avatarUrl}
                                 size="md"
@@ -96,15 +97,6 @@ export default function UserFooter() {
                     )}
 
                     <Group>
-                        {/* ノート投稿ボタン */}
-                        <ActionIcon 
-                            variant="outline" 
-                            onClick={() => setIsModalOpen(true)}
-                            title="ノートを投稿"
-                        >
-                            <IconPencil size={18} />
-                        </ActionIcon>
-                        
                         <Menu shadow="md" width={240} position="top-end" closeOnItemClick={false}>
                             <Menu.Target>
                                 <ActionIcon variant="outline">
@@ -137,6 +129,15 @@ export default function UserFooter() {
                                 </Menu.Item>
                             </Menu.Dropdown>
                         </Menu>
+
+                        {/* ノート投稿ボタン */}
+                        <Button
+                            variant="filled"
+                            onClick={() => setIsModalOpen(true)}
+                            title="ノートを投稿"
+                        >
+                            <IconPencil size={18} />
+                        </Button>
                     </Group>
                 </Flex>
             </Paper>
