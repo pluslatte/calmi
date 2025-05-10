@@ -2,7 +2,7 @@ import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rg
 import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile, IconCheck, IconLink, IconMessageCircle, IconTrash } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
-import { Note, User } from "misskey-js/entities.js";
+import { Note } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
 import EmojiNode from "./EmojiNode";
 import QuoteNoteModal from "./QuoteNoteModal";
@@ -20,7 +20,6 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const [quoteModalOpen, setQuoteModalOpen] = useState(false);
     const [replyModalOpen, setReplyModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [isOwnNote, setIsOwnNote] = useState(false);
 
     const { createReaction, deleteReaction, apiState, createRenote, deleteNote, getUserInfo } = useMisskeyApiStore();
@@ -37,8 +36,6 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
         const fetchUserInfo = async () => {
             try {
                 const user = await getUserInfo();
-                setCurrentUser(user);
-                
                 // 投稿者のIDと現在のユーザーIDを比較して自分のノートかを判定
                 const noteUserId = isPlainRepost ? localNote.renote?.user.id : localNote.user.id;
                 setIsOwnNote(user.id === noteUserId);
@@ -46,7 +43,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                 console.error("ユーザー情報取得エラー:", error);
             }
         };
-        
+
         fetchUserInfo();
     }, [localNote]);
 
@@ -298,22 +295,22 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
             });
         }
     }
-    
+
     // ノート削除機能
     const handleDeleteNote = async () => {
         try {
             await deleteNote(localNote.id);
-            
+
             // 削除成功時の処理
             notifications.show({
                 title: 'ノート削除',
                 message: 'ノートを削除しました',
                 color: 'green',
             });
-            
+
             // モーダルを閉じる
             setDeleteModalOpen(false);
-            
+
             // ここで削除後の処理（例: タイムラインのリフレッシュなど）を行うことも可能
             // 現在の実装ではページのリロードなどは行わない
         } catch (error) {
@@ -456,7 +453,7 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
             </Group>
 
             {renderReactions()}
-            
+
             {/* 削除確認モーダル */}
             <Modal
                 opened={deleteModalOpen}
