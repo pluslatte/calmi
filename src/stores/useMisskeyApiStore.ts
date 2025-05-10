@@ -65,7 +65,7 @@ interface MisskeyApiActions {
 
     uploadFile: (file: File) => Promise<{ id: string; name: string; url: string; }>;
     createNoteWithMedia: (
-        text: string,
+        text: string | null,
         fileIds: string[],
         visibility?: 'public' | 'home' | 'followers' | 'specified',
         cw?: string | null,

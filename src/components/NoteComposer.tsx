@@ -309,6 +309,8 @@ export default function NoteComposer({
             if (uploadedFiles.length > 0) {
                 setIsUploading(true);
                 try {
+                    const textToUpload = text.length > 0 ? text : null;
+
                     // 複数ファイルを順次アップロード
                     const uploadPromises = uploadedFiles.map(filePreview => uploadFile(filePreview.file));
                     const uploadedFileResults = await Promise.all(uploadPromises);
@@ -316,7 +318,7 @@ export default function NoteComposer({
 
                     // ファイル付きノートを作成
                     await createNoteWithMedia(
-                        text,
+                        textToUpload,
                         uploadedFileResults.map(file => file.id),
                         visibility,
                         cwText,
