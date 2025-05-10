@@ -2,10 +2,11 @@
 import { Box, Flex, ScrollArea, Tabs, Tooltip } from "@mantine/core";
 import React, { memo, useEffect, useRef } from "react";
 import MisskeyTimeline from "@/components/MisskeyTimeline";
-import { IconGalaxy, IconHome, IconHomePlus, IconServer } from "@tabler/icons-react";
+import NotificationList from "@/components/NotificationList";
+import { IconGalaxy, IconHome, IconHomePlus, IconServer, IconBell } from "@tabler/icons-react";
 import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
 import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
-import { TimelineType } from "@/types/misskey.types";
+import { TabType, TimelineType } from "@/types/misskey.types";
 
 const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     containerRef
@@ -18,15 +19,28 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     const updateButtonOffset = useTimelineUiStore(state => state.updateButtonOffset);
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    
+    // 現在選択されているタブ（タイムラインタイプまたは通知）
+    const [activeTab, setActiveTab] = React.useState<TabType>(timelineType);
+
+    // タイムラインタイプが変更されたらactiveTabも更新
+    useEffect(() => {
+        setActiveTab(timelineType);
+    }, [timelineType]);
 
     // コンポーネントのマウント時にボタン位置を更新
     useEffect(() => {
         updateButtonOffset(containerRef);
     }, [containerRef, updateButtonOffset]);
 
-    // タイムラインタイプの変更ハンドラ
-    const handleTimelineTypeChange = (value: string | null) => {
-        if (value && ['home', 'social', 'local', 'global'].includes(value)) {
+    // タブ変更ハンドラ
+    const handleTabChange = (value: string | null) => {
+        if (!value) return;
+        
+        setActiveTab(value as TabType);
+        
+        // 通知以外のタブが選択された場合は従来のタイムラインタイプとして扱う
+        if (value !== 'notifications' && ['home', 'social', 'local', 'global'].includes(value)) {
             changeTimelineType(value as TimelineType);
             // ストア内のchangeTimelineTypeがローカルストレージへの保存を担当
         }
@@ -35,9 +49,9 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     return (
         <Flex direction="column" h="100%" style={{ overflowX: 'hidden' }}>
             <Tabs
-                value={timelineType}
+                value={activeTab}
                 variant="default"
-                onChange={handleTimelineTypeChange}
+                onChange={handleTabChange}
             >
                 <Tabs.List justify="center" px="md">
                     <Tooltip label="ホーム">
@@ -52,15 +66,25 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
                     <Tooltip label="グローバル">
                         <Tabs.Tab value="global" leftSection={<IconGalaxy size={18} />}></Tabs.Tab>
                     </Tooltip>
+                    <Tooltip label="通知">
+                        <Tabs.Tab value="notifications" leftSection={<IconBell size={18} />}></Tabs.Tab>
+                    </Tooltip>
                 </Tabs.List>
             </Tabs>
             <ScrollArea viewportRef={scrollAreaRef} flex={1} type="scroll">
                 <Box maw="calc(100vw - 8px)">
-                    <MisskeyTimeline
-                        timelineType={timelineType}
-                        scrollAreaRef={scrollAreaRef}
-                        containerRef={containerRef}
-                    />
+                    {activeTab !== 'notifications' ? (
+                        <MisskeyTimeline
+                            timelineType={timelineType}
+                            scrollAreaRef={scrollAreaRef}
+                            containerRef={containerRef}
+                        />
+                    ) : (
+                        <Box pt="xs">
+                            {/* 通知タブの表示 */}
+                            <NotificationList />
+                        </Box>
+                    )}
                 </Box>
             </ScrollArea>
         </Flex>
