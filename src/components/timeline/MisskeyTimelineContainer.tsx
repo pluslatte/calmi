@@ -1,7 +1,7 @@
 // src/components/MisskeyTimelineContainer.tsx
 import { Box, Flex, ScrollArea, Tabs, Tooltip } from "@mantine/core";
 import React, { memo, useEffect, useRef } from "react";
-import MisskeyTimeline from "@/components/MisskeyTimeline";
+import MisskeyTimeline from "@/components/timeline/MisskeyTimeline";
 import TimelineNotifications from "@/components/timeline/TimelineNotifications";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer, IconBell } from "@tabler/icons-react";
 import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
@@ -19,7 +19,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     const updateButtonOffset = useTimelineUiStore(state => state.updateButtonOffset);
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    
+
     // 現在選択されているタブ（タイムラインタイプまたは通知）
     const [activeTab, setActiveTab] = React.useState<TabType>(timelineType);
 
@@ -36,9 +36,9 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     // タブ変更ハンドラ
     const handleTabChange = (value: string | null) => {
         if (!value) return;
-        
+
         setActiveTab(value as TabType);
-        
+
         // 通知以外のタブが選択された場合は従来のタイムラインタイプとして扱う
         if (value !== 'notifications' && ['home', 'social', 'local', 'global'].includes(value)) {
             changeTimelineType(value as TimelineType);

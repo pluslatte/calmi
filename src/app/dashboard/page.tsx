@@ -1,11 +1,10 @@
 'use client';
 
-import { Box, Container, Grid, Modal, ActionIcon, Flex } from "@mantine/core";
+import { Box, Container, Grid, Flex } from "@mantine/core";
 import { useRef, useState, useEffect } from "react";
-import MisskeyTimelineContainer from "@/components/MisskeyTimelineContainer";
-import { IconPencil } from '@tabler/icons-react';
+import MisskeyTimelineContainer from "@/components/timeline/MisskeyTimelineContainer";
 import NoteComposer from "@/components/NoteComposer";
-import NotificationList from "@/components/NotificationList";
+import NotificationList from "@/components/notifications/NotificationList";
 
 export default function Dashboard() {
     const [isMobile, setIsMobile] = useState(false);
