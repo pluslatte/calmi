@@ -1,8 +1,8 @@
 'use client'
 
-import { Anchor, Blockquote, Code, Text, Box } from "@mantine/core";
+import { Anchor, Blockquote, Code, Box } from "@mantine/core";
 import * as mfm from 'mfm-js';
-import React, { ReactElement, ReactNode } from "react";
+import React, { ReactElement } from "react";
 import EmojiNode from "./EmojiNode";
 
 // 安全でないURLをチェックする関数
@@ -10,7 +10,7 @@ const isSafeUrl = (url: string): boolean => {
     // JavaScriptプロトコルなどの危険なプロトコルをブロック
     const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
     const lowerUrl = url.toLowerCase().trim();
-    
+
     return !dangerousProtocols.some(protocol => lowerUrl.startsWith(protocol));
 };
 
