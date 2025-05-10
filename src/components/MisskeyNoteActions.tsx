@@ -1,8 +1,8 @@
-import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rgba, Menu } from "@mantine/core";
-import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile, IconCheck, IconLink, IconMessageCircle } from "@tabler/icons-react";
+import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rgba, Menu, Modal, Button } from "@mantine/core";
+import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile, IconCheck, IconLink, IconMessageCircle, IconTrash } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
-import { Note } from "misskey-js/entities.js";
+import { Note, User } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
 import EmojiNode from "./EmojiNode";
 import QuoteNoteModal from "./QuoteNoteModal";
@@ -19,14 +19,36 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
     const [quoteModalOpen, setQuoteModalOpen] = useState(false);
     const [replyModalOpen, setReplyModalOpen] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [isOwnNote, setIsOwnNote] = useState(false);
 
-    const { createReaction, deleteReaction, apiState, createRenote } = useMisskeyApiStore();
+    const { createReaction, deleteReaction, apiState, createRenote, deleteNote, getUserInfo } = useMisskeyApiStore();
     const theme = useMantineTheme();
 
     // noteプロップが変更されたら内部状態を更新
     useEffect(() => {
         setLocalNote(note);
     }, [note]);
+
+    // コンポーネントがマウントされたときに自分のユーザー情報を取得し、
+    // 表示されているノートが自分のものかどうかを判定する
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const user = await getUserInfo();
+                setCurrentUser(user);
+                
+                // 投稿者のIDと現在のユーザーIDを比較して自分のノートかを判定
+                const noteUserId = isPlainRepost ? localNote.renote?.user.id : localNote.user.id;
+                setIsOwnNote(user.id === noteUserId);
+            } catch (error) {
+                console.error("ユーザー情報取得エラー:", error);
+            }
+        };
+        
+        fetchUserInfo();
+    }, [localNote]);
 
     // リノートチェック：リノートかつテキストがない場合は純粋なリノート（リポストのみ）と判断
     const isPlainRepost = localNote.renote && !localNote.text;
@@ -276,6 +298,33 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
             });
         }
     }
+    
+    // ノート削除機能
+    const handleDeleteNote = async () => {
+        try {
+            await deleteNote(localNote.id);
+            
+            // 削除成功時の処理
+            notifications.show({
+                title: 'ノート削除',
+                message: 'ノートを削除しました',
+                color: 'green',
+            });
+            
+            // モーダルを閉じる
+            setDeleteModalOpen(false);
+            
+            // ここで削除後の処理（例: タイムラインのリフレッシュなど）を行うことも可能
+            // 現在の実装ではページのリロードなどは行わない
+        } catch (error) {
+            console.error("ノート削除エラー:", error);
+            notifications.show({
+                title: 'ノート削除失敗',
+                message: 'ノートの削除に失敗しました',
+                color: 'red'
+            });
+        }
+    }
 
 
     return (
@@ -392,12 +441,36 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                         >
                             ノートを表示
                         </Menu.Item>
-                        {/* 将来的に他のアクションをここに追加できます */}
+                        {/* 自分のノートの場合のみ、削除オプションを表示 */}
+                        {isOwnNote && (
+                            <Menu.Item
+                                leftSection={<IconTrash size={14} />}
+                                onClick={() => setDeleteModalOpen(true)}
+                                color="red"
+                            >
+                                削除
+                            </Menu.Item>
+                        )}
                     </Menu.Dropdown>
                 </Menu>
             </Group>
 
             {renderReactions()}
+            
+            {/* 削除確認モーダル */}
+            <Modal
+                opened={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                title="ノートの削除"
+                centered
+                size="sm"
+            >
+                <Text mb="md">このノートを削除してもよろしいですか？この操作は取り消せません。</Text>
+                <Flex justify="flex-end" gap="md">
+                    <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>キャンセル</Button>
+                    <Button color="red" onClick={handleDeleteNote} loading={apiState.loading}>削除</Button>
+                </Flex>
+            </Modal>
 
             {/* 引用リノートモーダル */}
             <QuoteNoteModal

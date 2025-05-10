@@ -59,6 +59,7 @@ interface MisskeyApiActions {
         noteId: string,
         visibility?: 'public' | 'home' | 'followers' | 'specified'
     ) => Promise<{ createdNote: Note }>;
+    deleteNote: (noteId: string) => Promise<void>; // ノート削除アクションを追加
     getEmoji: (name: string) => Promise<{ url: string; name: string }>;
     getUserInfo: () => Promise<User>;
 
@@ -297,6 +298,15 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 'notes/create',
                 { renoteId: noteId, visibility },
                 'リノートの実行に失敗しました'
+            );
+        },
+
+        // ノートを削除
+        deleteNote: async (noteId) => {
+            return await get().executeApiRequest<void>(
+                'notes/delete',
+                { noteId },
+                'ノートの削除に失敗しました'
             );
         },
 
