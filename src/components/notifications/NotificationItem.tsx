@@ -14,24 +14,18 @@ interface NotificationItemProps {
     notification: Notification;
     lastReadAt: Date | null;
     handleViewNote: (noteId: string, event: React.MouseEvent) => void;
-    withBorder?: boolean; // trueの場合はNotificationListスタイル、falseの場合はタイムラインスタイル
 }
 
-const NotificationItem: React.FC<NotificationItemProps> = ({ 
-    notification, 
+const NotificationItem: React.FC<NotificationItemProps> = ({
+    notification,
     lastReadAt,
     handleViewNote,
-    withBorder = false
 }) => {
     return (
-        <Box 
+        <Box
             p="xs"
             style={{
                 backgroundColor: 'var(--mantine-color-body)',
-                borderRadius: withBorder ? undefined : 'var(--mantine-radius-sm)',
-                borderLeft: lastReadAt && new Date(notification.createdAt) > lastReadAt
-                    ? '3px solid #3498db'
-                    : withBorder ? '1px solid #e0e0e0' : 'none'
             }}
         >
             <Group wrap="nowrap" align="flex-start">
