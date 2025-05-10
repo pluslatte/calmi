@@ -1,5 +1,5 @@
 // src/components/notifications/NotificationList.tsx
-import { Box, Loader, Paper, ScrollArea, Text } from "@mantine/core";
+import { Box, Divider, Loader, Paper, ScrollArea, Text } from "@mantine/core";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useEffect } from "react";
@@ -79,12 +79,13 @@ const NotificationList: React.FC<NotificationListProps> = ({ withContainer = tru
         return (
             <>
                 {notifications.map((notification) => (
-                    <Box key={notification.id} mb="xs">
+                    <Box key={notification.id} pr="md" mb="xs">
                         <NotificationItem
                             notification={notification}
                             lastReadAt={lastReadAt}
                             handleViewNote={handleViewNote}
                         />
+                        <Divider mt="xs" />
                     </Box>
                 ))}
             </>
@@ -94,7 +95,7 @@ const NotificationList: React.FC<NotificationListProps> = ({ withContainer = tru
     // ラッパーの有無で分岐
     if (withContainer) {
         return (
-            <Paper p="sm" withBorder style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <Paper p="md" pr={0} withBorder style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <ScrollArea h="100%" type="scroll" style={{ flex: 1 }}>
                     {renderContent()}
                 </ScrollArea>

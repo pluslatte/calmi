@@ -23,7 +23,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 }) => {
     return (
         <Box
-            p="xs"
             style={{
                 backgroundColor: 'var(--mantine-color-body)',
             }}
