@@ -79,27 +79,6 @@ const NotificationList: React.FC<NotificationListProps> = ({ withContainer = tru
 
         return (
             <>
-                {withContainer && (
-                    <Group justify="space-between" mb="md">
-                        <Title order={4}>
-                            <IconBell size={18} style={{ marginRight: 8 }} />
-                            通知
-                        </Title>
-                        <Group gap="xs">
-                            <Text size="sm" c="dimmed">
-                                {unreadCount > 0 ? `${unreadCount}件の未読` : '既読'}
-                            </Text>
-                            {unreadCount > 0 && (
-                                <ActionIcon size="sm" onClick={markAsRead} title="すべて既読にする">
-                                    <IconCheck size={16} />
-                                </ActionIcon>
-                            )}
-                        </Group>
-                    </Group>
-                )}
-
-                {withContainer && <Divider mb="md" />}
-
                 {notifications.map((notification) => (
                     <Box key={notification.id} mb="xs">
                         <NotificationItem 
