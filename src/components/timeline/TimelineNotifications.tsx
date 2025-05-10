@@ -2,7 +2,7 @@
 import { Box, Text, Loader, Avatar, Group, UnstyledButton, ActionIcon, Badge, Anchor } from "@mantine/core";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import { IconBell, IconUser, IconHeart, IconRepeat, IconMessageCircle, IconHash, IconInfoCircle, IconArrowRight, IconPhoto } from "@tabler/icons-react";
@@ -126,25 +126,6 @@ export default function TimelineNotifications() {
         loadNotifications,
         markAsRead
     } = useNotificationStore();
-    
-    // ノート項目用のホバー状態管理
-    const [hoveredId, setHoveredId] = useState<string | null>(null);
-    
-    // ダークモード判定
-    const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-    
-    // ダークモード判定
-    useEffect(() => {
-        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setIsDarkMode(isDark);
-        
-        // 変更を監視
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-        mediaQuery.addEventListener('change', handler);
-        
-        return () => mediaQuery.removeEventListener('change', handler);
-    }, []);
 
     useEffect(() => {
         if (client) {
@@ -260,17 +241,12 @@ export default function TimelineNotifications() {
                         <Box
                             p="xs"
                             style={{
-                                backgroundColor: hoveredId === notification.id 
-                                    ? isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)'
-                                    : 'var(--mantine-color-body)',
+                                backgroundColor: 'var(--mantine-color-body)',
                                 borderRadius: 'var(--mantine-radius-sm)',
                                 borderLeft: lastReadAt && new Date(notification.createdAt) > lastReadAt
                                     ? '3px solid #3498db'
-                                    : 'none',
-                                transition: 'background-color 0.2s ease',
+                                    : 'none'
                             }}
-                            onMouseEnter={() => setHoveredId(notification.id)}
-                            onMouseLeave={() => setHoveredId(null)}
                         >
                             <Group wrap="nowrap" align="flex-start">
                                 {hasUserAvatar(notification) && 'user' in notification && notification.user ? (
