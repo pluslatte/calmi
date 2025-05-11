@@ -44,18 +44,18 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     const handleTabChange = (value: string | null) => {
         if (!value) return;
 
-        setActiveTab(value as TabType);
-
-        // 通知以外のタブが選択された場合は従来のタイムラインタイプとして扱う
-        if (value !== 'notifications' && ['home', 'social', 'local', 'global'].includes(value)) {
-            changeTimelineType();
-        }
-
         // タイムラインタイプをローカルストレージに保存
         try {
             localStorage.setItem('calmi_timeline_type', value);
         } catch (error) {
             console.error('Failed to save timeline type to localStorage:', error);
+        }
+
+        setActiveTab(value as TabType);
+
+        // 通知以外のタブが選択された場合は従来のタイムラインタイプとして扱う
+        if (value !== 'notifications' && ['home', 'social', 'local', 'global'].includes(value)) {
+            changeTimelineType();
         }
     };
 
