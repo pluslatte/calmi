@@ -71,7 +71,6 @@ interface TimelineActions {
 const MAX_NOTES_IN_TIMELINE = 100;
 const SKIPPED_GROUP_THRESHOLD = 60000; // 60秒
 const MAX_SKIPPED_NOTES_TO_LOAD = 20;
-const MAX_TRIMMED_NOTES_TO_LOAD = 20;
 
 // Zustandストア
 export const useTimelineStore = create<TimelineState & TimelineActions>()(

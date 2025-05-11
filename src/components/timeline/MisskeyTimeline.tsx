@@ -74,12 +74,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         }
     };
 
-    // ロード関数をラップする
-    const loadMore = async () => {
-        await loadMoreNotes(getTimelineFunction());
-        return notes;
-    };
-
     // 初期化処理
     useEffect(() => {
         console.log("MisskeyTimeline initialization effect running");
@@ -225,7 +219,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                 </Box>
             </React.Fragment>
         );
-    }, [notes, lastBoundaryIndexRef, lastSwitchToAutoUpdateTime, skippedNotesGroups, loadSkippedNotes, getNote]);
+    }, [notes, lastSwitchToAutoUpdateTime, skippedNotesGroups, loadSkippedNotes, getNote]);
 
     // ヘッダーとしてスキップされたノートのインジケーターをレンダリング
     const renderHeader = useCallback(() => {
@@ -267,8 +261,14 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     // 新しいデータをロードするコールバック
     const loadMoreData = useCallback(async () => {
+        // ロード関数をラップする
+        const loadMore = async () => {
+            await loadMoreNotes(getTimelineFunction());
+            return notes;
+        };
+
         await loadMore();
-    }, [loadMore]);
+    }, []);
 
     // virtuosoのスクロールリファレンス
     const virtuosoRef = useRef(null);
