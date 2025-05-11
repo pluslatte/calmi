@@ -1,11 +1,10 @@
 // src/components/MisskeyTimelineContainer.tsx
 import { Box, Flex, Tabs, Tooltip } from "@mantine/core";
-import React, { memo, useEffect } from "react";
+import React, { memo } from "react";
 import MisskeyTimeline from "@/components/timeline/MisskeyTimeline";
 import TimelineNotifications from "@/components/timeline/TimelineNotifications";
 import { IconGalaxy, IconHome, IconHomePlus, IconServer, IconBell } from "@tabler/icons-react";
 import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
-import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
 import { TabType, TimelineType } from "@/types/misskey.types";
 
 const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
