@@ -81,7 +81,7 @@ export class MisskeyStream {
             this.subscribedNoteIds.add(noteId);
 
             // リアクションイベントの購読
-            this.stream.on('noteUpdated', (data: { id: string; type: string; body: any }) => {
+            this.stream.on('noteUpdated', (data: { id: string; type: string; body: Record<string, unknown> }) => {
                 if (data.id === noteId) {
                     // ノート更新時にコールバックを呼び出す
                     if ((data.type === 'reacted' || data.type === 'unreacted') && this.onNoteUpdated) {

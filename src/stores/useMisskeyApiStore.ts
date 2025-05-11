@@ -16,7 +16,7 @@ export type ApiErrorType =
 export interface ApiError {
     type: ApiErrorType;
     message: string;
-    original?: any;
+    original?: unknown;
     statusCode?: number;
 }
 
@@ -42,7 +42,7 @@ interface MisskeyApiActions {
     logout: () => void;
     clearError: () => void;
 
-    executeApiRequest: <T>(endpoint: keyof Endpoints, params: any, errorMessage: string) => Promise<T>;
+    executeApiRequest: <T>(endpoint: keyof Endpoints, params: Record<string, unknown>, errorMessage: string) => Promise<T>;
 
     // エンドポイント関連のアクション
     getHomeTimeline: (params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
@@ -91,25 +91,29 @@ const defaultApiState: ApiState = {
 };
 
 // APIエラー処理の共通メソッド
-const determineErrorType = (error: any): ApiErrorType => {
+const determineErrorType = (error: unknown): ApiErrorType => {
     if (!error) return 'unknown';
 
-    if (error.response) {
-        const status = error.response.status;
+    if (typeof error === 'object' && error !== null && 'response' in error) {
+        const response = (error as { response: { status: number } }).response;
+        const status = response.status;
         if (status === 401 || status === 403) return 'auth';
         if (status === 429) return 'rate_limit';
         if (status >= 500) return 'server';
         return 'unknown';
     }
 
-    if (error.message && error.message.includes('Network Error')) {
-        return 'network';
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+        const message = (error as { message: string }).message;
+        if (message.includes('Network Error')) {
+            return 'network';
+        }
     }
 
     return 'unknown';
 };
 
-const formatErrorMessage = (type: ApiErrorType, error: any): string => {
+const formatErrorMessage = (type: ApiErrorType, error: unknown): string => {
     switch (type) {
         case 'network':
             return 'ネットワーク接続エラーが発生しました。インターネット接続を確認してください。';
@@ -120,7 +124,9 @@ const formatErrorMessage = (type: ApiErrorType, error: any): string => {
         case 'server':
             return 'サーバーエラーが発生しました。しばらく経ってから再試行してください。';
         default:
-            return error?.message || 'エラーが発生しました。';
+            return typeof error === 'object' && error !== null && 'message' in error 
+                ? (error as { message: string }).message 
+                : 'エラーが発生しました。';
     }
 };
 
@@ -182,7 +188,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         // APIリクエスト共通ラッパー
         executeApiRequest: async <T>(
             endpoint: keyof Endpoints,
-            params: any,
+            params: Record<string, unknown>,
             errorMessage: string
         ): Promise<T> => {
             const state = get();
@@ -215,7 +221,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 });
 
                 return result;
-            } catch (err: any) {
+            } catch (err: unknown) {
                 const errorType = determineErrorType(err);
                 const errorMsg = formatErrorMessage(errorType, err);
 
@@ -223,7 +229,9 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                     type: errorType,
                     message: errorMsg || errorMessage,
                     original: err,
-                    statusCode: err.response?.status
+                    statusCode: typeof err === 'object' && err !== null && 'response' in err 
+                        ? (err as { response?: { status?: number } }).response?.status 
+                        : undefined
                 };
 
                 set(state => {
@@ -412,7 +420,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 });
 
                 return data;
-            } catch (err: any) {
+            } catch (err: unknown) {
                 const errorType = determineErrorType(err);
                 const errorMsg = formatErrorMessage(errorType, err);
 
@@ -420,7 +428,9 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                     type: errorType,
                     message: errorMsg || 'ファイルのアップロードに失敗しました',
                     original: err,
-                    statusCode: err.response?.status
+                    statusCode: typeof err === 'object' && err !== null && 'response' in err 
+                        ? (err as { response?: { status?: number } }).response?.status 
+                        : undefined
                 };
 
                 set(state => {

@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
             if (mastodonResponse.ok) {
                 const emojis = await mastodonResponse.json();
-                const foundEmoji = emojis.find((emoji: any) => emoji.shortcode === name);
+                const foundEmoji = emojis.find((emoji: { shortcode: string; url: string }) => emoji.shortcode === name);
 
                 if (foundEmoji && foundEmoji.url) {
                     return NextResponse.json({

@@ -41,7 +41,7 @@ export default function Callback() {
                     throw new Error(`認証エラー: ${res.status} ${res.statusText}`);
                 }
 
-                const data: { token: string; user: any } = await res.json();
+                const data: { token: string; user: { name?: string; username?: string } } = await res.json();
 
                 if (!data.token) {
                     throw new Error('トークンが取得できませんでした');
@@ -68,13 +68,13 @@ export default function Callback() {
                     router.push('/dashboard');
                 }, 1500);
 
-            } catch (error: any) {
+            } catch (error: unknown) {
                 setStatus('error');
-                setErrorMessage(error.message || '認証処理中にエラーが発生しました');
+                setErrorMessage(error instanceof Error ? error.message : '認証処理中にエラーが発生しました');
 
                 notifications.show({
                     title: 'ログインエラー',
-                    message: error.message || '認証処理中にエラーが発生しました',
+                    message: error instanceof Error ? error.message : '認証処理中にエラーが発生しました',
                     color: 'red',
                     icon: <IconX />,
                     autoClose: 5000

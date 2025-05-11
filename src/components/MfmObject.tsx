@@ -201,7 +201,7 @@ export default function MfmObject({ mfmNodes, assets }: { mfmNodes: mfm.MfmNode[
                     .join(' ');
                 return <Box component="span" c="dimmed">{`$[${node.props.name}${argsStr ? ' ' + argsStr : ''}(${renderNodes(node.children)})]`}</Box>;
             default:
-                return <Box component="span" style={{ color: 'red' }}>{`Unknown node: ${(node as any).type}`}</Box>;
+                return <Box component="span" style={{ color: 'red' }}>{`Unknown node: ${(node as { type: string }).type}`}</Box>;
         }
     }
 
