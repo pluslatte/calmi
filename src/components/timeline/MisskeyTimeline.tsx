@@ -1,7 +1,7 @@
 // src/components/MisskeyTimeline.tsx
 'use client';
 
-import React, { memo, useEffect, useRef, useCallback } from 'react';
+import React, { memo, useEffect, useRef, useCallback, useState } from 'react';
 import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
@@ -10,7 +10,6 @@ import SkippedNotesIndicator from "@/components/SkippedNotesIndicator";
 import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
-import { useInfiniteScrollStore } from "@/stores/useInfiniteScrollStore";
 import { TimelineType } from "@/types/misskey.types";
 import { Virtuoso } from 'react-virtuoso';
 
@@ -52,11 +51,9 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         updateButtonOffset,
     } = useTimelineUiStore();
 
-    const {
-        isLoading: isLoadingMore,
-        initialize: initializeInfiniteScroll,
-    } = useInfiniteScrollStore();
-
+    // useInfiniteScrollStoreの代わりにローカルステートを使用
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const lastLoadTimeRef = useRef<number>(0);
     const lastBoundaryIndexRef = useRef<number | null>(null);
 
     // 初期化処理
@@ -73,8 +70,11 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         console.log(`Timeline initialized with type: ${timelineType}`);
 
         initializeTimelineUi();
-        initializeInfiniteScroll();
-
+        
+        // 無限スクロール関連の状態をリセット
+        setIsLoadingMore(false);
+        lastLoadTimeRef.current = 0;
+        
         // 境界インデックスをリセット
         lastBoundaryIndexRef.current = null;
 
@@ -96,8 +96,18 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             console.log("Timeline component cleanup");
             cleanupTimeline();
         };
-        // 依存配列から余分な要素を削除し、必要なものだけを残す
-    }, [timelineType]);
+    }, [
+        timelineType,
+        client,
+        initializeTimeline,
+        initializeTimelineUi,
+        cleanupTimeline,
+        loadMoreNotes,
+        getHomeTimeline,
+        getHybridTimeline,
+        getLocalTimeline,
+        getGlobalTimeline
+    ]);
 
     // ボタン表示位置の計算
     useEffect(() => {
@@ -198,14 +208,29 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     // 新しいデータをロードするコールバック
     const loadMoreData = useCallback(async () => {
-        // ロード関数をラップする
-        const loadMore = async () => {
-            await loadMoreNotes();
-            return notes;
-        };
+        const now = Date.now();
+        // 前回のロードからの一定時間経過していない場合はロードをスキップ
+        const THROTTLE_TIMEOUT = 1000; // 1秒間のスロットリング
+        if (isLoadingMore || (now - lastLoadTimeRef.current < THROTTLE_TIMEOUT)) {
+            return;
+        }
 
-        await loadMore();
-    }, [loadMoreNotes]);
+        // ロード状態を更新
+        setIsLoadingMore(true);
+        lastLoadTimeRef.current = now;
+        
+        try {
+            // ロード関数をラップする
+            await loadMoreNotes();
+        } catch (error) {
+            console.error('Error loading more notes:', error);
+        } finally {
+            // ロード完了後に状態をリセット（少し遅延させる）
+            setTimeout(() => {
+                setIsLoadingMore(false);
+            }, 300); // 短い遅延でローディング表示の点滅を防止
+        }
+    }, [isLoadingMore, loadMoreNotes]);
 
     // virtuosoのスクロールリファレンス
     const virtuosoRef = useRef(null);
