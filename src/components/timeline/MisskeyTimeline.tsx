@@ -1,7 +1,7 @@
 // src/components/MisskeyTimeline.tsx
 'use client';
 
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef, useCallback } from 'react';
 import MisskeyNote from "@/components/MisskeyNote";
 import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
@@ -13,6 +13,7 @@ import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
 import { useInfiniteScrollStore } from "@/stores/useInfiniteScrollStore";
 import { TimelineType } from "@/types/misskey.types";
+import { Virtuoso } from 'react-virtuoso';
 
 const MisskeyTimeline = memo(function MisskeyTimeline({
     timelineType,
@@ -293,21 +294,141 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         );
     }
 
+    // 単一ノートをレンダリングする関数
+    const renderItem = useCallback((index: number) => {
+        // 配列の範囲外をチェック
+        if (index >= notes.length) return null;
+        
+        const note = notes[index];
+        const showBoundary = lastBoundaryIndexRef.current === index && lastSwitchToAutoUpdateTime;
+
+        // 境界要素（もしあれば）
+        const boundary = showBoundary && trimmedNotesGroup && trimmedNotesGroup.count > 0 ? (
+            <TrimmedNotesIndicator
+                count={trimmedNotesGroup.count}
+                timestamp={trimmedNotesGroup.timestamp}
+                loadTrimmedNotes={() => loadTrimmedNotes(getNote)}
+                loadedNotes={trimmedNotesGroup.loadedNotes}
+                isLoading={trimmedNotesGroup.isLoading}
+            />
+        ) : null;
+
+        // このノートに関連するスキップ・グループを取得
+        const relatedGroups = skippedNotesGroups
+            .filter(group => group.referenceNoteId === note.id);
+
+        // 関連するインジケーターをレンダリング
+        const relatedIndicators = relatedGroups.map(group => {
+            const groupIndex = skippedNotesGroups.findIndex(g =>
+                g.timestamp === group.timestamp && g.referenceNoteId === group.referenceNoteId);
+
+            return (
+                <Box key={`skipped-${note.id}-${group.timestamp.getTime()}`}>
+                    <SkippedNotesIndicator
+                        count={group.count}
+                        timestamp={group.timestamp}
+                        groupIndex={groupIndex}
+                        loadSkippedNotes={(groupIdx) => loadSkippedNotes(groupIdx, getNote)}
+                        loadedNotes={group.loadedNotes}
+                        isLoading={group.isLoading}
+                    />
+                </Box>
+            );
+        });
+
+        return (
+            <React.Fragment>
+                {boundary}
+                {relatedIndicators.length > 0 && (
+                    <Box>{relatedIndicators}</Box>
+                )}
+                <Box p="xs">
+                    <MisskeyNote note={note} />
+                    <MisskeyNoteActions note={note} />
+                    <Divider mt="xs" />
+                </Box>
+            </React.Fragment>
+        );
+    }, [notes, lastBoundaryIndexRef, lastSwitchToAutoUpdateTime, trimmedNotesGroup, skippedNotesGroups, loadTrimmedNotes, loadSkippedNotes, getNote]);
+
+    // ヘッダーとしてスキップされたノートのインジケーターをレンダリング
+    const renderHeader = useCallback(() => {
+        // トップに表示するスキップされたノート
+        const topIndicators = skippedNotesGroups
+            .filter(group => group.referenceNoteId === 'timeline-top')
+            .map((group, index) => {
+                const groupIndex = skippedNotesGroups.findIndex(g =>
+                    g.timestamp === group.timestamp && g.referenceNoteId === group.referenceNoteId);
+
+                return (
+                    <Box key={`skipped-top-${group.timestamp.getTime()}`}>
+                        <SkippedNotesIndicator
+                            count={group.count}
+                            timestamp={group.timestamp}
+                            groupIndex={groupIndex}
+                            loadSkippedNotes={(groupIdx) => loadSkippedNotes(groupIdx, getNote)}
+                            loadedNotes={group.loadedNotes}
+                            isLoading={group.isLoading}
+                        />
+                    </Box>
+                );
+            });
+
+        if (topIndicators.length === 0) return null;
+        return <Box>{topIndicators}</Box>;
+    }, [skippedNotesGroups, loadSkippedNotes, getNote]);
+
+    // フッターとして読み込み中インジケーターをレンダリング
+    const renderFooter = useCallback(() => {
+        if (!isLoadingMore) return null;
+        return (
+            <Box py="md" ta="center">
+                <Loader size="sm" />
+                <Text size="xs" c="dimmed" mt="xs">読み込み中...</Text>
+            </Box>
+        );
+    }, [isLoadingMore]);
+
+    // 新しいデータをロードするコールバック
+    const loadMoreData = useCallback(async () => {
+        await loadMore();
+    }, [loadMore]);
+
+    // virtuosoのスクロールリファレンス
+    const virtuosoRef = useRef(null);
+
     // スクロールトップ処理
     const handleScrollToTop = () => {
-        scrollToTop(scrollAreaRef);
+        if (virtuosoRef.current) {
+            // @ts-ignore Virtuosoのrefは複雑な型を持つため
+            virtuosoRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     };
 
     return (
         <Box pos="relative">
-            {renderItems()}
-            <div ref={observerRef} style={{ height: 1 }} />
-            {isLoadingMore && (
-                <Box py="md" ta="center">
-                    <Loader size="sm" />
-                    <Text size="xs" c="dimmed" mt="xs">読み込み中...</Text>
-                </Box>
-            )}
+            <Virtuoso 
+                ref={virtuosoRef}
+                style={{ height: '100%' }}
+                totalCount={notes.length}
+                itemContent={renderItem}
+                components={{
+                    Header: renderHeader,
+                    Footer: renderFooter,
+                }}
+                endReached={loadMoreData}
+                overscan={200}
+                increaseViewportBy={{ top: 300, bottom: 300 }}
+                initialTopMostItemIndex={0}
+                atTopStateChange={(atTop) => {
+                    // atTopがtrueの場合は先頭にいる
+                    if (atTop && !autoUpdateEnabled) {
+                        setAutoUpdateEnabled(true);
+                    } else if (!atTop && autoUpdateEnabled) {
+                        setAutoUpdateEnabled(false);
+                    }
+                }}
+            />
 
             {buttonRightOffset !== null && (
                 <React.Fragment>

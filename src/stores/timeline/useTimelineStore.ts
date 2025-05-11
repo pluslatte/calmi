@@ -240,29 +240,28 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                     }
                 }
 
-                // 最大数超過時に古いノートを削除
-                if (state.notes.length > MAX_NOTES_IN_TIMELINE) {
-                    const oldNote = state.notes.pop();
-                    if (oldNote) {
+                // 最大数を超えた場合は一定数超過したときのみサブスクリプション解除
+                if (state.notes.length > MAX_NOTES_IN_TIMELINE * 2) {
+                    // 超過した分のノートのサブスクリプションを解除（メモリ効率のため）
+                    const excessNotes = state.notes.slice(MAX_NOTES_IN_TIMELINE * 2);
+                    excessNotes.forEach(oldNote => {
                         state.stream?.unsubscribeFromNote(oldNote.id);
-
-                        // リノートの関連付けも削除
                         if (oldNote.renote) {
+                            state.stream?.unsubscribeFromNote(oldNote.renote.id);
+                            
+                            // 関連マップからも削除
                             const renoteId = oldNote.renote.id;
-                            state.stream?.unsubscribeFromNote(renoteId);
-
-                            // 関連マップから削除
                             if (state.renoteRelationMap[renoteId]) {
                                 state.renoteRelationMap[renoteId] = state.renoteRelationMap[renoteId]
                                     .filter(id => id !== oldNote.id);
-
+                                
                                 // 空になったら項目自体を削除
                                 if (state.renoteRelationMap[renoteId].length === 0) {
                                     delete state.renoteRelationMap[renoteId];
                                 }
                             }
                         }
-                    }
+                    });
                 }
             });
         },
@@ -305,27 +304,17 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                             }
                         }
 
-                        // 最大数超過時に古いノートを削除（先頭から）
-                        if (state.notes.length > MAX_NOTES_IN_TIMELINE) {
-                            const oldNote = state.notes.shift();
-                            if (oldNote) {
+                        // 最大数を超えた場合はサブスクリプション解除のみ行い、ノートは保持する
+                        // 仮想化スクロール対応のため、ノート自体は削除せずにレンダリングを最適化
+                        if (state.notes.length > MAX_NOTES_IN_TIMELINE * 2) {
+                            // 超過した分のノートのサブスクリプションを解除
+                            const excessNotes = state.notes.slice(MAX_NOTES_IN_TIMELINE * 2);
+                            excessNotes.forEach(oldNote => {
                                 state.stream?.unsubscribeFromNote(oldNote.id);
-
-                                // 表示範囲外になったノートを記録
-                                if (!state.trimmedNotesGroup) {
-                                    state.trimmedNotesGroup = {
-                                        count: 1,
-                                        timestamp: new Date(),
-                                        trimmedNoteIds: [oldNote.id],
-                                        loadedNotes: null,
-                                        isLoading: false
-                                    };
-                                } else {
-                                    state.trimmedNotesGroup.count += 1;
-                                    state.trimmedNotesGroup.timestamp = new Date();
-                                    state.trimmedNotesGroup.trimmedNoteIds.push(oldNote.id);
+                                if (oldNote.renote) {
+                                    state.stream?.unsubscribeFromNote(oldNote.renote.id);
                                 }
-                            }
+                            });
                         }
                     });
 

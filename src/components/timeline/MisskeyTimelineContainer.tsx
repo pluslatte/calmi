@@ -1,5 +1,5 @@
 // src/components/MisskeyTimelineContainer.tsx
-import { Box, Flex, ScrollArea, Tabs, Tooltip } from "@mantine/core";
+import { Box, Flex, Tabs, Tooltip } from "@mantine/core";
 import React, { memo, useEffect, useRef } from "react";
 import MisskeyTimeline from "@/components/timeline/MisskeyTimeline";
 import TimelineNotifications from "@/components/timeline/TimelineNotifications";
@@ -71,19 +71,17 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
                     </Tooltip>
                 </Tabs.List>
             </Tabs>
-            <ScrollArea viewportRef={scrollAreaRef} flex={1} type="scroll">
-                <Box maw="calc(100vw - 8px)">
-                    {activeTab !== 'notifications' ? (
-                        <MisskeyTimeline
-                            timelineType={timelineType}
-                            scrollAreaRef={scrollAreaRef}
-                            containerRef={containerRef}
-                        />
-                    ) : (
-                        <TimelineNotifications />
-                    )}
-                </Box>
-            </ScrollArea>
+            <Box style={{ flex: 1, overflow: 'hidden', height: 'calc(100vh - 120px)' }}>
+                {activeTab !== 'notifications' ? (
+                    <MisskeyTimeline
+                        timelineType={timelineType}
+                        scrollAreaRef={scrollAreaRef}
+                        containerRef={containerRef}
+                    />
+                ) : (
+                    <TimelineNotifications />
+                )}
+            </Box>
         </Flex>
     )
 });
