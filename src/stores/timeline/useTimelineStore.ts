@@ -286,6 +286,29 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 set(state => {
                     newNotes.forEach(note => {
                         if (!state.notes.some(n => n.id === note.id)) {
+                            // 最大数超過が見込まれる場合は古いノートを削除（先頭から）
+                            if (state.notes.length + 1 > MAX_NOTES_IN_TIMELINE) {
+                                const oldNote = state.notes.shift();
+                                if (oldNote) {
+                                    state.stream?.unsubscribeFromNote(oldNote.id);
+
+                                    // 表示範囲外になったノートを記録
+                                    if (!state.trimmedNotesGroup) {
+                                        state.trimmedNotesGroup = {
+                                            count: 1,
+                                            timestamp: new Date(),
+                                            trimmedNoteIds: [oldNote.id],
+                                            loadedNotes: null,
+                                            isLoading: false
+                                        };
+                                    } else {
+                                        state.trimmedNotesGroup.count += 1;
+                                        state.trimmedNotesGroup.timestamp = new Date();
+                                        state.trimmedNotesGroup.trimmedNoteIds.push(oldNote.id);
+                                    }
+                                }
+                            }
+
                             state.notes.push(note);
                             // ノートを購読
                             state.stream?.subscribeToNote(note.id);
@@ -301,29 +324,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                                 }
                                 if (!state.renoteRelationMap[renoteId].includes(note.id)) {
                                     state.renoteRelationMap[renoteId].push(note.id);
-                                }
-                            }
-                        }
-
-                        // 最大数超過時に古いノートを削除（先頭から）
-                        if (state.notes.length > MAX_NOTES_IN_TIMELINE) {
-                            const oldNote = state.notes.shift();
-                            if (oldNote) {
-                                state.stream?.unsubscribeFromNote(oldNote.id);
-
-                                // 表示範囲外になったノートを記録
-                                if (!state.trimmedNotesGroup) {
-                                    state.trimmedNotesGroup = {
-                                        count: 1,
-                                        timestamp: new Date(),
-                                        trimmedNoteIds: [oldNote.id],
-                                        loadedNotes: null,
-                                        isLoading: false
-                                    };
-                                } else {
-                                    state.trimmedNotesGroup.count += 1;
-                                    state.trimmedNotesGroup.timestamp = new Date();
-                                    state.trimmedNotesGroup.trimmedNoteIds.push(oldNote.id);
                                 }
                             }
                         }
