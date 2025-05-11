@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Image, Paper, Text, Group, ActionIcon, Grid } from "@mantine/core";
-import { IconFile, IconFileMusic, IconPlayerPlay, IconExternalLink, IconEye } from "@tabler/icons-react";
+import { IconFile, IconPlayerPlay, IconExternalLink } from "@tabler/icons-react";
 import { useState } from "react";
 import { DriveFile } from "misskey-js/entities.js";
 import ImageModal from "./ImageModal";

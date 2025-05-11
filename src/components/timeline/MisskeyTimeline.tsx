@@ -49,7 +49,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         showScrollToTop,
         buttonRightOffset,
         initializeTimelineUi,
-        updateScrollPosition,
         updateButtonOffset,
     } = useTimelineUiStore();
 

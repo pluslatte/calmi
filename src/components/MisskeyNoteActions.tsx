@@ -106,6 +106,7 @@ function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
                         [emoji]: noteToUpdate.reactions[emoji] - 1
                     };
                 } else {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [emoji]: _, ...restReactions } = noteToUpdate.reactions;
                     noteToUpdate.reactions = restReactions;
                 }

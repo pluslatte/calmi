@@ -11,7 +11,6 @@ interface TimelineUiActions {
     // 上へ戻るボタン関連のアクション
     initializeTimelineUi: () => void;
     scrollToTop: (scrollAreaRef: React.RefObject<HTMLDivElement | null>) => void;
-    updateScrollPosition: (scrollAreaRef: React.RefObject<HTMLDivElement | null>) => { top: number, nearTop: boolean } | null;
     updateButtonOffset: (containerRef: React.RefObject<HTMLDivElement | null>) => void;
 }
 
@@ -32,21 +31,6 @@ export const useTimelineUiStore = create<TimelineUiState & TimelineUiActions>()(
         scrollToTop: (scrollAreaRef) => {
             if (!scrollAreaRef.current) return;
             scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-        },
-
-        // スクロール位置の監視
-        updateScrollPosition: (scrollAreaRef): { top: number, nearTop: boolean } | null => {
-            if (!scrollAreaRef.current) return null;
-
-            const scrollEl = scrollAreaRef.current;
-            const top = scrollEl.scrollTop;
-
-            // スクロール位置によってボタン表示を切り替え
-            set(state => {
-                state.showScrollToTop = top > 200;
-            });
-
-            return { top, nearTop: top < 200 };
         },
 
         // ボタンの位置調整

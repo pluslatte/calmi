@@ -12,7 +12,7 @@ import React from "react";
 
 interface NotificationItemProps {
     notification: Notification;
-    lastReadAt: Date | null;
+    lastReadAt: Date | null; // 将来的に未読通知のハイライト表示などに使用予定
     handleViewNote: (noteId: string, event: React.MouseEvent) => void;
 }
 
