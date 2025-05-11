@@ -330,21 +330,21 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
 
         getUserInfo: async () => {
             const state = get();
-            
+
             // キャッシュの有効期限（5分 = 300000ミリ秒）
             const CACHE_EXPIRATION = 300000;
-            
+
             // 現在のユーザー情報がキャッシュされていて、かつキャッシュが有効期限内であれば、
             // キャッシュされたデータを返す
             if (
-                state.currentUser && 
-                state.lastUserFetchTime && 
+                state.currentUser &&
+                state.lastUserFetchTime &&
                 Date.now() - state.lastUserFetchTime < CACHE_EXPIRATION
             ) {
                 console.log('getUserInfo: キャッシュから取得');
                 return state.currentUser;
             }
-            
+
             // キャッシュがない場合やキャッシュが期限切れの場合は、APIリクエストを実行
             console.log('getUserInfo: APIリクエスト実行');
             const user = await get().executeApiRequest<User>(
@@ -352,13 +352,13 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 {},
                 'ユーザー情報の取得に失敗しました'
             );
-            
+
             // 取得したユーザー情報をキャッシュ
             set(state => {
                 state.currentUser = user;
                 state.lastUserFetchTime = Date.now();
             });
-            
+
             return user;
         },
 
@@ -468,7 +468,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         },
 
         // リアクションを削除
-        deleteReaction: async (noteId, reaction) => {
+        deleteReaction: async (noteId) => {
             return await get().executeApiRequest<void>(
                 'notes/reactions/delete',
                 { noteId },

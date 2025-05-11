@@ -1,10 +1,10 @@
-import { SimpleGrid, Image, AspectRatio, Box, Paper, Text, Group, ActionIcon, Tooltip, Flex } from "@mantine/core";
+import { SimpleGrid, Image, AspectRatio, Box, Paper, Text, ActionIcon, Tooltip, Flex } from "@mantine/core";
 import { Note, DriveFile } from "misskey-js/entities.js";
 import { useState, useEffect } from "react";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
 import AudioPlayer from "./AudioPlayer";
-import { IconFileMusic, IconPlayerPlay, IconExternalLink, IconFile, IconVolume } from "@tabler/icons-react";
+import { IconPlayerPlay, IconExternalLink, IconFile } from "@tabler/icons-react";
 
 interface UserMediaGridProps {
     notes: Note[];

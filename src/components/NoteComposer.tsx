@@ -1,14 +1,14 @@
 // src/components/NoteComposer.tsx
 'use client';
 
-import { Button, Paper, Textarea, Select, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Flex, Grid, Tooltip, Switch, Collapse } from "@mantine/core";
+import { Button, Paper, Textarea, Group, Text, FileButton, Image, Stack, ActionIcon, Loader, SegmentedControl, Box, Tooltip, Collapse } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useUserSettingsStore, NoteVisibility } from "@/stores/useUserSettingsStore";
 import { notifications } from '@mantine/notifications';
 import {
     IconAlertTriangle, IconHome, IconLock, IconMail, IconPhoto, IconPlus, IconSend,
-    IconUsers, IconWorld, IconX, IconFile, IconFileMusic, IconVideo
+    IconWorld, IconX, IconFile, IconFileMusic, IconVideo
 } from '@tabler/icons-react';
 
 interface NoteComposerProps {

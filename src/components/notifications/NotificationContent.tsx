@@ -1,8 +1,6 @@
 // src/components/notifications/NotificationContent.tsx
 import { Box, Text } from "@mantine/core";
 import { Notification } from "misskey-js/entities.js";
-import MfmObject from "@/components/MfmObject";
-import * as mfm from 'mfm-js';
 import EmojiNode from "@/components/EmojiNode";
 
 // リアクション絵文字を表示するコンポーネント

@@ -164,7 +164,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         // トップに表示するスキップされたノート
         const topIndicators = skippedNotesGroups
             .filter(group => group.referenceNoteId === 'timeline-top')
-            .map((group, index) => {
+            .map((group) => {
                 const groupIndex = skippedNotesGroups.findIndex(g =>
                     g.timestamp === group.timestamp && g.referenceNoteId === group.referenceNoteId);
 

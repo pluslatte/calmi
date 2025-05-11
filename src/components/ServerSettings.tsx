@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button, TextInput, Paper, Title, Box, Text, Alert } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconServer, IconAlertCircle } from '@tabler/icons-react';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 
 export default function ServerSettings() {

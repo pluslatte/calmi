@@ -1,5 +1,5 @@
 import { Avatar, Box, Group, Menu, ActionIcon, Text, Skeleton, Paper, Flex, Switch, Modal, Button } from '@mantine/core';
-import { IconLogout, IconSettings, IconUser, IconPencil } from '@tabler/icons-react';
+import { IconLogout, IconSettings, IconPencil } from '@tabler/icons-react';
 import { useMisskeyApiStore } from '@/stores/useMisskeyApiStore';
 import { useEffect, useState } from 'react';
 import { User } from 'misskey-js/entities.js';
