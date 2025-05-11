@@ -83,7 +83,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     // 初期化処理
     useEffect(() => {
         console.log("MisskeyTimeline initialization effect running");
-        
+
         if (!client) {
             console.log("Client not available, skipping initialization");
             return;
@@ -92,7 +92,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         // タイムラインを初期化し、実際に使用されるタイムラインタイプを取得
         const actualTimelineType = initializeTimeline(client, timelineType);
         console.log(`Timeline initialized with type: ${actualTimelineType}`);
-        
+
         initializeTimelineUi();
         initializeInfiniteScroll();
 
@@ -139,8 +139,8 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             console.log("Timeline component cleanup");
             cleanupTimeline();
         };
-    // 依存配列から余分な要素を削除し、必要なものだけを残す
-    }, [client, timelineType, initializeTimeline, cleanupTimeline]);
+        // 依存配列から余分な要素を削除し、必要なものだけを残す
+    }, [timelineType]);
 
     // スクロール位置の監視を設定
     useEffect(() => {
@@ -180,7 +180,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     const renderItem = useCallback((index: number) => {
         // デバッグ情報を含める
         console.log(`Rendering item at index ${index}, notes length: ${notes.length}`);
-        
+
         // 配列の範囲外をチェック
         if (index >= notes.length) {
             console.log(`Index ${index} is out of bounds, returning null`);
@@ -310,7 +310,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     // レンダリング時のデバッグ情報
     console.log(`Rendering MisskeyTimeline component with ${notes.length} notes`);
-    
+
     return (
         <Box pos="relative" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             {notes.length > 0 ? (
