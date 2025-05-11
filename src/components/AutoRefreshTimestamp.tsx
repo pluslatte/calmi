@@ -16,7 +16,7 @@ export default function AutoRefreshTimestamp({ iso }: { iso: string }) {
         return (() => {
             clearInterval(interval);
         });
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <Text

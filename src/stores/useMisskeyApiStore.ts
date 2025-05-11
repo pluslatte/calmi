@@ -341,12 +341,12 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 state.lastUserFetchTime &&
                 Date.now() - state.lastUserFetchTime < CACHE_EXPIRATION
             ) {
-                console.log('getUserInfo: キャッシュから取得');
+                // console.log('getUserInfo: キャッシュから取得');
                 return state.currentUser;
             }
 
             // キャッシュがない場合やキャッシュが期限切れの場合は、APIリクエストを実行
-            console.log('getUserInfo: APIリクエスト実行');
+            console.log('getUserInfo: Api request sent');
             const user = await get().executeApiRequest<User>(
                 'i',
                 {},

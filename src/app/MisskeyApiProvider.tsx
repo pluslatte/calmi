@@ -55,7 +55,8 @@ export function MisskeyApiProvider({
         };
 
         initClient();
-    }, []); // clientを依存配列から削除
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // client と setClient は変化しないため、依存配列から除外しています
 
     // 初期化完了まで子要素を表示しない
     if (!initialized && typeof window !== 'undefined') {

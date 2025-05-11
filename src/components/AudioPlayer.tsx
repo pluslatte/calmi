@@ -52,7 +52,7 @@ export default function AudioPlayer({ file, compact = false }: AudioPlayerProps)
             audio.removeEventListener('ended', handleEnded);
             audio.removeEventListener('error', handleError);
         };
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // 再生/一時停止の切り替え
     const togglePlay = () => {
