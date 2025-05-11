@@ -7,7 +7,6 @@ import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { IconArrowUp } from "@tabler/icons-react";
 import SkippedNotesIndicator from "@/components/SkippedNotesIndicator";
-import TrimmedNotesIndicator from "@/components/TrimmedNotesIndicator";
 import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
@@ -41,20 +40,17 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         hasError,
         errorMessage,
         skippedNotesGroups,
-        trimmedNotesGroup,
         lastSwitchToAutoUpdateTime,
         initializeTimeline,
         cleanupTimeline,
         loadMoreNotes,
         setAutoUpdateEnabled,
         loadSkippedNotes,
-        loadTrimmedNotes,
     } = useTimelineStore();
     const {
         showScrollToTop,
         buttonRightOffset,
         initializeTimelineUi,
-        scrollToTop,
         updateScrollPosition,
         updateButtonOffset,
     } = useTimelineUiStore();
@@ -62,7 +58,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     const {
         isLoading: isLoadingMore,
         initialize: initializeInfiniteScroll,
-        useInfiniteScroll
     } = useInfiniteScrollStore();
 
     const lastBoundaryIndexRef = useRef<number | null>(null);
@@ -84,8 +79,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         await loadMoreNotes(getTimelineFunction());
         return notes;
     };
-
-    const { observerRef } = useInfiniteScroll(loadMore);
 
     // 初期化処理
     useEffect(() => {
@@ -177,97 +170,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         return null;
     };
 
-    // タイムラインの内容をレンダリング
-    const renderItems = () => {
-        // トップに表示するスキップされたノート
-        const topIndicators = skippedNotesGroups
-            .filter(group => group.referenceNoteId === 'timeline-top')
-            .map((group, index) => {
-                const groupIndex = skippedNotesGroups.findIndex(g =>
-                    g.timestamp === group.timestamp && g.referenceNoteId === group.referenceNoteId);
-
-                return (
-                    <Box key={`skipped-top-${group.timestamp.getTime()}`}>
-                        <SkippedNotesIndicator
-                            count={group.count}
-                            timestamp={group.timestamp}
-                            groupIndex={groupIndex}
-                            loadSkippedNotes={(groupIdx) => loadSkippedNotes(groupIdx, getNote)}
-                            loadedNotes={group.loadedNotes}
-                            isLoading={group.isLoading}
-                        />
-                    </Box>
-                );
-            });
-
-        // 更新境界インデックスを計算
-        const boundaryIndex = findUpdateBoundaryIndex();
-        if (boundaryIndex !== null) {
-            lastBoundaryIndexRef.current = boundaryIndex;
-        }
-
-        // 切り落とされたノートのインジケーター
-        const trimmedIndicator = trimmedNotesGroup && trimmedNotesGroup.count > 0 ? (
-            <Box key="trimmed-notes-indicator">
-                <TrimmedNotesIndicator
-                    count={trimmedNotesGroup.count}
-                    timestamp={trimmedNotesGroup.timestamp}
-                    loadTrimmedNotes={() => loadTrimmedNotes(getNote)}
-                    loadedNotes={trimmedNotesGroup.loadedNotes}
-                    isLoading={trimmedNotesGroup.isLoading}
-                />
-            </Box>
-        ) : null;
-
-        // 各ノートと関連するインジケーターをレンダリング
-        let notesWithIndicators = notes.map((note, index) => {
-            const showBoundary = lastBoundaryIndexRef.current === index && lastSwitchToAutoUpdateTime;
-
-            const boundary = showBoundary ? (
-                <React.Fragment key={`boundary-container-${lastSwitchToAutoUpdateTime?.getTime()}`}>
-                    {trimmedIndicator}
-                </React.Fragment>
-            ) : null;
-
-            const relatedGroups = skippedNotesGroups
-                .filter(group => group.referenceNoteId === note.id);
-
-            const relatedIndicators = relatedGroups
-                .map(group => {
-                    const groupIndex = skippedNotesGroups.findIndex(g =>
-                        g.timestamp === group.timestamp && g.referenceNoteId === group.referenceNoteId);
-
-                    return (
-                        <Box key={`skipped-${note.id}-${group.timestamp.getTime()}`}>
-                            <SkippedNotesIndicator
-                                count={group.count}
-                                timestamp={group.timestamp}
-                                groupIndex={groupIndex}
-                                loadSkippedNotes={(groupIdx) => loadSkippedNotes(groupIdx, getNote)}
-                                loadedNotes={group.loadedNotes}
-                                isLoading={group.isLoading}
-                            />
-                        </Box>
-                    );
-                });
-
-            // updateNoteInTimeline を onReactionUpdate プロップとして渡す
-            return (
-                <React.Fragment key={note.id}>
-                    {boundary}
-                    {relatedIndicators}
-                    <Box p="xs">
-                        <MisskeyNote note={note} />
-                        <MisskeyNoteActions note={note} />
-                        <Divider mt="xs" />
-                    </Box>
-                </React.Fragment>
-            );
-        });
-
-        return [...topIndicators, ...notesWithIndicators];
-    };
-
     // API読み込み中の表示
     if (isLoading && notes.length === 0) {
         return (
@@ -298,20 +200,8 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     const renderItem = useCallback((index: number) => {
         // 配列の範囲外をチェック
         if (index >= notes.length) return null;
-        
-        const note = notes[index];
-        const showBoundary = lastBoundaryIndexRef.current === index && lastSwitchToAutoUpdateTime;
 
-        // 境界要素（もしあれば）
-        const boundary = showBoundary && trimmedNotesGroup && trimmedNotesGroup.count > 0 ? (
-            <TrimmedNotesIndicator
-                count={trimmedNotesGroup.count}
-                timestamp={trimmedNotesGroup.timestamp}
-                loadTrimmedNotes={() => loadTrimmedNotes(getNote)}
-                loadedNotes={trimmedNotesGroup.loadedNotes}
-                isLoading={trimmedNotesGroup.isLoading}
-            />
-        ) : null;
+        const note = notes[index];
 
         // このノートに関連するスキップ・グループを取得
         const relatedGroups = skippedNotesGroups
@@ -338,7 +228,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
         return (
             <React.Fragment>
-                {boundary}
                 {relatedIndicators.length > 0 && (
                     <Box>{relatedIndicators}</Box>
                 )}
@@ -349,7 +238,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                 </Box>
             </React.Fragment>
         );
-    }, [notes, lastBoundaryIndexRef, lastSwitchToAutoUpdateTime, trimmedNotesGroup, skippedNotesGroups, loadTrimmedNotes, loadSkippedNotes, getNote]);
+    }, [notes, lastBoundaryIndexRef, lastSwitchToAutoUpdateTime, skippedNotesGroups, loadSkippedNotes, getNote]);
 
     // ヘッダーとしてスキップされたノートのインジケーターをレンダリング
     const renderHeader = useCallback(() => {
@@ -407,7 +296,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     return (
         <Box pos="relative">
-            <Virtuoso 
+            <Virtuoso
                 ref={virtuosoRef}
                 style={{ height: '100%' }}
                 totalCount={notes.length}

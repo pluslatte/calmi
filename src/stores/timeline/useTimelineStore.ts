@@ -15,14 +15,6 @@ export interface SkippedNotesGroup {
     isLoading: boolean;
 }
 
-export interface TrimmedNotesGroup {
-    count: number;
-    timestamp: Date;
-    trimmedNoteIds: string[];
-    loadedNotes: Note[] | null;
-    isLoading: boolean;
-}
-
 interface TimelineState {
     // 基本的なタイムラインの状態
     notes: Note[];
@@ -35,9 +27,6 @@ interface TimelineState {
     // スキップされたノートの管理
     skippedNotesGroups: SkippedNotesGroup[];
     lastSkippedGroupTimestamp: Date | null;
-
-    // 表示範囲外のノートの管理
-    trimmedNotesGroup: TrimmedNotesGroup | null;
 
     // 自動更新の境界
     lastSwitchToAutoUpdateTime: Date | null;
@@ -65,9 +54,6 @@ interface TimelineActions {
     // スキップされたノート関連
     addSkippedNote: (note: Note) => void;
     loadSkippedNotes: (groupIndex: number, getNoteFn: (noteId: string) => Promise<Note>) => Promise<Note[] | null>;
-
-    // 表示範囲外ノート関連
-    loadTrimmedNotes: (getNoteFn: (noteId: string) => Promise<Note>) => Promise<Note[] | null>;
 
     // タイムラインタイプ切り替え
     changeTimelineType: (newType: TimelineType) => void;
@@ -154,7 +140,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 state.errorMessage = null;
                 state.skippedNotesGroups = [];
                 state.lastSkippedGroupTimestamp = null;
-                state.trimmedNotesGroup = null;
                 state.lastSwitchToAutoUpdateTime = null;
                 state.renoteRelationMap = {};
 
@@ -248,13 +233,13 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                         state.stream?.unsubscribeFromNote(oldNote.id);
                         if (oldNote.renote) {
                             state.stream?.unsubscribeFromNote(oldNote.renote.id);
-                            
+
                             // 関連マップからも削除
                             const renoteId = oldNote.renote.id;
                             if (state.renoteRelationMap[renoteId]) {
                                 state.renoteRelationMap[renoteId] = state.renoteRelationMap[renoteId]
                                     .filter(id => id !== oldNote.id);
-                                
+
                                 // 空になったら項目自体を削除
                                 if (state.renoteRelationMap[renoteId].length === 0) {
                                     delete state.renoteRelationMap[renoteId];
@@ -436,59 +421,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             }
         },
 
-        // 表示範囲外ノートのロード
-        loadTrimmedNotes: async (getNoteFn) => {
-            const group = get().trimmedNotesGroup;
-            if (!group || group.isLoading || group.loadedNotes) {
-                return group?.loadedNotes || null;
-            }
-
-            // ロード中状態に設定
-            set(state => {
-                if (state.trimmedNotesGroup) {
-                    state.trimmedNotesGroup.isLoading = true;
-                }
-            });
-
-            try {
-                // 読み込むノートIDを制限
-                const noteIdsToLoad = group.trimmedNoteIds.slice(0, MAX_TRIMMED_NOTES_TO_LOAD);
-
-                // 各ノートを並列で取得
-                const promises = noteIdsToLoad.map(async (noteId) => {
-                    try {
-                        return await getNoteFn(noteId);
-                    } catch (error) {
-                        console.error(`Failed to load note ${noteId}:`, error);
-                        return null;
-                    }
-                });
-
-                const results = await Promise.all(promises);
-                const validNotes = results.filter((note): note is Note => note !== null);
-
-                // 結果を状態に保存
-                set(state => {
-                    if (state.trimmedNotesGroup) {
-                        state.trimmedNotesGroup.loadedNotes = validNotes;
-                        state.trimmedNotesGroup.isLoading = false;
-                    }
-                });
-
-                return validNotes;
-            } catch (error) {
-                console.error('Failed to load trimmed notes:', error);
-
-                set(state => {
-                    if (state.trimmedNotesGroup) {
-                        state.trimmedNotesGroup.isLoading = false;
-                    }
-                });
-
-                return null;
-            }
-        },
-
         // タイムラインタイプの変更
         changeTimelineType: (newType) => {
             const currentType = get().timelineType;
@@ -510,7 +442,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 state.autoUpdateEnabled = false;
                 state.skippedNotesGroups = [];
                 state.lastSkippedGroupTimestamp = null;
-                state.trimmedNotesGroup = null;
                 state.lastSwitchToAutoUpdateTime = null;
                 state.stream = null;
             });
@@ -607,15 +538,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                             group.count -= 1;
                         }
                     });
-
-                    // 表示範囲外ノートからも削除
-                    if (state.trimmedNotesGroup) {
-                        const trimIndex = state.trimmedNotesGroup.trimmedNoteIds.indexOf(noteId);
-                        if (trimIndex !== -1) {
-                            state.trimmedNotesGroup.trimmedNoteIds.splice(trimIndex, 1);
-                            state.trimmedNotesGroup.count -= 1;
-                        }
-                    }
 
                     // タイムラインから削除
                     state.notes.splice(noteIndex, 1);
