@@ -14,7 +14,6 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     containerRef: React.RefObject<HTMLDivElement | null>
 }) {
     const discardStream = useTimelineStore(state => state.discardStream);
-    const updateButtonOffset = useTimelineUiStore(state => state.updateButtonOffset);
 
     // ローカルストレージからタイムラインタイプを読み込み
     let savedTimelineType: TimelineType | null = null;
@@ -32,11 +31,6 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
 
     // 現在選択されているタブ（タイムラインタイプまたは通知）
     const [activeTab, setActiveTab] = React.useState<TabType>(savedTimelineType);
-
-    // コンポーネントのマウント時にボタン位置を更新
-    useEffect(() => {
-        updateButtonOffset(containerRef);
-    }, [containerRef, updateButtonOffset]);
 
     // タブ変更ハンドラ
     const handleTabChange = (value: string | null) => {
@@ -83,7 +77,6 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
                 {activeTab !== 'notifications' ? (
                     <MisskeyTimeline
                         timelineType={activeTab}
-                        containerRef={containerRef}
                     />
                 ) : (
                     <TimelineNotifications />

@@ -3,22 +3,18 @@
 
 import React, { memo, useEffect, useRef, useCallback, useState } from 'react';
 import MisskeyNote from "@/components/MisskeyNote";
-import { Box, Button, Divider, Loader, Text, Transition } from "@mantine/core";
+import { Box, Button, Divider, Loader, Text } from "@mantine/core";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
-import { IconArrowUp } from "@tabler/icons-react";
 import SkippedNotesIndicator from "@/components/SkippedNotesIndicator";
 import { useTimelineStore } from '@/stores/timeline/useTimelineStore';
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
-import { useTimelineUiStore } from "@/stores/timeline/useTimelineUiStore";
 import { TimelineType } from "@/types/misskey.types";
 import { Virtuoso } from 'react-virtuoso';
 
 const MisskeyTimeline = memo(function MisskeyTimeline({
     timelineType,
-    containerRef
 }: {
     timelineType: TimelineType;
-    containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
     const {
         client,
@@ -44,12 +40,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         setAutoUpdateEnabled,
         loadSkippedNotes,
     } = useTimelineStore();
-    const {
-        showScrollToTop,
-        buttonRightOffset,
-        initializeTimelineUi,
-        updateButtonOffset,
-    } = useTimelineUiStore();
 
     // useInfiniteScrollStoreの代わりにローカルステートを使用
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -69,12 +59,10 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         initializeTimeline(client, timelineType, getHomeTimeline, getHybridTimeline, getLocalTimeline, getGlobalTimeline);
         console.log(`Timeline initialized with type: ${timelineType}`);
 
-        initializeTimelineUi();
-        
         // 無限スクロール関連の状態をリセット
         setIsLoadingMore(false);
         lastLoadTimeRef.current = 0;
-        
+
         // 境界インデックスをリセット
         lastBoundaryIndexRef.current = null;
 
@@ -100,7 +88,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         timelineType,
         client,
         initializeTimeline,
-        initializeTimelineUi,
         cleanupTimeline,
         loadMoreNotes,
         getHomeTimeline,
@@ -109,17 +96,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         getGlobalTimeline
     ]);
 
-    // ボタン表示位置の計算
-    useEffect(() => {
-        updateButtonOffset(containerRef);
-
-        const handleResize = () => {
-            updateButtonOffset(containerRef);
-        };
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [containerRef, updateButtonOffset]);
 
     // 単一ノートをレンダリングする関数
     const renderItem = useCallback((index: number) => {
@@ -218,7 +194,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         // ロード状態を更新
         setIsLoadingMore(true);
         lastLoadTimeRef.current = now;
-        
+
         try {
             // ロード関数をラップする
             await loadMoreNotes();
@@ -262,13 +238,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         );
     }
 
-    // スクロールトップ処理
-    const handleScrollToTop = () => {
-        if (virtuosoRef.current) {
-            // @ts-expect-error Virtuosoのrefは複雑な型を持つため
-            virtuosoRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
 
     return (
         <Box pos="relative" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -302,31 +271,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
                 </Box>
             )}
 
-            {buttonRightOffset !== null && (
-                <React.Fragment>
-                    <Box
-                        style={{
-                            position: 'fixed',
-                            bottom: 94,
-                            right: buttonRightOffset,
-                            zIndex: 1000,
-                        }}
-                    >
-                        <Transition mounted={showScrollToTop} transition="slide-up" duration={200} timingFunction="ease">
-                            {(styles) => (
-                                <Button
-                                    leftSection={<IconArrowUp size={16} />}
-                                    style={styles}
-                                    onClick={handleScrollToTop}
-                                    variant="filled"
-                                >
-                                    上へ戻る
-                                </Button>
-                            )}
-                        </Transition>
-                    </Box>
-                </React.Fragment>
-            )}
         </Box>
     );
 });
