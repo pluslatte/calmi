@@ -6,6 +6,8 @@ import { MisskeyStream } from '@/lib/misskey/MisskeyStream';
 import { NoteUpdatedEvent } from "misskey-js/streaming.types.js";
 import { TimelineType } from "@/types/misskey.types";
 
+type GetTimelineNotesFn = (params?: { limit?: number; untilId?: string }) => Promise<Note[]>;
+
 export interface SkippedNotesGroup {
     count: number;
     timestamp: Date;
@@ -18,10 +20,17 @@ export interface SkippedNotesGroup {
 interface TimelineState {
     // 基本的なタイムラインの状態
     notes: Note[];
+    timelineType: TimelineType;
     autoUpdateEnabled: boolean;
     isLoading: boolean;
     hasError: boolean;
     errorMessage: string | null;
+
+    // タイムライン読み込み関数
+    getHomeTimelineNotes: GetTimelineNotesFn | null;
+    getHybridTimelineNotes: GetTimelineNotesFn | null;
+    getLocalTimelineNotes: GetTimelineNotesFn | null;
+    getGlobalTimelineNotes: GetTimelineNotesFn | null;
 
     // スキップされたノートの管理
     skippedNotesGroups: SkippedNotesGroup[];
@@ -39,9 +48,16 @@ interface TimelineState {
 
 interface TimelineActions {
     // 初期化と基本操作
-    initializeTimeline: (client: api.APIClient, timelineType: TimelineType) => void;
+    initializeTimeline: (
+        client: api.APIClient,
+        timelineType: TimelineType,
+        getHomeTimelineNotes: GetTimelineNotesFn,
+        getHybridTimelineNotes: GetTimelineNotesFn,
+        getLocalTimelineNotes: GetTimelineNotesFn,
+        getGlobalTimelineNotes: GetTimelineNotesFn,
+    ) => void;
     cleanupTimeline: () => void;
-    loadMoreNotes: (getTimelineFn: (params?: any) => Promise<Note[]>) => Promise<void>;
+    loadMoreNotes: () => Promise<void>;
 
     // ノート管理
     addNoteOnTop: (note: Note) => void;
@@ -76,10 +92,15 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
     immer((set, get) => ({
         // 状態の初期値
         notes: [],
+        timelineType: 'home', // デフォルトのタイムラインタイプ
         autoUpdateEnabled: false,
         isLoading: false,
         hasError: false,
         errorMessage: null,
+        getHomeTimelineNotes: null,
+        getHybridTimelineNotes: null,
+        getLocalTimelineNotes: null,
+        getGlobalTimelineNotes: null,
         skippedNotesGroups: [],
         lastSkippedGroupTimestamp: null,
         trimmedNotesGroup: null,
@@ -88,8 +109,15 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         renoteRelationMap: {},
 
         // アクション
-        initializeTimeline: (client, timelineType) => {
-            // リソースのクリーンアップ
+        initializeTimeline: (
+            client,
+            timelineType,
+            getHomeTimelineNotes,
+            getHybridTimelineNotes,
+            getLocalTimelineNotes,
+            getGlobalTimelineNotes
+        ) => {
+            // ストリームの初期化
             const currentStream = get().stream;
             if (currentStream) {
                 currentStream.disconnect();
@@ -119,10 +147,15 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             // 状態のリセット
             set(state => {
                 state.notes = [];
+                state.timelineType = timelineType;
                 state.autoUpdateEnabled = false;
                 state.isLoading = true;
                 state.hasError = false;
                 state.errorMessage = null;
+                state.getHomeTimelineNotes = getHomeTimelineNotes;
+                state.getHybridTimelineNotes = getHybridTimelineNotes;
+                state.getLocalTimelineNotes = getLocalTimelineNotes;
+                state.getGlobalTimelineNotes = getGlobalTimelineNotes;
                 state.skippedNotesGroups = [];
                 state.lastSkippedGroupTimestamp = null;
                 state.lastSwitchToAutoUpdateTime = null;
@@ -234,13 +267,42 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         },
 
         // 過去のノートをロード
-        loadMoreNotes: async (getTimelineFn) => {
+        loadMoreNotes: async () => {
             const state = get();
+
+            if (
+                state.getHomeTimelineNotes === null ||
+                state.getHybridTimelineNotes === null ||
+                state.getLocalTimelineNotes === null ||
+                state.getGlobalTimelineNotes === null
+            ) {
+                throw new Error('Timeline loading functions are not initialized');
+            }
+
             const lastNoteId = state.notes.length > 0
                 ? state.notes[state.notes.length - 1].id
                 : undefined;
 
             set(state => { state.isLoading = true; });
+
+            let getTimelineFn: GetTimelineNotesFn = state.getHomeTimelineNotes;
+            switch (state.timelineType) {
+                case 'home':
+                    getTimelineFn = state.getHomeTimelineNotes;
+                    break;
+                case 'social':
+                    getTimelineFn = state.getHybridTimelineNotes;
+                    break;
+                case 'local':
+                    getTimelineFn = state.getLocalTimelineNotes;
+                    break;
+                case 'global':
+                    getTimelineFn = state.getGlobalTimelineNotes;
+                    break;
+                default:
+                    console.error('Invalid timeline type');
+                    throw new Error('Invalid timeline type');
+            }
 
             try {
                 const params = lastNoteId

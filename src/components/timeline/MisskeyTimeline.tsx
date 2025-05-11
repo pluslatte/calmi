@@ -62,17 +62,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     const lastBoundaryIndexRef = useRef<number | null>(null);
 
-    // タイムラインタイプに応じた取得関数を返す
-    const getTimelineFunction = () => {
-        switch (timelineType) {
-            case 'home': return getHomeTimeline;
-            case 'social': return getHybridTimeline;
-            case 'local': return getLocalTimeline;
-            case 'global': return getGlobalTimeline;
-            default: return getHomeTimeline;
-        }
-    };
-
     // 初期化処理
     useEffect(() => {
         console.log("MisskeyTimeline initialization effect running");
@@ -83,7 +72,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         }
 
         // タイムラインを初期化
-        initializeTimeline(client, timelineType);
+        initializeTimeline(client, timelineType, getHomeTimeline, getHybridTimeline, getLocalTimeline, getGlobalTimeline);
         console.log(`Timeline initialized with type: ${timelineType}`);
 
         initializeTimelineUi();
@@ -97,20 +86,9 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         // 境界インデックスをリセット
         lastBoundaryIndexRef.current = null;
 
-        // initializeTimeline で設定されたタイプに基づいてデータをロード
-        const currentGetTimelineFn = () => {
-            switch (timelineType) {
-                case 'home': return getHomeTimeline;
-                case 'social': return getHybridTimeline;
-                case 'local': return getLocalTimeline;
-                case 'global': return getGlobalTimeline;
-                default: return getHomeTimeline;
-            }
-        };
-
         // 初期データのロード
         console.log("Loading initial timeline data...");
-        loadMoreNotes(currentGetTimelineFn())
+        loadMoreNotes()
             .then(() => {
                 console.log(`Initial data loaded, notes count: ${notes.length}`);
                 if (notes.length > 0) {
@@ -252,7 +230,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     const loadMoreData = useCallback(async () => {
         // ロード関数をラップする
         const loadMore = async () => {
-            await loadMoreNotes(getTimelineFunction());
+            await loadMoreNotes();
             return notes;
         };
 
@@ -279,7 +257,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             <Box py="xl" ta="center">
                 <Text c="red">{errorMessage}</Text>
                 <Button
-                    onClick={() => loadMoreNotes(getTimelineFunction())}
+                    onClick={() => loadMoreNotes()}
                     mt="md"
                     variant="outline"
                 >
