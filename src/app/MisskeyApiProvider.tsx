@@ -55,7 +55,7 @@ export function MisskeyApiProvider({
         };
 
         initClient();
-    }, [client, setClient]);
+    }, [setClient]); // clientを依存配列から削除
 
     // 初期化完了まで子要素を表示しない
     if (!initialized && typeof window !== 'undefined') {

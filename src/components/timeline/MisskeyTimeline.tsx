@@ -139,7 +139,8 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             console.log("Timeline component cleanup");
             cleanupTimeline();
         };
-    }, [client, timelineType, initializeTimeline, loadMoreNotes, cleanupTimeline, initializeInfiniteScroll]);
+    // 依存配列から余分な要素を削除し、必要なものだけを残す
+    }, [client, timelineType, initializeTimeline, cleanupTimeline]);
 
     // スクロール位置の監視を設定
     useEffect(() => {
