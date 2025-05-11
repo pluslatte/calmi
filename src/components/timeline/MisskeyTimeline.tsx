@@ -16,11 +16,9 @@ import { Virtuoso } from 'react-virtuoso';
 
 const MisskeyTimeline = memo(function MisskeyTimeline({
     timelineType,
-    scrollAreaRef,
     containerRef
 }: {
     timelineType: TimelineType;
-    scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
     const {
@@ -78,11 +76,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         initializeTimelineUi();
         initializeInfiniteScroll();
 
-        // スクロール位置をトップに戻す
-        if (scrollAreaRef.current) {
-            scrollAreaRef.current.scrollTo({ top: 0 });
-        }
-
         // 境界インデックスをリセット
         lastBoundaryIndexRef.current = null;
 
@@ -106,28 +99,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         };
         // 依存配列から余分な要素を削除し、必要なものだけを残す
     }, [timelineType]);
-
-    // スクロール位置の監視を設定
-    useEffect(() => {
-        if (!scrollAreaRef.current) return;
-
-        const handleScroll = () => {
-            const scrollInfo = updateScrollPosition(scrollAreaRef);
-            if (!scrollInfo) return;
-
-            const nearTop = scrollInfo.nearTop;
-
-            // スクロール位置に応じて自動更新の切り替え
-            if (!nearTop && autoUpdateEnabled) {
-                setAutoUpdateEnabled(false);
-            } else if (nearTop && !autoUpdateEnabled) {
-                setAutoUpdateEnabled(true);
-            }
-        };
-
-        scrollAreaRef.current.addEventListener('scroll', handleScroll);
-        return () => scrollAreaRef.current?.removeEventListener('scroll', handleScroll);
-    }, [scrollAreaRef, autoUpdateEnabled, setAutoUpdateEnabled, updateScrollPosition]);
 
     // ボタン表示位置の計算
     useEffect(() => {
@@ -280,7 +251,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             {notes.length > 0 ? (
                 <Virtuoso
                     ref={virtuosoRef}
-                    style={{ height: 'calc(100vh - 120px)', width: '100%' }}
+                    style={{ height: 'calc(100vh - 100px)', width: '100%' }}
                     totalCount={notes.length}
                     itemContent={renderItem}
                     components={{

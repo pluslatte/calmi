@@ -16,8 +16,6 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     const changeTimelineType = useTimelineStore(state => state.changeTimelineType);
     const updateButtonOffset = useTimelineUiStore(state => state.updateButtonOffset);
 
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
-
     // ローカルストレージからタイムラインタイプを読み込み
     let savedTimelineType: TimelineType | null = null;
     try {
@@ -88,7 +86,6 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
                 {activeTab !== 'notifications' ? (
                     <MisskeyTimeline
                         timelineType={activeTab}
-                        scrollAreaRef={scrollAreaRef}
                         containerRef={containerRef}
                     />
                 ) : (
