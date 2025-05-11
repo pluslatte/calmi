@@ -323,36 +323,10 @@ export default function UserPage() {
             {/* メディア表示（UserMediaGridを使用） */}
             {activeTab === 'media' && (
                 mediaNotes.length > 0 ? (
-                    <Box style={{ height: 'calc(100vh - 90px - 70px)', width: '100%', overflowY: 'auto' }}>
-                        <UserMediaGrid notes={mediaNotes} />
-                        {isLoadingMore ? (
-                            <Text size="sm" c="dimmed" ta="center" py="sm">
-                                読み込み中...
-                            </Text>
-                        ) : (
-                            <Text size="sm" c="dimmed" ta="center" py="sm">
-                                これ以上の投稿はありません
-                            </Text>
-                        )}
-                        {/* IntersectionObserverを使用してメディアタブで無限スクロールを実装 */}
-                        <Box
-                            ref={node => {
-                                if (node) {
-                                    const observer = new IntersectionObserver(
-                                        (entries) => {
-                                            if (entries[0].isIntersecting && !isLoadingMore) {
-                                                loadMoreNotes();
-                                            }
-                                        },
-                                        { rootMargin: '100px' }
-                                    );
-                                    observer.observe(node);
-                                    return () => {
-                                        if (node) observer.unobserve(node);
-                                    };
-                                }
-                            }}
-                            style={{ height: 5 }}
+                    <Box style={{ height: 'calc(100vh - 90px - 70px)', width: '100%' }}>
+                        <UserMediaGrid 
+                            notes={mediaNotes} 
+                            onLoadMore={loadMoreNotes}
                         />
                     </Box>
                 ) : (
