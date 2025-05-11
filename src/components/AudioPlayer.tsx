@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Text, Paper, Group, ActionIcon, Slider, Tooltip } from "@mantine/core";
-import { IconPlayerPlay, IconPlayerPause, IconVolume, IconVolume3, IconVolume2, IconMinus, IconPlus } from "@tabler/icons-react";
+import { IconPlayerPlay, IconPlayerPause, IconVolume, IconVolume3, IconMinus, IconPlus } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { DriveFile } from "misskey-js/entities.js";
 import { useAudioSettingsStore } from "@/stores/useAudioSettingsStore";

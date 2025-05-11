@@ -5,7 +5,7 @@ import MfmObject from "./MfmObject";
 import * as mfm from 'mfm-js';
 import NoteAttachments from "./NoteAttachments";
 import React, { memo, useState } from "react";
-import { IconAlertTriangle, IconRepeat, IconLock, IconWorld, IconHome, IconMail, IconServer } from "@tabler/icons-react";
+import { IconAlertTriangle, IconRepeat, IconLock, IconHome, IconMail, IconServer } from "@tabler/icons-react";
 import Link from "next/link";
 import { useUserSettingsStore } from "@/stores/useUserSettingsStore";
 

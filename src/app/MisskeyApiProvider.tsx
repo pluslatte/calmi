@@ -1,7 +1,7 @@
 'use client';
 
 import { api } from "misskey-js";
-import React, { PropsWithChildren, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 
 /**
@@ -12,7 +12,7 @@ import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
  */
 export function MisskeyApiProvider({
     children
-}: PropsWithChildren<{}>) {
+}: React.PropsWithChildren) {
     const { client, setClient } = useMisskeyApiStore();
     const [initialized, setInitialized] = useState(false);
 
@@ -69,18 +69,11 @@ export function MisskeyApiProvider({
  * このコンポーネントを使用して、アプリケーション内でMisskeyのAPIクライアントを利用可能にします。
  * 通常は、src/app/dashboard/layout.tsxなどの高レベルのレイアウトファイルで使用します。
  * 
- * 例:
  * ```tsx
- * export default function DashboardLayout({ children }: { children: React.ReactNode }) {
- *     const [client, setClient] = useState<api.APIClient | null>(null);
- *     
- *     // クライアント初期化ロジック...
- *     
  *     return (
- *         <MisskeyApiProvider initialClient={client}>
+ *         <MisskeyApiProvider>
  *             {children}
  *         </MisskeyApiProvider>
  *     );
- * }
  * ```
  */
