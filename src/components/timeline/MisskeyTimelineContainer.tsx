@@ -13,20 +13,27 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
 }: {
     containerRef: React.RefObject<HTMLDivElement | null>
 }) {
-    // Zustandストアからタイムラインタイプと変更アクションを取得
-    const timelineType = useTimelineStore(state => state.timelineType);
     const changeTimelineType = useTimelineStore(state => state.changeTimelineType);
     const updateButtonOffset = useTimelineUiStore(state => state.updateButtonOffset);
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-    // 現在選択されているタブ（タイムラインタイプまたは通知）
-    const [activeTab, setActiveTab] = React.useState<TabType>(timelineType);
+    // ローカルストレージからタイムラインタイプを読み込み
+    let savedTimelineType: TimelineType | null = null;
+    try {
+        const saved = localStorage.getItem('calmi_timeline_type') as TimelineType | null;
+        if (saved && ['home', 'social', 'local', 'global'].includes(saved)) {
+            savedTimelineType = saved;
+        }
+    } catch (error) {
+        console.error('Failed to load timeline type from localStorage:', error);
+    }
+    if (!savedTimelineType) {
+        savedTimelineType = 'home'; // デフォルト値
+    }
 
-    // タイムラインタイプが変更されたらactiveTabも更新
-    useEffect(() => {
-        setActiveTab(timelineType);
-    }, [timelineType]);
+    // 現在選択されているタブ（タイムラインタイプまたは通知）
+    const [activeTab, setActiveTab] = React.useState<TabType>(savedTimelineType);
 
     // コンポーネントのマウント時にボタン位置を更新
     useEffect(() => {
@@ -41,8 +48,14 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
 
         // 通知以外のタブが選択された場合は従来のタイムラインタイプとして扱う
         if (value !== 'notifications' && ['home', 'social', 'local', 'global'].includes(value)) {
-            changeTimelineType(value as TimelineType);
-            // ストア内のchangeTimelineTypeがローカルストレージへの保存を担当
+            changeTimelineType();
+        }
+
+        // タイムラインタイプをローカルストレージに保存
+        try {
+            localStorage.setItem('calmi_timeline_type', value);
+        } catch (error) {
+            console.error('Failed to save timeline type to localStorage:', error);
         }
     };
 
@@ -74,7 +87,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
             <Box style={{ flex: 1, overflow: 'hidden', height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
                 {activeTab !== 'notifications' ? (
                     <MisskeyTimeline
-                        timelineType={timelineType}
+                        timelineType={activeTab}
                         scrollAreaRef={scrollAreaRef}
                         containerRef={containerRef}
                     />

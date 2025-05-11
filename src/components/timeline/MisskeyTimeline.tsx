@@ -61,7 +61,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     } = useInfiniteScrollStore();
 
     const lastBoundaryIndexRef = useRef<number | null>(null);
-    const prevTimelineTypeRef = useRef<TimelineType>(timelineType);
 
     // タイムラインタイプに応じた取得関数を返す
     const getTimelineFunction = () => {
@@ -83,30 +82,24 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             return;
         }
 
-        // タイムラインを初期化し、実際に使用されるタイムラインタイプを取得
-        const actualTimelineType = initializeTimeline(client, timelineType);
-        console.log(`Timeline initialized with type: ${actualTimelineType}`);
+        // タイムラインを初期化
+        initializeTimeline(client, timelineType);
+        console.log(`Timeline initialized with type: ${timelineType}`);
 
         initializeTimelineUi();
         initializeInfiniteScroll();
 
-        // タイムラインタイプが変更された場合
-        if (prevTimelineTypeRef.current !== actualTimelineType) {
-            console.log(`Timeline type changed from ${prevTimelineTypeRef.current} to ${actualTimelineType}`);
-            prevTimelineTypeRef.current = actualTimelineType as TimelineType;
-
-            // スクロール位置をトップに戻す
-            if (scrollAreaRef.current) {
-                scrollAreaRef.current.scrollTo({ top: 0 });
-            }
-
-            // 境界インデックスをリセット
-            lastBoundaryIndexRef.current = null;
+        // スクロール位置をトップに戻す
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTo({ top: 0 });
         }
+
+        // 境界インデックスをリセット
+        lastBoundaryIndexRef.current = null;
 
         // initializeTimeline で設定されたタイプに基づいてデータをロード
         const currentGetTimelineFn = () => {
-            switch (actualTimelineType) {
+            switch (timelineType) {
                 case 'home': return getHomeTimeline;
                 case 'social': return getHybridTimeline;
                 case 'local': return getLocalTimeline;
@@ -172,9 +165,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     // 単一ノートをレンダリングする関数
     const renderItem = useCallback((index: number) => {
-        // デバッグ情報を含める
-        console.log(`Rendering item at index ${index}, notes length: ${notes.length}`);
-
         // 配列の範囲外をチェック
         if (index >= notes.length) {
             console.log(`Index ${index} is out of bounds, returning null`);
@@ -182,7 +172,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         }
 
         const note = notes[index];
-        console.log(`Rendering note with id: ${note.id}`);
 
         // このノートに関連するスキップ・グループを取得
         const relatedGroups = skippedNotesGroups
@@ -307,9 +296,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
             virtuosoRef.current.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
-
-    // レンダリング時のデバッグ情報
-    console.log(`Rendering MisskeyTimeline component with ${notes.length} notes`);
 
     return (
         <Box pos="relative" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

@@ -237,6 +237,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
 
         // 各APIエンドポイントの実装
         getHomeTimeline: async (params = {}) => {
+            console.log('getHomeTimeline', params);
             return await get().executeApiRequest<Note[]>(
                 'notes/timeline',
                 params,
@@ -245,6 +246,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         },
 
         getHybridTimeline: async (params = {}) => {
+            console.log('getHybridTimeline', params);
             return await get().executeApiRequest<Note[]>(
                 'notes/hybrid-timeline',
                 params,
@@ -253,6 +255,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         },
 
         getLocalTimeline: async (params = {}) => {
+            console.log('getLocalTimeline', params);
             return await get().executeApiRequest<Note[]>(
                 'notes/local-timeline',
                 params,
@@ -261,6 +264,7 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         },
 
         getGlobalTimeline: async (params = {}) => {
+            console.log('getGlobalTimeline', params);
             return await get().executeApiRequest<Note[]>(
                 'notes/global-timeline',
                 params,

@@ -18,7 +18,6 @@ export interface SkippedNotesGroup {
 interface TimelineState {
     // 基本的なタイムラインの状態
     notes: Note[];
-    timelineType: TimelineType;
     autoUpdateEnabled: boolean;
     isLoading: boolean;
     hasError: boolean;
@@ -40,7 +39,7 @@ interface TimelineState {
 
 interface TimelineActions {
     // 初期化と基本操作
-    initializeTimeline: (client: api.APIClient, timelineType: TimelineType) => string;
+    initializeTimeline: (client: api.APIClient, timelineType: TimelineType) => void;
     cleanupTimeline: () => void;
     loadMoreNotes: (getTimelineFn: (params?: any) => Promise<Note[]>) => Promise<void>;
 
@@ -56,7 +55,7 @@ interface TimelineActions {
     loadSkippedNotes: (groupIndex: number, getNoteFn: (noteId: string) => Promise<Note>) => Promise<Note[] | null>;
 
     // タイムラインタイプ切り替え
-    changeTimelineType: (newType: TimelineType) => void;
+    changeTimelineType: () => void;
 
     // エラーハンドリング
     setError: (message: string) => void;
@@ -77,7 +76,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
     immer((set, get) => ({
         // 状態の初期値
         notes: [],
-        timelineType: 'home',
         autoUpdateEnabled: false,
         isLoading: false,
         hasError: false,
@@ -90,18 +88,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         renoteRelationMap: {},
 
         // アクション
-        initializeTimeline: (client, timelineType): string => {
-            // ローカルストレージからタイムラインタイプを読み込み
-            let savedType = timelineType;
-            try {
-                const saved = localStorage.getItem('calmi_timeline_type') as TimelineType | null;
-                if (saved && ['home', 'social', 'local', 'global'].includes(saved)) {
-                    savedType = saved;
-                }
-            } catch (error) {
-                console.error('Failed to load timeline type from localStorage:', error);
-            }
-
+        initializeTimeline: (client, timelineType) => {
             // リソースのクリーンアップ
             const currentStream = get().stream;
             if (currentStream) {
@@ -132,7 +119,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             // 状態のリセット
             set(state => {
                 state.notes = [];
-                state.timelineType = savedType; // ここで savedType を使用
                 state.autoUpdateEnabled = false;
                 state.isLoading = true;
                 state.hasError = false;
@@ -146,7 +132,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                 if (client.credential) {
                     state.stream = new MisskeyStream(
                         client,
-                        savedType, // ここでも savedType を使用
+                        timelineType,
                         (note) => {
                             const store = get();
                             if (store.autoUpdateEnabled) {
@@ -162,9 +148,6 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
                     state.stream.connect();
                 }
             });
-
-            // 状態更新が確実に完了した後に返す
-            return savedType; // savedType を返すように変更
         },
 
         cleanupTimeline: () => {
@@ -421,13 +404,7 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
         },
 
         // タイムラインタイプの変更
-        changeTimelineType: (newType) => {
-            const currentType = get().timelineType;
-
-            if (currentType === newType) {
-                return; // 同じタイプなら何もしない
-            }
-
+        changeTimelineType: () => {
             // 現在のStreamをクリーンアップ
             const currentStream = get().stream;
             if (currentStream) {
@@ -437,20 +414,12 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             // 状態をリセット
             set(state => {
                 state.notes = [];
-                state.timelineType = newType;
                 state.autoUpdateEnabled = false;
                 state.skippedNotesGroups = [];
                 state.lastSkippedGroupTimestamp = null;
                 state.lastSwitchToAutoUpdateTime = null;
                 state.stream = null;
             });
-
-            // タイムラインタイプをローカルストレージに保存
-            try {
-                localStorage.setItem('calmi_timeline_type', newType);
-            } catch (error) {
-                console.error('Failed to save timeline type to localStorage:', error);
-            }
         },
 
         // エラー状態の設定
