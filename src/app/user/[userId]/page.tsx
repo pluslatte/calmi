@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Tabs, LoadingOverlay, Text, Box, ScrollArea, Button, Divider, Affix } from "@mantine/core";
+import { Container, Tabs, LoadingOverlay, Text, Box, Button, Divider, Affix } from "@mantine/core";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note, UserDetailed } from "misskey-js/entities.js";
 import UserProfile from "@/components/UserProfile";
@@ -12,6 +12,7 @@ import MisskeyNoteActions from "@/components/MisskeyNoteActions";
 import { useInfiniteScrollStore } from "@/stores/useInfiniteScrollStore";
 import { IconNotes, IconPhoto, IconFile, IconArrowLeft } from "@tabler/icons-react";
 import UserMediaGrid from "@/components/UserMediaGrid";
+import { Virtuoso } from 'react-virtuoso';
 
 export default function UserPage() {
     const params = useParams();
@@ -26,10 +27,10 @@ export default function UserPage() {
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<string | null>("notes");
 
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
     const previousUserIdRef = useRef<string | null>(null);
+    const virtuosoRef = useRef(null);
 
-    const { isLoading: isLoadingMore, initialize, useInfiniteScroll } = useInfiniteScrollStore();
+    const { isLoading: isLoadingMore, initialize } = useInfiniteScrollStore();
 
     // データ取得関数をuseCallbackでメモ化
     const fetchUserData = useCallback(async (id: string) => {
@@ -160,45 +161,50 @@ export default function UserPage() {
         }
     };
 
-    const { observerRef } = useInfiniteScroll(loadMoreNotes);
-
-    // 表示するノートリスト
-    const displayNotes = () => {
-        switch (activeTab) {
-            case 'media':
-                return mediaNotes.length > 0 ? (
-                    <UserMediaGrid notes={mediaNotes} />
-                ) : (
-                    <Text ta="center" py="md" c="dimmed">メディア付きの投稿はありません</Text>
-                );
-            case 'files':
-                return filesNotes.length > 0 ? (
-                    filesNotes.map(note => (
-                        <Box key={"filenotes-" + note.id} mb="md">
-                            <MisskeyNote note={note} />
-                            <MisskeyNoteActions note={note} />
-                            <Divider mt="xs" />
-                        </Box>
-                    ))
-                ) : (
-                    <Text ta="center" py="md" c="dimmed">ファイル付きの投稿はありません</Text>
-                );
-            default:
-                return notes.length > 0 ? (
-                    notes.map((note) => {
-                        return (
-                            <Box key={"defaultnotes-" + note.id} mb="md">
-                                <MisskeyNote note={note} />
-                                <MisskeyNoteActions note={note} />
-                                <Divider mt="xs" />
-                            </Box>
-                        );
-                    })
-                ) : (
-                    <Text ta="center" py="md" c="dimmed">投稿はありません</Text>
-                );
+    // 単一のノートをレンダリングするための関数
+    const renderItem = useCallback((index: number, activeTabType: string, notesList: Note[]) => {
+        // 配列の範囲外をチェック
+        if (index >= notesList.length) {
+            return null;
         }
-    };
+
+        const note = notesList[index];
+        
+        return (
+            <Box key={activeTabType + "-note-" + note.id} p="xs">
+                <MisskeyNote note={note} />
+                <MisskeyNoteActions note={note} />
+                <Divider mt="xs" />
+            </Box>
+        );
+    }, []);
+
+    // フッターとして読み込み中インジケーターをレンダリング
+    const renderFooter = useCallback(() => {
+        if (!isLoadingMore) {
+            // アクティブなタブに応じてリストを選択
+            const currentList = activeTab === 'media' 
+                ? mediaNotes 
+                : activeTab === 'files' 
+                    ? filesNotes 
+                    : notes;
+
+            if (!loading && currentList.length > 0) {
+                return (
+                    <Text size="sm" c="dimmed" ta="center" py="sm">
+                        これ以上の投稿はありません
+                    </Text>
+                );
+            }
+            return null;
+        }
+        
+        return (
+            <Text size="sm" c="dimmed" ta="center" py="sm">
+                読み込み中...
+            </Text>
+        );
+    }, [isLoadingMore, loading, activeTab, notes.length, mediaNotes.length, filesNotes.length]);
 
     // エラー時の表示
     if (error) {
@@ -268,24 +274,91 @@ export default function UserPage() {
                 </Tabs.List>
             </Tabs>
 
-            <ScrollArea viewportRef={scrollAreaRef} h="calc(100vh - 90px - 70px)" type="scroll">
-                <Box maw="calc(100vw - 38px)">
-                    {displayNotes()}
-                    <div ref={observerRef} style={{ height: 1 }} />
+            {/* 通常のノート表示 */}
+            {activeTab === 'notes' && (
+                notes.length > 0 ? (
+                    <Box style={{ height: 'calc(100vh - 90px - 70px)', width: '100%' }}>
+                        <Virtuoso
+                            ref={virtuosoRef}
+                            style={{ height: '100%', width: '100%' }}
+                            totalCount={notes.length}
+                            itemContent={(index) => renderItem(index, 'notes', notes)}
+                            components={{
+                                Footer: renderFooter,
+                            }}
+                            endReached={loadMoreNotes}
+                            overscan={200}
+                            increaseViewportBy={{ top: 300, bottom: 300 }}
+                            initialTopMostItemIndex={0}
+                        />
+                    </Box>
+                ) : (
+                    <Text ta="center" py="md" c="dimmed">投稿はありません</Text>
+                )
+            )}
 
-                    {isLoadingMore && (
-                        <Text size="sm" c="dimmed" ta="center" py="sm">
-                            読み込み中...
-                        </Text>
-                    )}
+            {/* ファイル付きノート表示 */}
+            {activeTab === 'files' && (
+                filesNotes.length > 0 ? (
+                    <Box style={{ height: 'calc(100vh - 90px - 70px)', width: '100%' }}>
+                        <Virtuoso
+                            ref={virtuosoRef}
+                            style={{ height: '100%', width: '100%' }}
+                            totalCount={filesNotes.length}
+                            itemContent={(index) => renderItem(index, 'files', filesNotes)}
+                            components={{
+                                Footer: renderFooter,
+                            }}
+                            endReached={loadMoreNotes}
+                            overscan={200}
+                            increaseViewportBy={{ top: 300, bottom: 300 }}
+                            initialTopMostItemIndex={0}
+                        />
+                    </Box>
+                ) : (
+                    <Text ta="center" py="md" c="dimmed">ファイル付きの投稿はありません</Text>
+                )
+            )}
 
-                    {!isLoadingMore && !loading && notes.length > 0 && (
-                        <Text size="sm" c="dimmed" ta="center" py="sm">
-                            これ以上の投稿はありません
-                        </Text>
-                    )}
-                </Box>
-            </ScrollArea>
+            {/* メディア表示（UserMediaGridを使用） */}
+            {activeTab === 'media' && (
+                mediaNotes.length > 0 ? (
+                    <Box style={{ height: 'calc(100vh - 90px - 70px)', width: '100%', overflowY: 'auto' }}>
+                        <UserMediaGrid notes={mediaNotes} />
+                        {isLoadingMore ? (
+                            <Text size="sm" c="dimmed" ta="center" py="sm">
+                                読み込み中...
+                            </Text>
+                        ) : (
+                            <Text size="sm" c="dimmed" ta="center" py="sm">
+                                これ以上の投稿はありません
+                            </Text>
+                        )}
+                        {/* IntersectionObserverを使用してメディアタブで無限スクロールを実装 */}
+                        <Box
+                            ref={node => {
+                                if (node) {
+                                    const observer = new IntersectionObserver(
+                                        (entries) => {
+                                            if (entries[0].isIntersecting && !isLoadingMore) {
+                                                loadMoreNotes();
+                                            }
+                                        },
+                                        { rootMargin: '100px' }
+                                    );
+                                    observer.observe(node);
+                                    return () => {
+                                        if (node) observer.unobserve(node);
+                                    };
+                                }
+                            }}
+                            style={{ height: 5 }}
+                        />
+                    </Box>
+                ) : (
+                    <Text ta="center" py="md" c="dimmed">メディア付きの投稿はありません</Text>
+                )
+            )}
         </Container>
     );
 }
