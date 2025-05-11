@@ -85,12 +85,15 @@ export class MisskeyStream {
                 if (data.id === noteId) {
                     // ノート更新時にコールバックを呼び出す
                     if ((data.type === 'reacted' || data.type === 'unreacted') && this.onNoteUpdated) {
-                        // ノート情報を取得して更新
-                        this.onNoteUpdated({
+                        // 型に応じてbodyをキャスト
+                        const event = {
                             id: noteId,
                             type: data.type,
-                            body: data.body
-                        });
+                            body: data.body as any
+                        } as NoteUpdatedEvent;
+                        
+                        // ノート情報を取得して更新
+                        this.onNoteUpdated(event);
 
                         // リノート元ノートとして使われている場合も更新
                         if (this.updateRenoteSource) {
@@ -107,11 +110,13 @@ export class MisskeyStream {
 
                     // ノート削除イベントの処理
                     if (data.type === 'deleted' && this.onNoteDeleted) {
-                        this.onNoteDeleted({
+                        const deleteEvent = {
                             id: noteId,
-                            type: 'deleted',
-                            body: data.body
-                        });
+                            type: 'deleted' as const,
+                            body: data.body as any
+                        } as NoteUpdatedEvent;
+                        
+                        this.onNoteDeleted(deleteEvent);
                     }
                 }
             });
