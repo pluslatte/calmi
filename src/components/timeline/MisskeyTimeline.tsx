@@ -82,15 +82,23 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     // 初期化処理
     useEffect(() => {
-        if (!client) return;
+        console.log("MisskeyTimeline initialization effect running");
+        
+        if (!client) {
+            console.log("Client not available, skipping initialization");
+            return;
+        }
 
         // タイムラインを初期化し、実際に使用されるタイムラインタイプを取得
         const actualTimelineType = initializeTimeline(client, timelineType);
+        console.log(`Timeline initialized with type: ${actualTimelineType}`);
+        
         initializeTimelineUi();
         initializeInfiniteScroll();
 
         // タイムラインタイプが変更された場合
         if (prevTimelineTypeRef.current !== actualTimelineType) {
+            console.log(`Timeline type changed from ${prevTimelineTypeRef.current} to ${actualTimelineType}`);
             prevTimelineTypeRef.current = actualTimelineType as TimelineType;
 
             // スクロール位置をトップに戻す
@@ -114,10 +122,21 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         };
 
         // 初期データのロード
-        loadMoreNotes(currentGetTimelineFn());
+        console.log("Loading initial timeline data...");
+        loadMoreNotes(currentGetTimelineFn())
+            .then(() => {
+                console.log(`Initial data loaded, notes count: ${notes.length}`);
+                if (notes.length > 0) {
+                    console.log(`First note ID: ${notes[0].id}`);
+                }
+            })
+            .catch(error => {
+                console.error("Error loading initial timeline data:", error);
+            });
 
         // クリーンアップ
         return () => {
+            console.log("Timeline component cleanup");
             cleanupTimeline();
         };
     }, [client, timelineType, initializeTimeline, loadMoreNotes, cleanupTimeline, initializeInfiniteScroll]);
@@ -158,10 +177,17 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     // 単一ノートをレンダリングする関数
     const renderItem = useCallback((index: number) => {
+        // デバッグ情報を含める
+        console.log(`Rendering item at index ${index}, notes length: ${notes.length}`);
+        
         // 配列の範囲外をチェック
-        if (index >= notes.length) return null;
+        if (index >= notes.length) {
+            console.log(`Index ${index} is out of bounds, returning null`);
+            return null;
+        }
 
         const note = notes[index];
+        console.log(`Rendering note with id: ${note.id}`);
 
         // このノートに関連するスキップ・グループを取得
         const relatedGroups = skippedNotesGroups
@@ -281,30 +307,40 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         }
     };
 
+    // レンダリング時のデバッグ情報
+    console.log(`Rendering MisskeyTimeline component with ${notes.length} notes`);
+    
     return (
-        <Box pos="relative">
-            <Virtuoso
-                ref={virtuosoRef}
-                style={{ height: '100%' }}
-                totalCount={notes.length}
-                itemContent={renderItem}
-                components={{
-                    Header: renderHeader,
-                    Footer: renderFooter,
-                }}
-                endReached={loadMoreData}
-                overscan={200}
-                increaseViewportBy={{ top: 300, bottom: 300 }}
-                initialTopMostItemIndex={0}
-                atTopStateChange={(atTop) => {
-                    // atTopがtrueの場合は先頭にいる
-                    if (atTop && !autoUpdateEnabled) {
-                        setAutoUpdateEnabled(true);
-                    } else if (!atTop && autoUpdateEnabled) {
-                        setAutoUpdateEnabled(false);
-                    }
-                }}
-            />
+        <Box pos="relative" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            {notes.length > 0 ? (
+                <Virtuoso
+                    ref={virtuosoRef}
+                    style={{ height: 'calc(100vh - 120px)', width: '100%' }}
+                    totalCount={notes.length}
+                    itemContent={renderItem}
+                    components={{
+                        Header: renderHeader,
+                        Footer: renderFooter,
+                    }}
+                    endReached={loadMoreData}
+                    overscan={200}
+                    increaseViewportBy={{ top: 300, bottom: 300 }}
+                    initialTopMostItemIndex={0}
+                    atTopStateChange={(atTop) => {
+                        // atTopがtrueの場合は先頭にいる
+                        if (atTop && !autoUpdateEnabled) {
+                            setAutoUpdateEnabled(true);
+                        } else if (!atTop && autoUpdateEnabled) {
+                            setAutoUpdateEnabled(false);
+                        }
+                    }}
+                />
+            ) : (
+                <Box py="md" ta="center">
+                    <Text>ノートが読み込まれていません（デバッグ表示）</Text>
+                    <Text size="xs" c="dimmed" mt="xs">notes.length: {notes.length}</Text>
+                </Box>
+            )}
 
             {buttonRightOffset !== null && (
                 <React.Fragment>

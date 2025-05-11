@@ -71,7 +71,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
                     </Tooltip>
                 </Tabs.List>
             </Tabs>
-            <Box style={{ flex: 1, overflow: 'hidden', height: 'calc(100vh - 120px)' }}>
+            <Box style={{ flex: 1, overflow: 'hidden', height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
                 {activeTab !== 'notifications' ? (
                     <MisskeyTimeline
                         timelineType={timelineType}
