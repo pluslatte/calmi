@@ -13,7 +13,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
 }: {
     containerRef: React.RefObject<HTMLDivElement | null>
 }) {
-    const changeTimelineType = useTimelineStore(state => state.changeTimelineType);
+    const discardStream = useTimelineStore(state => state.discardStream);
     const updateButtonOffset = useTimelineUiStore(state => state.updateButtonOffset);
 
     // ローカルストレージからタイムラインタイプを読み込み
@@ -41,6 +41,7 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
     // タブ変更ハンドラ
     const handleTabChange = (value: string | null) => {
         if (!value) return;
+        if (activeTab === value) return;
 
         // タイムラインタイプをローカルストレージに保存
         try {
@@ -49,12 +50,8 @@ const MisskeyTimelineContainer = memo(function MisskeyTimelineContainer({
             console.error('Failed to save timeline type to localStorage:', error);
         }
 
+        discardStream();
         setActiveTab(value as TabType);
-
-        // 通知以外のタブが選択された場合は従来のタイムラインタイプとして扱う
-        if (value !== 'notifications' && ['home', 'social', 'local', 'global'].includes(value)) {
-            changeTimelineType();
-        }
     };
 
     return (

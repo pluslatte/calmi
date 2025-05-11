@@ -70,8 +70,8 @@ interface TimelineActions {
     addSkippedNote: (note: Note) => void;
     loadSkippedNotes: (groupIndex: number, getNoteFn: (noteId: string) => Promise<Note>) => Promise<Note[] | null>;
 
-    // タイムラインタイプ切り替え
-    changeTimelineType: () => void;
+    // ストリームの購読解除
+    discardStream: () => void;
 
     // エラーハンドリング
     setError: (message: string) => void;
@@ -465,23 +465,13 @@ export const useTimelineStore = create<TimelineState & TimelineActions>()(
             }
         },
 
-        // タイムラインタイプの変更
-        changeTimelineType: () => {
+        // ストリームの購読解除
+        discardStream: () => {
             // 現在のStreamをクリーンアップ
             const currentStream = get().stream;
             if (currentStream) {
                 currentStream.disconnect();
             }
-
-            // 状態をリセット
-            set(state => {
-                state.notes = [];
-                state.autoUpdateEnabled = false;
-                state.skippedNotesGroups = [];
-                state.lastSkippedGroupTimestamp = null;
-                state.lastSwitchToAutoUpdateTime = null;
-                state.stream = null;
-            });
         },
 
         // エラー状態の設定
