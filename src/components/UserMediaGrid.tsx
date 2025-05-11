@@ -10,9 +10,10 @@ import { VirtuosoGrid } from 'react-virtuoso';
 interface UserMediaGridProps {
     notes: Note[];
     onLoadMore?: () => void;
+    isLoading?: boolean;
 }
 
-export default function UserMediaGrid({ notes, onLoadMore }: UserMediaGridProps) {
+export default function UserMediaGrid({ notes, onLoadMore, isLoading = false }: UserMediaGridProps) {
     const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
     const [videoFile, setVideoFile] = useState<DriveFile | null>(null);
     const [mediaFiles, setMediaFiles] = useState<DriveFile[]>([]);
@@ -308,22 +309,37 @@ export default function UserMediaGrid({ notes, onLoadMore }: UserMediaGridProps)
         []
     );
 
+    // 読み込み状態のフッターをレンダリングするコンポーネント
+    const FooterContainer = useCallback(() => {
+        if (isLoading) {
+            return (
+                <Box py="md" ta="center">
+                    <Text size="sm" c="dimmed" fw={500}>読み込み中...</Text>
+                </Box>
+            );
+        }
+        return null;
+    }, [isLoading]);
+
     return (
         <>
             {mediaFiles.length === 0 ? (
                 <Box py="md">メディアはありません</Box>
             ) : (
-                <VirtuosoGrid
-                    style={{ height: '100%' }}
-                    totalCount={mediaFiles.length}
-                    overscan={200}
-                    components={{
-                        Item: ItemContainer,
-                    }}
-                    itemContent={index => renderMediaItem(mediaFiles[index])}
-                    listClassName="grid-list"
-                    endReached={onLoadMore}
-                />
+                <Box pos="relative" style={{ height: '100%' }}>
+                    <VirtuosoGrid
+                        style={{ height: '100%' }}
+                        totalCount={mediaFiles.length}
+                        overscan={200}
+                        components={{
+                            Item: ItemContainer,
+                            Footer: FooterContainer
+                        }}
+                        itemContent={index => renderMediaItem(mediaFiles[index])}
+                        listClassName="grid-list"
+                        endReached={onLoadMore}
+                    />
+                </Box>
             )}
 
             {/* スタイルを追加 */}

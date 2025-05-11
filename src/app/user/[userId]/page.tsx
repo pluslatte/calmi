@@ -9,7 +9,6 @@ import { Note, UserDetailed } from "misskey-js/entities.js";
 import UserProfile from "@/components/UserProfile";
 import MisskeyNote from "@/components/MisskeyNote";
 import MisskeyNoteActions from "@/components/MisskeyNoteActions";
-import { useInfiniteScrollStore } from "@/stores/useInfiniteScrollStore";
 import { IconNotes, IconPhoto, IconFile, IconArrowLeft } from "@tabler/icons-react";
 import UserMediaGrid from "@/components/UserMediaGrid";
 import { Virtuoso } from 'react-virtuoso';
@@ -29,8 +28,7 @@ export default function UserPage() {
 
     const previousUserIdRef = useRef<string | null>(null);
     const virtuosoRef = useRef(null);
-
-    const { isLoading: isLoadingMore, initialize } = useInfiniteScrollStore();
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     // データ取得関数をuseCallbackでメモ化
     const fetchUserData = useCallback(async (id: string) => {
@@ -82,18 +80,15 @@ export default function UserPage() {
             fetchUserData(userId);
             previousUserIdRef.current = userId;
         }
-
-        // クリーンアップ
-        return () => {
-            initialize();
-        };
-    }, [userId, fetchUserData, initialize, client]);
+    }, [userId, fetchUserData, client]);
 
     // 通常ノートの無限スクロール
     const loadMoreNotes = async () => {
-        if (!userId || !client) return [];
+        if (!userId || !client || isLoadingMore) return [];
 
         try {
+            setIsLoadingMore(true);
+            
             // アクティブなタブに応じてロード処理を変更
             switch (activeTab) {
                 case 'media': {
@@ -158,6 +153,8 @@ export default function UserPage() {
         } catch (error) {
             console.error('Failed to load more notes:', error);
             return [];
+        } finally {
+            setIsLoadingMore(false);
         }
     };
 
@@ -181,30 +178,31 @@ export default function UserPage() {
 
     // フッターとして読み込み中インジケーターをレンダリング
     const renderFooter = useCallback(() => {
-        if (!isLoadingMore) {
-            // アクティブなタブに応じてリストを選択
-            const currentList = activeTab === 'media' 
-                ? mediaNotes 
-                : activeTab === 'files' 
-                    ? filesNotes 
-                    : notes;
-
-            if (!loading && currentList.length > 0) {
-                return (
-                    <Text size="sm" c="dimmed" ta="center" py="sm">
-                        これ以上の投稿はありません
-                    </Text>
-                );
-            }
-            return null;
+        // アクティブなタブに応じてリストを選択
+        const currentList = activeTab === 'media' 
+            ? mediaNotes 
+            : activeTab === 'files' 
+                ? filesNotes 
+                : notes;
+                
+        if (isLoadingMore) {
+            return (
+                <Text size="sm" c="dimmed" ta="center" py="sm" fw={500}>
+                    読み込み中...
+                </Text>
+            );
         }
         
-        return (
-            <Text size="sm" c="dimmed" ta="center" py="sm">
-                読み込み中...
-            </Text>
-        );
-    }, [isLoadingMore, loading, activeTab, notes.length, mediaNotes.length, filesNotes.length]);
+        if (!loading && currentList.length > 0) {
+            return (
+                <Text size="sm" c="dimmed" ta="center" py="sm">
+                    これ以上の投稿はありません
+                </Text>
+            );
+        }
+        
+        return null;
+    }, [isLoadingMore, loading, activeTab, notes, mediaNotes, filesNotes]);
 
     // エラー時の表示
     if (error) {
@@ -327,6 +325,7 @@ export default function UserPage() {
                         <UserMediaGrid 
                             notes={mediaNotes} 
                             onLoadMore={loadMoreNotes}
+                            isLoading={isLoadingMore}
                         />
                     </Box>
                 ) : (
