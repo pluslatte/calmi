@@ -31,6 +31,8 @@ interface MisskeyApiState {
     client: api.APIClient | null;
     apiState: ApiState;
     isLoggedIn: boolean;
+    currentUser: User | null; // 現在のユーザー情報をキャッシュ
+    lastUserFetchTime: number | null; // 最後にユーザー情報を取得した時間
 }
 
 // アクションの型定義
@@ -139,6 +141,8 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         client: null,
         apiState: defaultApiState,
         isLoggedIn: false,
+        currentUser: null,
+        lastUserFetchTime: null,
 
         // APIクライアントの設定
         setClient: (client) => {
@@ -156,6 +160,8 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
                 state.client = null;
                 state.isLoggedIn = false;
                 state.apiState.error = null;
+                state.currentUser = null;
+                state.lastUserFetchTime = null;
             });
 
             notifications.show({
@@ -323,11 +329,37 @@ export const useMisskeyApiStore = create<MisskeyApiState & MisskeyApiActions>()(
         },
 
         getUserInfo: async () => {
-            return await get().executeApiRequest<User>(
+            const state = get();
+            
+            // キャッシュの有効期限（5分 = 300000ミリ秒）
+            const CACHE_EXPIRATION = 300000;
+            
+            // 現在のユーザー情報がキャッシュされていて、かつキャッシュが有効期限内であれば、
+            // キャッシュされたデータを返す
+            if (
+                state.currentUser && 
+                state.lastUserFetchTime && 
+                Date.now() - state.lastUserFetchTime < CACHE_EXPIRATION
+            ) {
+                console.log('getUserInfo: キャッシュから取得');
+                return state.currentUser;
+            }
+            
+            // キャッシュがない場合やキャッシュが期限切れの場合は、APIリクエストを実行
+            console.log('getUserInfo: APIリクエスト実行');
+            const user = await get().executeApiRequest<User>(
                 'i',
                 {},
                 'ユーザー情報の取得に失敗しました'
             );
+            
+            // 取得したユーザー情報をキャッシュ
+            set(state => {
+                state.currentUser = user;
+                state.lastUserFetchTime = Date.now();
+            });
+            
+            return user;
         },
 
         uploadFile: async (file) => {

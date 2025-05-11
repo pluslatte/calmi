@@ -1,6 +1,6 @@
 import { Group, ActionIcon, useMantineTheme, Box, Popover, Paper, Text, Flex, rgba, Menu, Modal, Button } from "@mantine/core";
 import { IconArrowBackUp, IconRepeat, IconDots, IconMoodSmile, IconCheck, IconLink, IconMessageCircle, IconTrash } from "@tabler/icons-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
 import { Note } from "misskey-js/entities.js";
 import { notifications } from "@mantine/notifications";
@@ -9,12 +9,11 @@ import QuoteNoteModal from "./QuoteNoteModal";
 import ReplyNoteModal from "./ReplyNoteModal";
 import { useTimelineStore } from "@/stores/timeline/useTimelineStore";
 
-// プロップからonReactionUpdateを削除
 interface MisskeyNoteActionsProps {
     note: Note;
 }
 
-export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
+function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
     const [localNote, setLocalNote] = useState<Note>(note);
     const [copySuccess, setCopySuccess] = useState(false);
     const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
@@ -31,6 +30,12 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
         setLocalNote(note);
     }, [note]);
 
+    // リノートチェック：リノートかつテキストがない場合は純粋なリノート（リポストのみ）と判断
+    const isPlainRepost = localNote.renote && !localNote.text;
+
+    // 操作対象のノートID
+    const targetNoteId = isPlainRepost ? localNote.renote!.id : localNote.id;
+
     // コンポーネントがマウントされたときに自分のユーザー情報を取得し、
     // 表示されているノートが自分のものかどうかを判定する
     useEffect(() => {
@@ -46,13 +51,9 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
         };
 
         fetchUserInfo();
-    }, [localNote]);
-
-    // リノートチェック：リノートかつテキストがない場合は純粋なリノート（リポストのみ）と判断
-    const isPlainRepost = localNote.renote && !localNote.text;
-
-    // 操作対象のノートID
-    const targetNoteId = isPlainRepost ? localNote.renote!.id : localNote.id;
+        // 必要最小限の依存関係のみを含める
+        // ノートのIDが変わった場合のみ再実行
+    }, [localNote.id, getUserInfo]);
 
     // リノート先であるかどうかにあわせた、描画するノートの絵文字データ
     const targetNoteEmojis = isPlainRepost ? localNote.renote!.emojis : localNote.emojis;
@@ -497,3 +498,8 @@ export default function MisskeyNoteActions({ note }: MisskeyNoteActionsProps) {
         </Box>
     );
 }
+
+// memo化して同じnote.idのノートの場合は再レンダリングしないようにする
+export default memo(MisskeyNoteActions, (prevProps, nextProps) => {
+    return prevProps.note.id === nextProps.note.id;
+});
