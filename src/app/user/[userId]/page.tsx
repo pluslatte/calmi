@@ -185,7 +185,7 @@ export default function UserPage() {
                 );
             default:
                 return notes.length > 0 ? (
-                    notes.map((note, index) => {
+                    notes.map((note) => {
                         return (
                             <Box key={"defaultnotes-" + note.id} mb="md">
                                 <MisskeyNote note={note} />

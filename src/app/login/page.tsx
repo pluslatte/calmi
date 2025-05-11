@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Container, Card, Text, Title, Stack, TextInput, Paper, Flex, Group, List, ThemeIcon, Box, Divider, Anchor } from "@mantine/core";
+import { Button, Container, Card, Text, Title, Stack, TextInput, Flex, Group, List, ThemeIcon, Divider, Anchor } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { notifications } from '@mantine/notifications';
 import { IconLogin, IconBrandGithub, IconMoon, IconFilter, IconRocket, IconCoffee, IconArrowRight } from '@tabler/icons-react';

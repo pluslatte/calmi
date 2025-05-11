@@ -156,46 +156,6 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         return () => window.removeEventListener('resize', handleResize);
     }, [containerRef, updateButtonOffset]);
 
-    // 更新境界インデックスを探す
-    const findUpdateBoundaryIndex = (): number | null => {
-        if (!lastSwitchToAutoUpdateTime || notes.length === 0) return null;
-
-        for (let i = 0; i < notes.length; i++) {
-            const noteDate = new Date(notes[i].createdAt);
-            if (noteDate < lastSwitchToAutoUpdateTime) {
-                return i;
-            }
-        }
-
-        return null;
-    };
-
-    // API読み込み中の表示
-    if (isLoading && notes.length === 0) {
-        return (
-            <Box py="xl" ta="center">
-                <Loader size="md" />
-                <Text mt="md">タイムラインを読み込み中...</Text>
-            </Box>
-        );
-    }
-
-    // APIエラーの表示
-    if (hasError && notes.length === 0) {
-        return (
-            <Box py="xl" ta="center">
-                <Text c="red">{errorMessage}</Text>
-                <Button
-                    onClick={() => loadMoreNotes(getTimelineFunction())}
-                    mt="md"
-                    variant="outline"
-                >
-                    再試行
-                </Button>
-            </Box>
-        );
-    }
-
     // 単一ノートをレンダリングする関数
     const renderItem = useCallback((index: number) => {
         // 配列の範囲外をチェック
@@ -285,6 +245,33 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
 
     // virtuosoのスクロールリファレンス
     const virtuosoRef = useRef(null);
+
+
+    // API読み込み中の表示
+    if (isLoading && notes.length === 0) {
+        return (
+            <Box py="xl" ta="center">
+                <Loader size="md" />
+                <Text mt="md">タイムラインを読み込み中...</Text>
+            </Box>
+        );
+    }
+
+    // APIエラーの表示
+    if (hasError && notes.length === 0) {
+        return (
+            <Box py="xl" ta="center">
+                <Text c="red">{errorMessage}</Text>
+                <Button
+                    onClick={() => loadMoreNotes(getTimelineFunction())}
+                    mt="md"
+                    variant="outline"
+                >
+                    再試行
+                </Button>
+            </Box>
+        );
+    }
 
     // スクロールトップ処理
     const handleScrollToTop = () => {

@@ -11,11 +11,8 @@ import { useMisskeyApiStore } from "@/stores/useMisskeyApiStore";
  * @param children 子コンポーネント
  */
 export function MisskeyApiProvider({
-    initialClient = null,
     children
-}: PropsWithChildren<{
-    initialClient?: api.APIClient | null
-}>) {
+}: PropsWithChildren<{}>) {
     const { client, setClient } = useMisskeyApiStore();
     const [initialized, setInitialized] = useState(false);
 
