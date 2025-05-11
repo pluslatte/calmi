@@ -73,15 +73,6 @@ export function EmojiCacheProvider({ children }: { children: React.ReactNode }) 
         }));
     };
 
-    // 絵文字の読み込み状態を設定する関数
-    const setEmojiLoading = (host: string | null, name: string, isLoading: boolean): void => {
-        const key = getEmojiKey(host, name);
-        setLoadingEmojis(prev => ({
-            ...prev,
-            [key]: isLoading
-        }));
-    };
-
     // コンテキスト値
     const contextValue: EmojiCacheContextType = {
         getEmojiUrl,

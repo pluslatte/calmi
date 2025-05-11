@@ -268,7 +268,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
         };
 
         await loadMore();
-    }, []);
+    }, [loadMoreNotes]);
 
     // virtuosoのスクロールリファレンス
     const virtuosoRef = useRef(null);
@@ -303,7 +303,7 @@ const MisskeyTimeline = memo(function MisskeyTimeline({
     // スクロールトップ処理
     const handleScrollToTop = () => {
         if (virtuosoRef.current) {
-            // @ts-ignore Virtuosoのrefは複雑な型を持つため
+            // @ts-expect-error Virtuosoのrefは複雑な型を持つため
             virtuosoRef.current.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };

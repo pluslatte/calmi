@@ -1,5 +1,4 @@
 // src/stores/useInfiniteScrollStore.ts
-import { Note } from "misskey-js/entities.js";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
