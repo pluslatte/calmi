@@ -31,7 +31,7 @@ export default function Dashboard() {
             {isMobile ? (
                 // モバイルレイアウト
                 <>
-                    <Box h="calc(100vh - 70px)"> {/* ヘッダーの高さ分を引く */}
+                    <Box h="calc(100vh - 70px)"> {/* フッターの高さ分を引く */}
                         <MisskeyTimelineContainer containerRef={containerRef} />
                     </Box>
                 </>

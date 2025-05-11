@@ -88,7 +88,7 @@ export default function UserPage() {
 
         try {
             setIsLoadingMore(true);
-            
+
             // アクティブなタブに応じてロード処理を変更
             switch (activeTab) {
                 case 'media': {
@@ -166,7 +166,7 @@ export default function UserPage() {
         }
 
         const note = notesList[index];
-        
+
         return (
             <Box key={activeTabType + "-note-" + note.id} p="xs">
                 <MisskeyNote note={note} />
@@ -179,12 +179,12 @@ export default function UserPage() {
     // フッターとして読み込み中インジケーターをレンダリング
     const renderFooter = useCallback(() => {
         // アクティブなタブに応じてリストを選択
-        const currentList = activeTab === 'media' 
-            ? mediaNotes 
-            : activeTab === 'files' 
-                ? filesNotes 
+        const currentList = activeTab === 'media'
+            ? mediaNotes
+            : activeTab === 'files'
+                ? filesNotes
                 : notes;
-                
+
         if (isLoadingMore) {
             return (
                 <Text size="sm" c="dimmed" ta="center" py="sm" fw={500}>
@@ -192,7 +192,7 @@ export default function UserPage() {
                 </Text>
             );
         }
-        
+
         if (!loading && currentList.length > 0) {
             return (
                 <Text size="sm" c="dimmed" ta="center" py="sm">
@@ -200,7 +200,7 @@ export default function UserPage() {
                 </Text>
             );
         }
-        
+
         return null;
     }, [isLoadingMore, loading, activeTab, notes, mediaNotes, filesNotes]);
 
@@ -240,7 +240,7 @@ export default function UserPage() {
     }
 
     return (
-        <Container size="md" py="lg" style={{ position: 'relative', overflowX: 'hidden' }}>
+        <Container p={4} mb="60px" style={{ position: 'relative', overflowX: 'hidden' }}>
             <LoadingOverlay visible={loading} overlayProps={{ radius: "sm", blur: 2 }} />
 
             {user && <UserProfile user={user} />}
@@ -258,7 +258,7 @@ export default function UserPage() {
                 </Button>
             </Affix>
 
-            <Tabs value={activeTab} onChange={setActiveTab} mb="md">
+            <Tabs value={activeTab} onChange={setActiveTab} mb="xs">
                 <Tabs.List>
                     <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                         ノート
@@ -275,7 +275,7 @@ export default function UserPage() {
             {/* 通常のノート表示 */}
             {activeTab === 'notes' && (
                 notes.length > 0 ? (
-                    <Box style={{ height: 'calc(100vh - 90px - 70px)', width: '100%' }}>
+                    <Box style={{ height: 'calc(100vh - 120px)', width: '100%' }}>
                         <Virtuoso
                             ref={virtuosoRef}
                             style={{ height: '100%', width: '100%' }}
@@ -298,7 +298,7 @@ export default function UserPage() {
             {/* ファイル付きノート表示 */}
             {activeTab === 'files' && (
                 filesNotes.length > 0 ? (
-                    <Box style={{ height: 'calc(100vh - 90px - 70px)', width: '100%' }}>
+                    <Box style={{ height: 'calc(100vh - 120px)', width: '100%' }}>
                         <Virtuoso
                             ref={virtuosoRef}
                             style={{ height: '100%', width: '100%' }}
@@ -321,9 +321,9 @@ export default function UserPage() {
             {/* メディア表示（UserMediaGridを使用） */}
             {activeTab === 'media' && (
                 mediaNotes.length > 0 ? (
-                    <Box style={{ height: 'calc(100vh - 90px - 70px)', width: '100%' }}>
-                        <UserMediaGrid 
-                            notes={mediaNotes} 
+                    <Box style={{ height: 'calc(100vh - 120px)', width: '100%' }}>
+                        <UserMediaGrid
+                            notes={mediaNotes}
                             onLoadMore={loadMoreNotes}
                             isLoading={isLoadingMore}
                         />
