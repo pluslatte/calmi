@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
+import { useSession } from "next-auth/react";
 
 type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
     select: {
@@ -19,7 +20,7 @@ type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
 
 interface AccountsData {
     accounts: MisskeyAccountPublic[];
-    activeAccoutId: string | null;
+    activeAccountId: string | null;
 };
 
 interface RegisterAccountResponse {
@@ -31,7 +32,9 @@ interface ErrorResponse {
     error: string;
 }
 
-export default async function Dashboard() {
+export default function Dashboard() {
+    const { data: session, status } = useSession();
+
     const [accounts, setAccounts] = useState<MisskeyAccountPublic[]>([]);
     const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -49,7 +52,7 @@ export default async function Dashboard() {
             if (response.ok) {
                 const data: AccountsData = await response.json();
                 setAccounts(data.accounts);
-                setActiveAccountId(data.activeAccoutId);
+                setActiveAccountId(data.activeAccountId);
             } else {
                 const errorData: ErrorResponse = await response.json();
                 notifications.show({
@@ -167,11 +170,21 @@ export default async function Dashboard() {
         fetchAccounts();
     }, []);
 
-    if (loading) {
+    if (loading || status === 'loading') {
         return (
             <Container size="md" py="xl">
                 <Group justify="center">
                     <Loader size="lg" />
+                </Group>
+            </Container>
+        );
+    }
+
+    if (status === 'unauthenticated') {
+        return (
+            <Container size="md" py="xl">
+                <Group justify="center">
+                    <Text>Access  Denied</Text>
                 </Group>
             </Container>
         );
