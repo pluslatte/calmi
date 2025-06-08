@@ -1,0 +1,37 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:./dev.db"
+}
+
+model MisskeyAccount {
+    id            String   @id @default(cuid())
+    sessionUserId String   @map("session_user_id")
+    instanceUrl   String   @map("instance_url")
+    accessToken   String   @map("access_token") // 暗号化済み
+    username      String
+    displayName   String   @map("display_name")
+    avatarUrl     String?  @map("avatar_url")
+    createdAt     DateTime @default(now()) @map("created_at")
+    updatedAt     DateTime @updatedAt @map("updated_at")
+
+    // Relationships
+    userSettings UserSettings[]
+
+    @@map("misskey_accounts")
+}
+
+model UserSettings {
+    sessionUserId   String   @id @map("session_user_id")
+    activeAccountId String?  @map("active_account_id")
+    createdAt       DateTime @default(now()) @map("created_at")
+    updatedAt       DateTime @updatedAt @map("updated_at")
+
+    // Relationships
+    activeAccount MisskeyAccount? @relation(fields: [activeAccountId], references: [id])
+
+    @@map("user_settings")
+}
