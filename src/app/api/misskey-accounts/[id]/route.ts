@@ -14,7 +14,8 @@ export async function DELETE(
         );
     }
 
-    const accountId = params.id;
+    const { id } = await params;
+    const accountId = id;
 
     const account = await prisma.misskeyAccount.findFirst({
         where: {
