@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 // nextjs のホットリロード対策らしい
+// https://www.prisma.io/docs/guides/nextjs
 const globalForPrisma = global as unknown as {
     prisma: PrismaClient
 };
