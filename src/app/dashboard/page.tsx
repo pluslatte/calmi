@@ -167,8 +167,10 @@ export default function Dashboard() {
     };
 
     useEffect(() => {
-        fetchAccounts();
-    }, []);
+        if (status === 'authenticated') {
+            fetchAccounts();
+        }
+    }, [status]);
 
     if (loading || status === 'loading') {
         return (
