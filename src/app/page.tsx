@@ -6,7 +6,7 @@ export default function Top() {
         <form
             action={async () => {
                 'use server';
-                await signIn("github");
+                await signIn("github", { redirectTo: "/dashboard" });
             }}
         >
             <Button type="submit">Signin with GitHub</Button>
