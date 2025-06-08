@@ -28,23 +28,15 @@ export async function GET() {
             createdAt: 'desc'
         }
     }).catch(error => {
-        console.error('Failed to fetch accounts:', error);
-        return null;
+        throw Error('Failed to fetch accounts:', error);
     })
-    if (!accounts) {
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        )
-    }
 
     const userSettings = await prisma.userSettings.findUnique({
         where: {
             sessionUserId: session.user.id
         }
     }).catch(error => {
-        console.error('Failed to fetch userSettings:', error);
-        return null;
+        throw Error('Failed to fetch userSettings:', error);
     });
 
     return NextResponse.json({
@@ -63,15 +55,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(error => {
-        console.error('Error request.json:', error);
-        return null;
+        throw Error('Error request.json:', error);
     })
-    if (!body) {
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        );
-    }
 
     const { instanceUrl, accessToken } = body;
     if (!instanceUrl || !accessToken) {
@@ -90,11 +75,10 @@ export async function POST(request: NextRequest) {
             i: accessToken
         })
     }).catch(error => {
-        console.warn('Failed to fetch misskey api:', error);
-        return null;
+        throw Error('Failed to fetch misskey api:', error);
     })
 
-    if (!misskeyResponse?.ok) {
+    if (!misskeyResponse.ok) {
         return NextResponse.json(
             { error: 'Invalid access token or instance URL, or failed to fetch API' },
             { status: 400 }
@@ -102,15 +86,8 @@ export async function POST(request: NextRequest) {
     }
 
     const userInfo = await misskeyResponse.json().catch(error => {
-        console.error('Error misskeyResponse.json:', error)
-        return null;
+        throw Error('Error misskeyResponse.json:', error)
     });
-    if (!userInfo) {
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        );
-    }
 
     const existingAccount = await prisma.misskeyAccount.findFirst({
         where: {
@@ -119,7 +96,7 @@ export async function POST(request: NextRequest) {
             username: userInfo.username,
         }
     }).catch(error => {
-        console.error('Failed to fetch existing accounts:', error);
+        throw Error('Failed to fetch existing accounts:', error);
     });
 
     if (existingAccount) {
@@ -149,42 +126,28 @@ export async function POST(request: NextRequest) {
             createdAt: true
         }
     }).catch(error => {
-        console.error('Failed to create new account:', error);
-        return null;
+        throw Error('Failed to create new account:', error);
     });
-    if (!newAccount) {
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        );
-    }
 
     const userSettings = await prisma.userSettings.findUnique({
         where: {
             sessionUserId: session.user.id
         }
     }).catch(error => {
-        console.error('Failed to fetch existing user settings:', error);
+        throw Error('Failed to fetch existing user settings:', error);
     })
 
     if (!userSettings) {
-        const result = await prisma.userSettings.create({
+        await prisma.userSettings.create({
             data: {
                 sessionUserId: session.user.id,
                 activeAccountId: newAccount.id,
             }
         }).catch(error => {
-            console.error('Failed to create new user setting:', error);
-            return null;
+            throw Error('Failed to create new user setting:', error);
         })
-        if (!result) {
-            return NextResponse.json(
-                { error: 'Internal server error' },
-                { status: 500 }
-            );
-        }
     } else if (!userSettings.activeAccountId) {
-        const result = await prisma.userSettings.update({
+        await prisma.userSettings.update({
             where: {
                 sessionUserId: session.user.id
             },
@@ -192,15 +155,8 @@ export async function POST(request: NextRequest) {
                 activeAccountId: newAccount.id
             }
         }).catch(error => {
-            console.error('Failed to update user setting:', error);
-            return null;
+            throw Error('Failed to update user setting:', error);
         })
-        if (!result) {
-            return NextResponse.json(
-                { error: 'Internal server error' },
-                { status: 500 }
-            );
-        }
     }
 
     return NextResponse.json({
