@@ -1,6 +1,7 @@
 import { MantineProvider } from "@mantine/core"
 import ThemeProvider from "@/app/theme-provider"
 import { theme } from "@/lib/mantine-theme"
+import { Notifications } from "@mantine/notifications"
 
 export const metadata = {
   title: 'Next.js',
@@ -19,6 +20,7 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
+          <Notifications />
           {children}
         </ThemeProvider>
       </body>
