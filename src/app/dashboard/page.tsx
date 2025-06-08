@@ -1,5 +1,31 @@
 import { auth, signOut } from "@/../auth";
 import { Button } from "@mantine/core";
+import { Prisma } from "@prisma/client";
+
+type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
+    select: {
+        id: true;
+        instanceUrl: true;
+        username: true;
+        displayName: true;
+        avatarUrl: true;
+        createdAt: true;
+    }
+}>;
+
+interface AccountsData {
+    accounts: MisskeyAccountPublic[];
+    activeAccoutId: string | null;
+};
+
+interface RegisterAccountResponse {
+    success: true;
+    account: MisskeyAccountPublic;
+}
+
+interface ErrorResponce {
+    error: string;
+}
 
 export default async function Dashboard() {
     const session = await auth();
