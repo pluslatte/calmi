@@ -8,6 +8,7 @@ export default async function Dashboard() {
             <div>
                 <h1>Unauthorized</h1>
                 <p>You are not authorized to view this page.</p>
+                <a href="/">もどる</a>
             </div>
         );
     }
