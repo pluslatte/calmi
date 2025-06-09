@@ -8,10 +8,6 @@ import { Notifications } from "@mantine/notifications";
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
     session?: Session | null;
-    sessionStatus?: 'loading' | 'authenticated' | 'unauthenticated';
-
-    theme?: MantineThemeOverride;
-    initialNotifications?: any[];
 }
 
 /**
