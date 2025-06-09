@@ -14,6 +14,13 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
     initialNotifications?: any[];
 }
 
+/**
+ * Renders element inside SessionProvider and MantineProvider  
+ * NOTE: Maybe you want to use next-auth mock in /src/__tests__/__mocks__
+ * @param ui React element to render
+ * @param options renderOptions and next-auth session state
+ * @returns React element wrapped with SessionProvider and MantineProvider
+ */
 export function renderWithProviders(
     ui: ReactElement,
     options: CustomRenderOptions = {},

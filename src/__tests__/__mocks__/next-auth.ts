@@ -13,6 +13,10 @@ let mockSessionData: {
 export const mockUseSession = vi.fn(() => mockSessionData);
 export const mockSignOut = vi.fn();
 
+/**
+ * Set mock session state of next-auth
+ * @param session next-auth session state
+ */
 export function setMockSession(session: {
     data: Session | null;
     status: 'loading' | 'authenticated' | 'unauthenticated';
@@ -21,6 +25,9 @@ export function setMockSession(session: {
     mockUseSession.mockReturnValue(session);
 }
 
+/**
+ * Reset mock session state of next-auth
+ */
 export function resetMockSession() {
     mockSessionData = { data: null, status: 'unauthenticated' };
     mockUseSession.mockClear();
