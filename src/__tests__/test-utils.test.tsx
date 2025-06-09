@@ -20,7 +20,7 @@ function MantineTestComponent() {
     return <Button>Test Button</Button>;
 }
 
-describe('test-utils renderProvider', () => {
+describe('test-utils renderWithProviders', () => {
 
     test('simply render', () => {
         renderWithProviders(<TestComponent />);
