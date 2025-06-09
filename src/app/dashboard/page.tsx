@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useSession } from "next-auth/react";
+import { propagateServerField } from "next/dist/server/lib/render-server";
 
 type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
     select: {
@@ -214,6 +215,54 @@ function DeleteConfirmationModal({
     )
 }
 
+function NewAccountRegistrationForm({
+    handleRegister,
+    instanceUrl,
+    accessToken,
+    submitting,
+    setInstanceUrl,
+    setAccessToken,
+}: {
+    handleRegister: (e: React.FormEvent) => Promise<void>;
+    instanceUrl: string;
+    accessToken: string;
+    submitting: boolean;
+    setInstanceUrl: (instanceUrl: string) => void;
+    setAccessToken: (token: string) => void;
+}) {
+    return (
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+            <Title order={3} mb="md">新規アカウント登録</Title>
+            <form onSubmit={handleRegister}>
+                <Stack gap="md">
+                    <TextInput
+                        label="インスタンスURL"
+                        placeholder="https://misskey.io"
+                        value={instanceUrl}
+                        onChange={(e) => setInstanceUrl(e.target.value)}
+                        required
+                    />
+                    <TextInput
+                        label="アクセストークン"
+                        placeholder="APIキーを入力してください"
+                        value={accessToken}
+                        onChange={(e) => setAccessToken(e.target.value)}
+                        type="password"
+                        required
+                    />
+                    <Button
+                        type="submit"
+                        loading={submitting}
+                        disabled={!instanceUrl || !accessToken}
+                    >
+                        登録
+                    </Button>
+                </Stack>
+            </form>
+        </Card>
+    )
+}
+
 export default function Dashboard() {
     const { data: session, status } = useSession();
 
@@ -334,36 +383,14 @@ export default function Dashboard() {
                 )}
             </Stack>
 
-            {/* 新規アカウント登録フォーム */}
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-                <Title order={3} mb="md">新規アカウント登録</Title>
-                <form onSubmit={handleRegister}>
-                    <Stack gap="md">
-                        <TextInput
-                            label="インスタンスURL"
-                            placeholder="https://misskey.io"
-                            value={instanceUrl}
-                            onChange={(e) => setInstanceUrl(e.target.value)}
-                            required
-                        />
-                        <TextInput
-                            label="アクセストークン"
-                            placeholder="APIキーを入力してください"
-                            value={accessToken}
-                            onChange={(e) => setAccessToken(e.target.value)}
-                            type="password"
-                            required
-                        />
-                        <Button
-                            type="submit"
-                            loading={submitting}
-                            disabled={!instanceUrl || !accessToken}
-                        >
-                            登録
-                        </Button>
-                    </Stack>
-                </form>
-            </Card>
+            <NewAccountRegistrationForm
+                handleRegister={handleRegister}
+                instanceUrl={instanceUrl}
+                accessToken={accessToken}
+                submitting={submitting}
+                setInstanceUrl={setInstanceUrl}
+                setAccessToken={setAccessToken}
+            />
 
             <DeleteConfirmationModal
                 opened={opened}
