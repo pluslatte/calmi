@@ -263,6 +263,65 @@ function NewAccountRegistrationForm({
     )
 }
 
+function RegisteredAccountList({
+    accounts,
+    activeAccountId,
+    openDeleteModal,
+}: {
+    accounts: MisskeyAccountPublic[];
+    activeAccountId: string | null;
+    openDeleteModal: (accountId: string) => void;
+}) {
+    return (
+        <Stack gap="md" mb="xl">
+            <Title order={2} size="h3">登録済みアカウント</Title>
+
+            {accounts.length === 0 ? (
+                <Alert color="blue">
+                    アカウントが登録されていません。下記のフォームから登録してください。
+                </Alert>
+            ) : (
+                accounts.map((account) => (
+                    <Card key={account.id} shadow="sm" padding="lg" radius="md" withBorder>
+                        <Group justify="space-between">
+                            <Group gap="md">
+                                <Avatar
+                                    src={account.avatarUrl}
+                                    size="md"
+                                    radius="xl"
+                                />
+                                <div>
+                                    <Text fw={500}>{account.displayName}</Text>
+                                    <Text size="sm" c="dimmed">
+                                        @{account.username}
+                                    </Text>
+                                    <Text size="xs" c="dimmed">
+                                        {account.instanceUrl}
+                                    </Text>
+                                </div>
+                            </Group>
+
+                            <Group gap="sm">
+                                {account.id === activeAccountId && (
+                                    <Badge color="green">アクティブ</Badge>
+                                )}
+                                <Button
+                                    color="red"
+                                    size="xs"
+                                    variant="outline"
+                                    onClick={() => openDeleteModal(account.id)}
+                                >
+                                    削除
+                                </Button>
+                            </Group>
+                        </Group>
+                    </Card>
+                ))
+            )}
+        </Stack>
+    )
+}
+
 export default function Dashboard() {
     const { data: session, status } = useSession();
 
@@ -335,53 +394,11 @@ export default function Dashboard() {
                 </Button>
             </Group>
 
-            {/* 登録済みアカウント一覧 */}
-            <Stack gap="md" mb="xl">
-                <Title order={2} size="h3">登録済みアカウント</Title>
-
-                {accounts.length === 0 ? (
-                    <Alert color="blue">
-                        アカウントが登録されていません。下記のフォームから登録してください。
-                    </Alert>
-                ) : (
-                    accounts.map((account) => (
-                        <Card key={account.id} shadow="sm" padding="lg" radius="md" withBorder>
-                            <Group justify="space-between">
-                                <Group gap="md">
-                                    <Avatar
-                                        src={account.avatarUrl}
-                                        size="md"
-                                        radius="xl"
-                                    />
-                                    <div>
-                                        <Text fw={500}>{account.displayName}</Text>
-                                        <Text size="sm" c="dimmed">
-                                            @{account.username}
-                                        </Text>
-                                        <Text size="xs" c="dimmed">
-                                            {account.instanceUrl}
-                                        </Text>
-                                    </div>
-                                </Group>
-
-                                <Group gap="sm">
-                                    {account.id === activeAccountId && (
-                                        <Badge color="green">アクティブ</Badge>
-                                    )}
-                                    <Button
-                                        color="red"
-                                        size="xs"
-                                        variant="outline"
-                                        onClick={() => openDeleteModal(account.id)}
-                                    >
-                                        削除
-                                    </Button>
-                                </Group>
-                            </Group>
-                        </Card>
-                    ))
-                )}
-            </Stack>
+            <RegisteredAccountList
+                accounts={accounts}
+                activeAccountId={activeAccountId}
+                openDeleteModal={openDeleteModal}
+            />
 
             <NewAccountRegistrationForm
                 handleRegister={handleRegister}
