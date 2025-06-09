@@ -6,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useSession } from "next-auth/react";
-import { propagateServerField } from "next/dist/server/lib/render-server";
 
 type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
     select: {
