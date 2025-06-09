@@ -168,6 +168,52 @@ const handleDelete = async (
     }
 };
 
+function DeleteConfirmationModal({
+    opened,
+    deleteTargetId,
+    close,
+    setAccounts,
+    setActiveAccountId,
+    setLoading,
+    setDeleteTargetId,
+}: {
+    opened: boolean;
+    deleteTargetId: string | null;
+    close: () => void;
+    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void;
+    setActiveAccountId: (activeAccountId: string | null) => void;
+    setLoading: (isLoading: boolean) => void;
+    setDeleteTargetId: (deleteTargetId: string | null) => void;
+}
+) {
+
+    return (
+        <Modal opened={opened} onClose={close} title="アカウント削除の確認">
+            <Text mb="md">
+                このアカウントを削除してもよろしいですか？この操作は取り消せません。
+            </Text>
+            <Group justify="flex-end" gap="sm">
+                <Button variant="outline" onClick={close}>
+                    キャンセル
+                </Button>
+                <Button
+                    color="red"
+                    onClick={() => deleteTargetId && handleDelete(
+                        deleteTargetId,
+                        setAccounts,
+                        setActiveAccountId,
+                        setLoading,
+                        setDeleteTargetId,
+                        close
+                    )}
+                >
+                    削除
+                </Button>
+            </Group>
+        </Modal>
+    )
+}
+
 export default function Dashboard() {
     const { data: session, status } = useSession();
 
@@ -319,30 +365,15 @@ export default function Dashboard() {
                 </form>
             </Card>
 
-            {/* 削除確認モーダル */}
-            <Modal opened={opened} onClose={close} title="アカウント削除の確認">
-                <Text mb="md">
-                    このアカウントを削除してもよろしいですか？この操作は取り消せません。
-                </Text>
-                <Group justify="flex-end" gap="sm">
-                    <Button variant="outline" onClick={close}>
-                        キャンセル
-                    </Button>
-                    <Button
-                        color="red"
-                        onClick={() => deleteTargetId && handleDelete(
-                            deleteTargetId,
-                            setAccounts,
-                            setActiveAccountId,
-                            setLoading,
-                            setDeleteTargetId,
-                            close
-                        )}
-                    >
-                        削除
-                    </Button>
-                </Group>
-            </Modal>
+            <DeleteConfirmationModal
+                opened={opened}
+                deleteTargetId={deleteTargetId}
+                close={close}
+                setAccounts={setAccounts}
+                setActiveAccountId={setActiveAccountId}
+                setLoading={setLoading}
+                setDeleteTargetId={setDeleteTargetId}
+            />
         </Container>
     );
 }
