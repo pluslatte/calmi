@@ -172,11 +172,11 @@ const handleDelete = async (
 function DeleteConfirmationModal({
     opened,
     close,
-    confirmAccountDeletion,
+    onclick,
 }: {
     opened: boolean;
     close: () => void;
-    confirmAccountDeletion: () => "" | Promise<void> | null;
+    onclick: () => "" | Promise<void> | null;
 }
 ) {
 
@@ -191,7 +191,7 @@ function DeleteConfirmationModal({
                 </Button>
                 <Button
                     color="red"
-                    onClick={confirmAccountDeletion}
+                    onClick={onclick}
                 >
                     削除
                 </Button>
@@ -333,7 +333,7 @@ export default function Dashboard() {
     const [opened, { open, close }] = useDisclosure(false);
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-    const confirmAccountDeletion = () => deleteTargetId && handleDelete(
+    const handlerConfirmAccountDeletion = () => deleteTargetId && handleDelete(
         deleteTargetId,
         setAccounts,
         setActiveAccountId,
@@ -402,7 +402,7 @@ export default function Dashboard() {
             <DeleteConfirmationModal
                 opened={opened}
                 close={close}
-                confirmAccountDeletion={confirmAccountDeletion}
+                onclick={handlerConfirmAccountDeletion}
             />
         </Container>
     );
