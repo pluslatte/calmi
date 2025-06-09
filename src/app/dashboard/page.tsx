@@ -171,20 +171,12 @@ const handleDelete = async (
 
 function DeleteConfirmationModal({
     opened,
-    deleteTargetId,
     close,
-    setAccounts,
-    setActiveAccountId,
-    setLoading,
-    setDeleteTargetId,
+    confirmAccountDeletion,
 }: {
     opened: boolean;
-    deleteTargetId: string | null;
     close: () => void;
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void;
-    setActiveAccountId: (activeAccountId: string | null) => void;
-    setLoading: (isLoading: boolean) => void;
-    setDeleteTargetId: (deleteTargetId: string | null) => void;
+    confirmAccountDeletion: () => "" | Promise<void> | null;
 }
 ) {
 
@@ -199,14 +191,7 @@ function DeleteConfirmationModal({
                 </Button>
                 <Button
                     color="red"
-                    onClick={() => deleteTargetId && handleDelete(
-                        deleteTargetId,
-                        setAccounts,
-                        setActiveAccountId,
-                        setLoading,
-                        setDeleteTargetId,
-                        close
-                    )}
+                    onClick={confirmAccountDeletion}
                 >
                     削除
                 </Button>
@@ -216,20 +201,35 @@ function DeleteConfirmationModal({
 }
 
 function NewAccountRegistrationForm({
-    handleRegister,
-    instanceUrl,
-    accessToken,
     submitting,
-    setInstanceUrl,
-    setAccessToken,
+    setAccounts,
+    setActiveAccountId,
+    setLoading,
+    setSubmitting,
 }: {
-    handleRegister: (e: React.FormEvent) => Promise<void>;
-    instanceUrl: string;
-    accessToken: string;
     submitting: boolean;
-    setInstanceUrl: (instanceUrl: string) => void;
-    setAccessToken: (token: string) => void;
+    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void;
+    setActiveAccountId: (activeAccountId: string | null) => void;
+    setLoading: (isLoading: boolean) => void;
+    setSubmitting: (isSubmitting: boolean) => void;
 }) {
+    const [instanceUrl, setInstanceUrl] = useState('');
+    const [accessToken, setAccessToken] = useState('');
+
+    const handleRegister = async (e: React.FormEvent) => {
+        handleRegisterImpl(
+            e,
+            instanceUrl,
+            accessToken,
+            setAccounts,
+            setActiveAccountId,
+            setLoading,
+            setSubmitting,
+            setInstanceUrl,
+            setAccessToken
+        );
+    };
+
     return (
         <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Title order={3} mb="md">新規アカウント登録</Title>
@@ -330,26 +330,17 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
-    const [instanceUrl, setInstanceUrl] = useState('');
-    const [accessToken, setAccessToken] = useState('');
-
     const [opened, { open, close }] = useDisclosure(false);
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-    const handleRegister = async (e: React.FormEvent) => {
-        handleRegisterImpl(
-            e,
-            instanceUrl,
-            accessToken,
-            setAccounts,
-            setActiveAccountId,
-            setLoading,
-            setSubmitting,
-            setInstanceUrl,
-            setAccessToken
-        );
-    };
-
+    const confirmAccountDeletion = () => deleteTargetId && handleDelete(
+        deleteTargetId,
+        setAccounts,
+        setActiveAccountId,
+        setLoading,
+        setDeleteTargetId,
+        close
+    );
 
     const openDeleteModal = (accountId: string) => {
         setDeleteTargetId(accountId);
@@ -401,22 +392,17 @@ export default function Dashboard() {
             />
 
             <NewAccountRegistrationForm
-                handleRegister={handleRegister}
-                instanceUrl={instanceUrl}
-                accessToken={accessToken}
                 submitting={submitting}
-                setInstanceUrl={setInstanceUrl}
-                setAccessToken={setAccessToken}
+                setAccounts={setAccounts}
+                setActiveAccountId={setActiveAccountId}
+                setLoading={setLoading}
+                setSubmitting={setSubmitting}
             />
 
             <DeleteConfirmationModal
                 opened={opened}
-                deleteTargetId={deleteTargetId}
                 close={close}
-                setAccounts={setAccounts}
-                setActiveAccountId={setActiveAccountId}
-                setLoading={setLoading}
-                setDeleteTargetId={setDeleteTargetId}
+                confirmAccountDeletion={confirmAccountDeletion}
             />
         </Container>
     );
