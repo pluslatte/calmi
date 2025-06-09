@@ -46,7 +46,11 @@ export default function Dashboard() {
     const [opened, { open, close }] = useDisclosure(false);
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-    const fetchAccounts = async () => {
+    const fetchAccounts = async (
+        setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
+        setActiveAccountId: (accountId: string | null) => void,
+        setLoading: (isLoading: boolean) => void, // こいつ表示のロジックやん
+    ) => {
         try {
             const response = await fetch('/api/misskey-accounts');
             if (response.ok) {
@@ -106,7 +110,7 @@ export default function Dashboard() {
                 });
                 setInstanceUrl('');
                 setAccessToken('');
-                fetchAccounts(); // 一覧を再取得
+                fetchAccounts(setAccounts, setActiveAccountId, setLoading); // 一覧を再取得
             } else {
                 const errorData: ErrorResponse = await response.json();
                 notifications.show({
@@ -139,7 +143,7 @@ export default function Dashboard() {
                     message: 'アカウントが削除されました',
                     color: 'green',
                 });
-                fetchAccounts(); // 一覧を再取得
+                fetchAccounts(setAccounts, setActiveAccountId, setLoading); // 一覧を再取得
             } else {
                 const errorData: ErrorResponse = await response.json();
                 notifications.show({
@@ -168,7 +172,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (status === 'authenticated') {
-            fetchAccounts();
+            fetchAccounts(setAccounts, setActiveAccountId, setLoading);
         }
     }, [status]);
 
