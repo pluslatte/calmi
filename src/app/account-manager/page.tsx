@@ -1,116 +1,13 @@
 'use client';
 import { signOut } from "@/../auth";
-import { Alert, Avatar, Badge, Button, Card, Container, Group, Loader, Modal, Stack, TextInput, Title, Text } from "@mantine/core";
-import React, { ReactNode, useState } from "react";
-import { useDisclosure } from "@mantine/hooks";
-import { notifications } from "@mantine/notifications";
+import { Alert, Avatar, Badge, Button, Card, Container, Group, Loader, Stack, Title, Text } from "@mantine/core";
+import React, { ReactNode } from "react";
 import { useSession } from "next-auth/react";
-import useAccounts, { ErrorResponse, fetchAccounts, MisskeyAccountPublic, RegisterAccountResponse } from "@/hooks/useAccounts";
+import useAccounts, { MisskeyAccountPublic } from "@/hooks/useAccounts";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
 import LoadHider from "../components/LoadHider";
-
-const handleDelete = async (
-    accountId: string,
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
-    setActiveAccountId: (accountId: string | null) => void,
-    setLoading: (isLoading: boolean) => void, // こいつ表示のロジックやん
-    setDeleteTargetId: (deleteTargetId: string | null) => void,
-    close: () => void,
-) => {
-    try {
-        const response = await fetch(`/api/misskey-accounts/${accountId}`, {
-            method: 'DELETE',
-        });
-
-        if (response.ok) {
-            notifications.show({
-                title: '成功',
-                message: 'アカウントが削除されました',
-                color: 'green',
-            });
-            fetchAccounts(setAccounts, setActiveAccountId, setLoading); // 一覧を再取得
-        } else {
-            const errorData: ErrorResponse = await response.json();
-            notifications.show({
-                title: 'エラー',
-                message: errorData.error || '削除に失敗しました',
-                color: 'red',
-            });
-        }
-    } catch (error) {
-        console.error('Failed to delete account:', error);
-        notifications.show({
-            title: 'エラー',
-            message: 'ネットワークエラーが発生しました',
-            color: 'red',
-        });
-    } finally {
-        close();
-        setDeleteTargetId(null);
-    }
-};
-
-interface PropsDeleteConfirmationModal {
-    opened: boolean;
-    close: () => void;
-    onclick: () => "" | Promise<void> | null;
-}
-const DeleteConfirmationModal = ({
-    opened,
-    close,
-    onclick,
-}: PropsDeleteConfirmationModal
-) => {
-    return (
-        <Modal opened={opened} onClose={close} title="アカウント削除の確認">
-            <Text mb="md">
-                このアカウントを削除してもよろしいですか？この操作は取り消せません。
-            </Text>
-            <Group justify="flex-end" gap="sm">
-                <Button variant="outline" onClick={close}>
-                    キャンセル
-                </Button>
-                <Button
-                    color="red"
-                    onClick={onclick}
-                >
-                    削除
-                </Button>
-            </Group>
-        </Modal>
-    )
-}
-
-const useAccountDeleteConfirmationModal = (
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
-    setActiveAccountId: (activeAccountId: string | null) => void,
-    setLoadingAccounts: (loadingAccounts: boolean) => void,
-) => {
-    const [opened, { open, close }] = useDisclosure(false);
-    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-
-    const handlerConfirmAccountDeletion = () => deleteTargetId && handleDelete(
-        deleteTargetId,
-        setAccounts,
-        setActiveAccountId,
-        setLoadingAccounts,
-        setDeleteTargetId,
-        close
-    );
-
-    const openDeleteModal = (accountId: string) => {
-        setDeleteTargetId(accountId);
-        open();
-    };
-
-    return {
-        opened,
-        deleteTargetId,
-        setDeleteTargetId,
-        handlerConfirmAccountDeletion,
-        openDeleteModal,
-    }
-}
+import useAccountDeleteConfirmationModal from "@/hooks/useAccountDeleteConfirmationModal";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 
 interface PropsRegisteredAccountList {
     accounts: MisskeyAccountPublic[];
@@ -131,8 +28,6 @@ const RegisteredAccountList = ({
 ) => {
     const {
         opened,
-        deleteTargetId,
-        setDeleteTargetId,
         handlerConfirmAccountDeletion,
         openDeleteModal,
     } = useAccountDeleteConfirmationModal(setAccounts, setActiveAccountId, setLoadingAccounts);
