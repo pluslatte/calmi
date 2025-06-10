@@ -1,13 +1,13 @@
 'use client';
 import { signOut } from "@/../auth";
 import { Alert, Avatar, Badge, Button, Card, Container, Group, Loader, Modal, Stack, TextInput, Title, Text } from "@mantine/core";
-import { Prisma } from "@prisma/client";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useSession } from "next-auth/react";
 import useAccounts, { ErrorResponse, fetchAccounts, MisskeyAccountPublic, RegisterAccountResponse } from "@/hooks/useAccounts";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
+import LoadHider from "../components/LoadHider";
 
 const handleDelete = async (
     accountId: string,
@@ -78,21 +78,6 @@ const DeleteConfirmationModal = ({
                 </Button>
             </Group>
         </Modal>
-    )
-}
-
-interface PropsLoadHider {
-    loading: boolean;
-    children: ReactNode;
-}
-const LoadHider = ({ loading, children }: PropsLoadHider) => {
-    if (loading) {
-        return (
-            <Loader size="lg" />
-        )
-    }
-    return (
-        <>{children}</>
     )
 }
 
