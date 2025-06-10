@@ -31,7 +31,7 @@ export interface RegisterAccountResponse {
 export const fetchAccounts = async (
     setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
     setActiveAccountId: (accountId: string | null) => void,
-    setLoading: (isLoading: boolean) => void, // こいつ表示のロジックやん
+    setLoadingAccounts: (isLoading: boolean) => void, // こいつ表示のロジックやん
 ) => {
     try {
         const response = await fetch('/api/misskey-accounts');
@@ -55,7 +55,7 @@ export const fetchAccounts = async (
             color: 'red',
         });
     } finally {
-        setLoading(false);
+        setLoadingAccounts(false);
     }
 }
 
