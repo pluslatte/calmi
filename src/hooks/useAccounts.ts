@@ -59,17 +59,16 @@ export const fetchAccounts = async (
     }
 }
 
-const useAccounts = () => {
-    const { status } = useSession();
+const useAccounts = (sessionStatus: 'loading' | 'authenticated' | 'unauthenticated') => {
     const [accounts, setAccounts] = useState<MisskeyAccountPublic[]>([]);
     const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
     const [loadingAccounts, setLoadingAccounts] = useState<boolean>(false);
 
     useEffect(() => {
-        if (status === 'authenticated') {
+        if (sessionStatus === 'authenticated') {
             fetchAccounts(setAccounts, setActiveAccountId, setLoadingAccounts);
         }
-    }, [status]);
+    }, [sessionStatus]);
 
     return {
         accounts,

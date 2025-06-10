@@ -18,7 +18,7 @@ const AccountManager = () => {
         setAccounts,
         setActiveAccountId,
         setLoadingAccounts,
-    } = useAccounts();
+    } = useAccounts(status);
 
     return (
         <AuthenticationRequired
