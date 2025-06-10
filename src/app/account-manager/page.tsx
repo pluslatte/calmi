@@ -1,96 +1,11 @@
 'use client';
 import { signOut } from "@/../auth";
-import { Alert, Avatar, Badge, Button, Card, Container, Group, Loader, Stack, Title, Text } from "@mantine/core";
+import { Button, Container, Group, Loader, Title, Text } from "@mantine/core";
 import React, { ReactNode } from "react";
 import { useSession } from "next-auth/react";
-import useAccounts, { MisskeyAccountPublic } from "@/hooks/useAccounts";
+import useAccounts from "@/hooks/useAccounts";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
-import LoadHider from "../components/LoadHider";
-import useAccountDeleteConfirmationModal from "@/hooks/useAccountDeleteConfirmationModal";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
-
-interface PropsRegisteredAccountList {
-    accounts: MisskeyAccountPublic[];
-    activeAccountId: string | null;
-    loading: boolean;
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
-    setActiveAccountId: (activeAccountId: string | null) => void,
-    setLoadingAccounts: (loadingAccounts: boolean) => void,
-}
-const RegisteredAccountList = ({
-    accounts,
-    activeAccountId,
-    loading,
-    setAccounts,
-    setActiveAccountId,
-    setLoadingAccounts,
-}: PropsRegisteredAccountList
-) => {
-    const {
-        opened,
-        handlerConfirmAccountDeletion,
-        openDeleteModal,
-    } = useAccountDeleteConfirmationModal(setAccounts, setActiveAccountId, setLoadingAccounts);
-
-    return (
-        <>
-            <Stack gap="md" mb="xl">
-                <Title order={2} size="h3">登録済みアカウント</Title>
-
-                <LoadHider loading={loading}>
-                    {accounts.length === 0 ? (
-                        <Alert color="blue">
-                            アカウントが登録されていません。下記のフォームから登録してください。
-                        </Alert>
-                    ) : (
-                        accounts.map((account) => (
-                            <Card key={account.id} shadow="sm" padding="lg" radius="md" withBorder>
-                                <Group justify="space-between">
-                                    <Group gap="md">
-                                        <Avatar
-                                            src={account.avatarUrl}
-                                            size="md"
-                                            radius="xl"
-                                        />
-                                        <div>
-                                            <Text fw={500}>{account.displayName}</Text>
-                                            <Text size="sm" c="dimmed">
-                                                @{account.username}
-                                            </Text>
-                                            <Text size="xs" c="dimmed">
-                                                {account.instanceUrl}
-                                            </Text>
-                                        </div>
-                                    </Group>
-
-                                    <Group gap="sm">
-                                        {account.id === activeAccountId && (
-                                            <Badge color="green">アクティブ</Badge>
-                                        )}
-                                        <Button
-                                            color="red"
-                                            size="xs"
-                                            variant="outline"
-                                            onClick={() => openDeleteModal(account.id)}
-                                        >
-                                            削除
-                                        </Button>
-                                    </Group>
-                                </Group>
-                            </Card>
-                        ))
-                    )}
-                </LoadHider>
-            </Stack>
-
-            <DeleteConfirmationModal
-                opened={opened}
-                close={close}
-                onclick={handlerConfirmAccountDeletion}
-            />
-        </>
-    )
-}
+import RegisteredAccountList from "../components/RegisteredAccountList";
 
 interface PropsAuthenticationRequired {
     status: 'loading' | 'authenticated' | 'unauthenticated';
