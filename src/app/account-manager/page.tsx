@@ -2,7 +2,7 @@
 import { signOut } from "@/../auth";
 import { Alert, Avatar, Badge, Button, Card, Container, Group, Loader, Modal, Stack, TextInput, Title, Text } from "@mantine/core";
 import { Prisma } from "@prisma/client";
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useSession } from "next-auth/react";
@@ -325,6 +325,36 @@ const RegisteredAccountList = ({
     )
 }
 
+interface PropsAuthenticationRequired {
+    loading: boolean;
+    status: 'loading' | 'authenticated' | 'unauthenticated';
+    children: ReactNode;
+}
+const AuthenticationRequired = ({ loading, status, children }: PropsAuthenticationRequired) => {
+
+    if (loading || status === 'loading') {
+        return (
+            <Container size="md" py="xl">
+                <Group justify="center">
+                    <Loader size="lg" />
+                </Group>
+            </Container>
+        );
+    }
+
+    if (status === 'unauthenticated') {
+        return (
+            <Container size="md" py="xl">
+                <Group justify="center">
+                    <Text>Access  Denied</Text>
+                </Group>
+            </Container>
+        );
+    }
+
+    return (<>{children}</>)
+}
+
 const AccountManager = () => {
     const { data: session, status } = useSession();
 
@@ -356,58 +386,43 @@ const AccountManager = () => {
         }
     }, [status]);
 
-    if (loading || status === 'loading') {
-        return (
-            <Container size="md" py="xl">
-                <Group justify="center">
-                    <Loader size="lg" />
-                </Group>
-            </Container>
-        );
-    }
-
-    if (status === 'unauthenticated') {
-        return (
-            <Container size="md" py="xl">
-                <Group justify="center">
-                    <Text>Access  Denied</Text>
-                </Group>
-            </Container>
-        );
-    }
-
     return (
-        <Container size="md" py="xl">
-            <Group justify="space-between" mb="xl">
-                <Title order={1}>ダッシュボード</Title>
-                <Button
-                    color="red"
-                    onClick={() => signOut()}
-                >
-                    サインアウト
-                </Button>
-            </Group>
+        <AuthenticationRequired
+            loading={loading}
+            status={status}
+        >
+            <Container size="md" py="xl">
+                <Group justify="space-between" mb="xl">
+                    <Title order={1}>ダッシュボード</Title>
+                    <Button
+                        color="red"
+                        onClick={() => signOut()}
+                    >
+                        サインアウト
+                    </Button>
+                </Group>
 
-            <RegisteredAccountList
-                accounts={accounts}
-                activeAccountId={activeAccountId}
-                openDeleteModal={openDeleteModal}
-            />
+                <RegisteredAccountList
+                    accounts={accounts}
+                    activeAccountId={activeAccountId}
+                    openDeleteModal={openDeleteModal}
+                />
 
-            <NewAccountRegistrationForm
-                submitting={submitting}
-                setAccounts={setAccounts}
-                setActiveAccountId={setActiveAccountId}
-                setLoading={setLoading}
-                setSubmitting={setSubmitting}
-            />
+                <NewAccountRegistrationForm
+                    submitting={submitting}
+                    setAccounts={setAccounts}
+                    setActiveAccountId={setActiveAccountId}
+                    setLoading={setLoading}
+                    setSubmitting={setSubmitting}
+                />
 
-            <DeleteConfirmationModal
-                opened={opened}
-                close={close}
-                onclick={handlerConfirmAccountDeletion}
-            />
-        </Container>
+                <DeleteConfirmationModal
+                    opened={opened}
+                    close={close}
+                    onclick={handlerConfirmAccountDeletion}
+                />
+            </Container>
+        </AuthenticationRequired>
     );
 }
 export default AccountManager;
