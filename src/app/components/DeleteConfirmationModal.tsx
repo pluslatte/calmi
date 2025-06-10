@@ -3,12 +3,14 @@ import { Modal, Group, Button, Text } from "@mantine/core";
 interface Props {
     opened: boolean;
     close: () => void;
-    onclick: () => "" | Promise<void> | null;
+    onclick: () => void | Promise<void>;
+    loading?: boolean;
 }
 const DeleteConfirmationModal = ({
     opened,
     close,
     onclick,
+    loading = false,
 }: Props
 ) => {
     return (
@@ -23,6 +25,8 @@ const DeleteConfirmationModal = ({
                 <Button
                     color="red"
                     onClick={onclick}
+                    loading={loading}
+                    disabled={loading}
                 >
                     削除
                 </Button>

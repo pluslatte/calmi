@@ -3,22 +3,15 @@ import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { deleteAccountApi } from "@/lib/api/accounts";
 
-const useAccountDeleteConfirmationModal = (
+const useAccountDelete = (
     onAccountDeleted: () => void
 ) => {
-    const [opened, { open, close }] = useDisclosure(false);
-    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const handlerConfirmAccountDeletion = async () => {
-        if (!deleteTargetId) {
-            console.warn('deleteTargetId is not set');
-            return;
-        }
-
+    const deleteAccount = async (accountId: string) => {
         setIsDeleting(true);
         try {
-            await deleteAccountApi(deleteTargetId);
+            await deleteAccountApi(accountId);
             notifications.show({
                 title: '成功',
                 message: 'アカウントが削除されました',
@@ -33,23 +26,13 @@ const useAccountDeleteConfirmationModal = (
             });
         } finally {
             setIsDeleting(false);
-            close();
-            setDeleteTargetId(null);
         }
     };
 
-    const openDeleteModal = (accountId: string) => {
-        setDeleteTargetId(accountId);
-        open();
-    };
-
     return {
-        opened,
-        close,
         isDeleting,
-        handlerConfirmAccountDeletion,
-        openDeleteModal,
+        deleteAccount,
     }
 }
 
-export default useAccountDeleteConfirmationModal;
+export default useAccountDelete;

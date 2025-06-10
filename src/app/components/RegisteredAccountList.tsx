@@ -1,8 +1,10 @@
-import useAccountDeleteConfirmationModal from "@/hooks/useAccountDeleteConfirmationModal";
+import useAccountDelete from "@/hooks/useAccountDelete";
 import { MisskeyAccountPublic } from "@/hooks/useAccounts";
 import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text } from "@mantine/core";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import LoadHider from "./LoadHider";
+import { useDisclosure } from "@mantine/hooks";
+import { useState } from "react";
 
 interface Props {
     accounts: MisskeyAccountPublic[];
@@ -17,12 +19,25 @@ const RegisteredAccountList = ({
     onAccountDeleted,
 }: Props
 ) => {
-    const {
-        opened,
-        close,
-        handlerConfirmAccountDeletion,
-        openDeleteModal,
-    } = useAccountDeleteConfirmationModal(onAccountDeleted);
+    const [opened, { open, close }] = useDisclosure(false);
+    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+    const { isDeleting, deleteAccount } = useAccountDelete(onAccountDeleted);
+
+    const openDeleteModal = (accountId: string) => {
+        setDeleteTargetId(accountId);
+        open();
+    };
+
+    const handlerConfirmAccountDeletion = async () => {
+        if (!deleteTargetId) {
+            console.warn('deleteTargetId is not set');
+            return;
+        }
+
+        await deleteAccount(deleteTargetId);
+        close();
+        setDeleteTargetId(null);
+    };
 
     return (
         <>
@@ -64,6 +79,7 @@ const RegisteredAccountList = ({
                                             size="xs"
                                             variant="outline"
                                             onClick={() => openDeleteModal(account.id)}
+                                            disabled={isDeleting}
                                         >
                                             削除
                                         </Button>
@@ -79,6 +95,7 @@ const RegisteredAccountList = ({
                 opened={opened}
                 close={close}
                 onclick={handlerConfirmAccountDeletion}
+                loading={isDeleting}
             />
         </>
     )
