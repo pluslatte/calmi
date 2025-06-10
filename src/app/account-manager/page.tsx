@@ -321,7 +321,7 @@ function RegisteredAccountList({
     )
 }
 
-export default function Dashboard() {
+export default function AccountManager() {
     const { data: session, status } = useSession();
 
     const [accounts, setAccounts] = useState<MisskeyAccountPublic[]>([]);
