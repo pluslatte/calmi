@@ -168,17 +168,17 @@ const handleDelete = async (
     }
 };
 
-function DeleteConfirmationModal({
-    opened,
-    close,
-    onclick,
-}: {
+interface PropsDeleteConfirmationModal {
     opened: boolean;
     close: () => void;
     onclick: () => "" | Promise<void> | null;
 }
-) {
-
+const DeleteConfirmationModal = ({
+    opened,
+    close,
+    onclick,
+}: PropsDeleteConfirmationModal
+) => {
     return (
         <Modal opened={opened} onClose={close} title="アカウント削除の確認">
             <Text mb="md">
@@ -199,19 +199,21 @@ function DeleteConfirmationModal({
     )
 }
 
-function NewAccountRegistrationForm({
-    submitting,
-    setAccounts,
-    setActiveAccountId,
-    setLoading,
-    setSubmitting,
-}: {
+interface PropsNewAccountRegistrationForm {
     submitting: boolean;
     setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void;
     setActiveAccountId: (activeAccountId: string | null) => void;
     setLoading: (isLoading: boolean) => void;
     setSubmitting: (isSubmitting: boolean) => void;
-}) {
+}
+const NewAccountRegistrationForm = ({
+    submitting,
+    setAccounts,
+    setActiveAccountId,
+    setLoading,
+    setSubmitting,
+}: PropsNewAccountRegistrationForm
+) => {
     const [instanceUrl, setInstanceUrl] = useState('');
     const [accessToken, setAccessToken] = useState('');
 
@@ -262,15 +264,17 @@ function NewAccountRegistrationForm({
     )
 }
 
-function RegisteredAccountList({
-    accounts,
-    activeAccountId,
-    openDeleteModal,
-}: {
+interface PropsRegisteredAccountList {
     accounts: MisskeyAccountPublic[];
     activeAccountId: string | null;
     openDeleteModal: (accountId: string) => void;
-}) {
+}
+const RegisteredAccountList = ({
+    accounts,
+    activeAccountId,
+    openDeleteModal,
+}: PropsRegisteredAccountList
+) => {
     return (
         <Stack gap="md" mb="xl">
             <Title order={2} size="h3">登録済みアカウント</Title>
@@ -321,7 +325,7 @@ function RegisteredAccountList({
     )
 }
 
-export default function AccountManager() {
+const AccountManager = () => {
     const { data: session, status } = useSession();
 
     const [accounts, setAccounts] = useState<MisskeyAccountPublic[]>([]);
@@ -406,3 +410,4 @@ export default function AccountManager() {
         </Container>
     );
 }
+export default AccountManager;
