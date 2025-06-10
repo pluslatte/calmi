@@ -1,15 +1,7 @@
 import { useState } from "react";
 import { MisskeyAccountPublic } from "./useAccounts";
 import { notifications } from "@mantine/notifications";
-
-export interface RegisterAccountResponse {
-    success: true;
-    account: MisskeyAccountPublic;
-}
-
-export interface ErrorResponse {
-    error: string;
-}
+import { registerAccountApi } from "@/lib/api/accounts";
 
 const useAccountRegistration = (onSuccess?: () => void) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,23 +12,7 @@ const useAccountRegistration = (onSuccess?: () => void) => {
     ) => {
         setIsSubmitting(true);
         try {
-            const response = await fetch('/api/misskey-accounts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    instanceUrl: instanceUrl.replace(/\/$/, ''), // 末尾のスラッシュを除去
-                    accessToken,
-                }),
-            });
-
-            if (!response.ok) {
-                const errorData: ErrorResponse = await response.json();
-                throw new Error(errorData.error);
-            }
-
-            const result: RegisterAccountResponse = await response.json();
+            const result = await registerAccountApi(instanceUrl, accessToken);
 
             notifications.show({
                 title: '成功',
