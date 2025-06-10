@@ -1,6 +1,5 @@
 import { notifications } from "@mantine/notifications";
 import { Prisma } from "@prisma/client";
-import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 export type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
