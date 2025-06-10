@@ -1,4 +1,3 @@
-import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { deleteAccountApi } from "@/lib/api/accounts";
