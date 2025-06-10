@@ -264,14 +264,31 @@ const NewAccountRegistrationForm = ({
     )
 }
 
+interface PropsLoadHider {
+    loading: boolean;
+    children: ReactNode;
+}
+const LoadHider = ({ loading, children }: PropsLoadHider) => {
+    if (loading) {
+        return (
+            <Loader size="lg" />
+        )
+    }
+    return (
+        <>{children}</>
+    )
+}
+
 interface PropsRegisteredAccountList {
     accounts: MisskeyAccountPublic[];
     activeAccountId: string | null;
+    loading: boolean;
     openDeleteModal: (accountId: string) => void;
 }
 const RegisteredAccountList = ({
     accounts,
     activeAccountId,
+    loading,
     openDeleteModal,
 }: PropsRegisteredAccountList
 ) => {
@@ -279,64 +296,66 @@ const RegisteredAccountList = ({
         <Stack gap="md" mb="xl">
             <Title order={2} size="h3">登録済みアカウント</Title>
 
-            {accounts.length === 0 ? (
-                <Alert color="blue">
-                    アカウントが登録されていません。下記のフォームから登録してください。
-                </Alert>
-            ) : (
-                accounts.map((account) => (
-                    <Card key={account.id} shadow="sm" padding="lg" radius="md" withBorder>
-                        <Group justify="space-between">
-                            <Group gap="md">
-                                <Avatar
-                                    src={account.avatarUrl}
-                                    size="md"
-                                    radius="xl"
-                                />
-                                <div>
-                                    <Text fw={500}>{account.displayName}</Text>
-                                    <Text size="sm" c="dimmed">
-                                        @{account.username}
-                                    </Text>
-                                    <Text size="xs" c="dimmed">
-                                        {account.instanceUrl}
-                                    </Text>
-                                </div>
-                            </Group>
+            <LoadHider loading={loading}>
+                {accounts.length === 0 ? (
+                    <Alert color="blue">
+                        アカウントが登録されていません。下記のフォームから登録してください。
+                    </Alert>
+                ) : (
+                    accounts.map((account) => (
+                        <Card key={account.id} shadow="sm" padding="lg" radius="md" withBorder>
+                            <Group justify="space-between">
+                                <Group gap="md">
+                                    <Avatar
+                                        src={account.avatarUrl}
+                                        size="md"
+                                        radius="xl"
+                                    />
+                                    <div>
+                                        <Text fw={500}>{account.displayName}</Text>
+                                        <Text size="sm" c="dimmed">
+                                            @{account.username}
+                                        </Text>
+                                        <Text size="xs" c="dimmed">
+                                            {account.instanceUrl}
+                                        </Text>
+                                    </div>
+                                </Group>
 
-                            <Group gap="sm">
-                                {account.id === activeAccountId && (
-                                    <Badge color="green">アクティブ</Badge>
-                                )}
-                                <Button
-                                    color="red"
-                                    size="xs"
-                                    variant="outline"
-                                    onClick={() => openDeleteModal(account.id)}
-                                >
-                                    削除
-                                </Button>
+                                <Group gap="sm">
+                                    {account.id === activeAccountId && (
+                                        <Badge color="green">アクティブ</Badge>
+                                    )}
+                                    <Button
+                                        color="red"
+                                        size="xs"
+                                        variant="outline"
+                                        onClick={() => openDeleteModal(account.id)}
+                                    >
+                                        削除
+                                    </Button>
+                                </Group>
                             </Group>
-                        </Group>
-                    </Card>
-                ))
-            )}
+                        </Card>
+                    ))
+                )}
+            </LoadHider>
         </Stack>
     )
 }
 
 interface PropsAuthenticationRequired {
-    loading: boolean;
     status: 'loading' | 'authenticated' | 'unauthenticated';
     children: ReactNode;
 }
-const AuthenticationRequired = ({ loading, status, children }: PropsAuthenticationRequired) => {
+const AuthenticationRequired = ({ status, children }: PropsAuthenticationRequired) => {
 
-    if (loading || status === 'loading') {
+    if (status === 'loading') {
         return (
             <Container size="md" py="xl">
                 <Group justify="center">
                     <Loader size="lg" />
+                    <Text>Checking authentication...</Text>
                 </Group>
             </Container>
         );
@@ -388,7 +407,6 @@ const AccountManager = () => {
 
     return (
         <AuthenticationRequired
-            loading={loading}
             status={status}
         >
             <Container size="md" py="xl">
@@ -405,6 +423,7 @@ const AccountManager = () => {
                 <RegisteredAccountList
                     accounts={accounts}
                     activeAccountId={activeAccountId}
+                    loading={loading}
                     openDeleteModal={openDeleteModal}
                 />
 
