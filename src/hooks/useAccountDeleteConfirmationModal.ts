@@ -1,65 +1,42 @@
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
-import { ErrorResponse, fetchAccounts, MisskeyAccountPublic } from "./useAccounts";
 import { notifications } from "@mantine/notifications";
+import { deleteAccountApi } from "@/lib/api/accounts";
 
-const handleDelete = async (
-    accountId: string,
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
-    setActiveAccountId: (accountId: string | null) => void,
-    setLoading: (isLoading: boolean) => void, // こいつ表示のロジックやん
-    setDeleteTargetId: (deleteTargetId: string | null) => void,
-    close: () => void,
+const useAccountDeleteConfirmationModal = (
+    onAccountDeleted: () => void
 ) => {
-    try {
-        const response = await fetch(`/api/misskey-accounts/${accountId}`, {
-            method: 'DELETE',
-        });
+    const [opened, { open, close }] = useDisclosure(false);
+    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-        if (response.ok) {
+    const handlerConfirmAccountDeletion = async () => {
+        if (!deleteTargetId) {
+            console.warn('deleteTargetId is not set');
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            await deleteAccountApi(deleteTargetId);
             notifications.show({
                 title: '成功',
                 message: 'アカウントが削除されました',
                 color: 'green',
             });
-            fetchAccounts(setAccounts, setActiveAccountId, setLoading); // 一覧を再取得
-        } else {
-            const errorData: ErrorResponse = await response.json();
+            onAccountDeleted();
+        } catch (error) {
             notifications.show({
                 title: 'エラー',
-                message: errorData.error || '削除に失敗しました',
+                message: error instanceof Error ? error.message : 'ネットワークエラーが発生しました',
                 color: 'red',
             });
+        } finally {
+            setIsDeleting(false);
+            close();
+            setDeleteTargetId(null);
         }
-    } catch (error) {
-        console.error('Failed to delete account:', error);
-        notifications.show({
-            title: 'エラー',
-            message: 'ネットワークエラーが発生しました',
-            color: 'red',
-        });
-    } finally {
-        close();
-        setDeleteTargetId(null);
-    }
-};
-
-const useAccountDeleteConfirmationModal = (
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
-    setActiveAccountId: (activeAccountId: string | null) => void,
-    setLoadingAccounts: (loadingAccounts: boolean) => void,
-) => {
-    const [opened, { open, close }] = useDisclosure(false);
-    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-
-    const handlerConfirmAccountDeletion = () => deleteTargetId && handleDelete(
-        deleteTargetId,
-        setAccounts,
-        setActiveAccountId,
-        setLoadingAccounts,
-        setDeleteTargetId,
-        close
-    );
+    };
 
     const openDeleteModal = (accountId: string) => {
         setDeleteTargetId(accountId);
@@ -68,6 +45,7 @@ const useAccountDeleteConfirmationModal = (
 
     return {
         opened,
+        isDeleting,
         handlerConfirmAccountDeletion,
         openDeleteModal,
     }

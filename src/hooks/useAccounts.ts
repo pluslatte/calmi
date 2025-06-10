@@ -1,6 +1,7 @@
+import { fetchAccountsApi } from "@/lib/api/accounts";
 import { notifications } from "@mantine/notifications";
 import { Prisma } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
     select: {
@@ -13,69 +14,39 @@ export type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
     }
 }>;
 
-export interface AccountsData {
-    accounts: MisskeyAccountPublic[];
-    activeAccountId: string | null;
-};
-
-export interface ErrorResponse {
-    error: string;
-}
-
-export interface RegisterAccountResponse {
-    success: true;
-    account: MisskeyAccountPublic;
-}
-
-export const fetchAccounts = async (
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
-    setActiveAccountId: (accountId: string | null) => void,
-    setLoadingAccounts: (isLoading: boolean) => void, // こいつ表示のロジックやん
-) => {
-    try {
-        const response = await fetch('/api/misskey-accounts');
-        if (response.ok) {
-            const data: AccountsData = await response.json();
-            setAccounts(data.accounts);
-            setActiveAccountId(data.activeAccountId);
-        } else {
-            const errorData: ErrorResponse = await response.json();
-            notifications.show({
-                title: 'エラー',
-                message: errorData.error || 'アカウント情報の取得に失敗しました',
-                color: 'red',
-            });
-        }
-    } catch (error) {
-        console.error("Failed to fetch accounts:", error);
-        notifications.show({
-            title: 'エラー',
-            message: '不明なエラー',
-            color: 'red',
-        });
-    } finally {
-        setLoadingAccounts(false);
-    }
-}
-
 const useAccounts = (sessionStatus: 'loading' | 'authenticated' | 'unauthenticated') => {
     const [accounts, setAccounts] = useState<MisskeyAccountPublic[]>([]);
     const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
     const [loadingAccounts, setLoadingAccounts] = useState<boolean>(false);
 
+    const refreshAccounts = useCallback(async () => {
+        setLoadingAccounts(true);
+        try {
+            const data = await fetchAccountsApi();
+            setAccounts(data.accounts);
+            setActiveAccountId(data.activeAccountId);
+        } catch (error) {
+            notifications.show({
+                title: 'エラー',
+                message: error instanceof Error ? error.message : '不明なエラー',
+                color: 'red',
+            });
+        } finally {
+            setLoadingAccounts(false);
+        }
+    }, []);
+
     useEffect(() => {
         if (sessionStatus === 'authenticated') {
-            fetchAccounts(setAccounts, setActiveAccountId, setLoadingAccounts);
+            refreshAccounts();
         }
-    }, [sessionStatus]);
+    }, [sessionStatus, refreshAccounts]);
 
     return {
         accounts,
         activeAccountId,
         loadingAccounts,
-        setAccounts,
-        setActiveAccountId,
-        setLoadingAccounts,
+        refreshAccounts,
     }
 };
 
