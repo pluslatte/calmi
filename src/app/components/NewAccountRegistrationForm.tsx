@@ -1,15 +1,22 @@
-import { ErrorResponse, fetchAccounts, MisskeyAccountPublic, RegisterAccountResponse } from "@/hooks/useAccounts";
+import { MisskeyAccountPublic } from "@/hooks/useAccounts";
 import { Card, Title, Stack, TextInput, Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
+
+export interface RegisterAccountResponse {
+    success: true;
+    account: MisskeyAccountPublic;
+}
+
+export interface ErrorResponse {
+    error: string;
+}
 
 const handleRegisterImpl = async (
     e: React.FormEvent,
     instanceUrl: string,
     accessToken: string,
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
-    setActiveAccountId: (accountId: string | null) => void,
-    setLoading: (isLoading: boolean) => void, // こいつ表示のロジックやん
+    onAccountRegistered: () => void,
     setSubmitting: (isSubmitting: boolean) => void,
     setInstanceUrl: (instanceUrl: string) => void,
     setAccessToken: (token: string) => void,
@@ -28,7 +35,7 @@ const handleRegisterImpl = async (
         });
         setInstanceUrl('');
         setAccessToken('');
-        fetchAccounts(setAccounts, setActiveAccountId, setLoading);
+        onAccountRegistered(); // コールバック関数を呼び出し
     } catch (error) {
         console.error('Failed to register account:', error);
         notifications.show({
@@ -64,30 +71,23 @@ const registerAccount = async (
 }
 
 interface Props {
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void;
-    setActiveAccountId: (activeAccountId: string | null) => void;
-    setLoading: (isLoading: boolean) => void;
+    onAccountRegistered: () => void;
 }
 
 const NewAccountRegistrationForm = ({
-    setAccounts,
-    setActiveAccountId,
-    setLoading,
+    onAccountRegistered,
 }: Props
 ) => {
     const [instanceUrl, setInstanceUrl] = useState('');
     const [accessToken, setAccessToken] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-
     const handleRegister = async (e: React.FormEvent) => {
         handleRegisterImpl(
             e,
             instanceUrl,
             accessToken,
-            setAccounts,
-            setActiveAccountId,
-            setLoading,
+            onAccountRegistered,
             setSubmitting,
             setInstanceUrl,
             setAccessToken

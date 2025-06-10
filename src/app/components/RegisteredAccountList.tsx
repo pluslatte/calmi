@@ -8,24 +8,21 @@ interface Props {
     accounts: MisskeyAccountPublic[];
     activeAccountId: string | null;
     loading: boolean;
-    setAccounts: (misskeyAccountPublics: MisskeyAccountPublic[]) => void,
-    setActiveAccountId: (activeAccountId: string | null) => void,
-    setLoadingAccounts: (loadingAccounts: boolean) => void,
+    onAccountDeleted: () => void; // コールバック関数に変更
 }
 const RegisteredAccountList = ({
     accounts,
     activeAccountId,
     loading,
-    setAccounts,
-    setActiveAccountId,
-    setLoadingAccounts,
+    onAccountDeleted,
 }: Props
 ) => {
     const {
         opened,
+        close,
         handlerConfirmAccountDeletion,
         openDeleteModal,
-    } = useAccountDeleteConfirmationModal(setAccounts, setActiveAccountId, setLoadingAccounts);
+    } = useAccountDeleteConfirmationModal(onAccountDeleted);
 
     return (
         <>

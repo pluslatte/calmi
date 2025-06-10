@@ -15,9 +15,7 @@ const AccountManager = () => {
         accounts,
         activeAccountId,
         loadingAccounts,
-        setAccounts,
-        setActiveAccountId,
-        setLoadingAccounts,
+        refreshAccounts,
     } = useAccounts(status);
 
     return (
@@ -39,15 +37,11 @@ const AccountManager = () => {
                     accounts={accounts}
                     activeAccountId={activeAccountId}
                     loading={loadingAccounts}
-                    setAccounts={setAccounts}
-                    setActiveAccountId={setActiveAccountId}
-                    setLoadingAccounts={setLoadingAccounts}
+                    onAccountDeleted={refreshAccounts}
                 />
 
                 <NewAccountRegistrationForm
-                    setAccounts={setAccounts}
-                    setActiveAccountId={setActiveAccountId}
-                    setLoading={setLoadingAccounts}
+                    onAccountRegistered={refreshAccounts}
                 />
             </Container>
         </AuthenticationRequired>

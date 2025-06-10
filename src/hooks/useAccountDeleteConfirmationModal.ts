@@ -45,6 +45,7 @@ const useAccountDeleteConfirmationModal = (
 
     return {
         opened,
+        close,
         isDeleting,
         handlerConfirmAccountDeletion,
         openDeleteModal,
