@@ -6,36 +6,7 @@ import { useSession } from "next-auth/react";
 import useAccounts from "@/hooks/useAccounts";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
 import RegisteredAccountList from "../components/RegisteredAccountList";
-
-interface PropsAuthenticationRequired {
-    status: 'loading' | 'authenticated' | 'unauthenticated';
-    children: ReactNode;
-}
-const AuthenticationRequired = ({ status, children }: PropsAuthenticationRequired) => {
-
-    if (status === 'loading') {
-        return (
-            <Container size="md" py="xl">
-                <Group justify="center">
-                    <Loader size="lg" />
-                    <Text>Checking authentication...</Text>
-                </Group>
-            </Container>
-        );
-    }
-
-    if (status === 'unauthenticated') {
-        return (
-            <Container size="md" py="xl">
-                <Group justify="center">
-                    <Text>Access  Denied</Text>
-                </Group>
-            </Container>
-        );
-    }
-
-    return (<>{children}</>)
-}
+import AuthenticationRequired from "../components/AuthenticationRequired";
 
 const AccountManager = () => {
     const { data: session, status } = useSession();
