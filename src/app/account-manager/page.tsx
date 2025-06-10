@@ -1,7 +1,7 @@
 'use client';
 import { signOut } from "@/../auth";
-import { Button, Container, Group, Loader, Title, Text } from "@mantine/core";
-import React, { ReactNode } from "react";
+import { Button, Container, Group, Title } from "@mantine/core";
+import React from "react";
 import { useSession } from "next-auth/react";
 import useAccounts from "@/hooks/useAccounts";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
