@@ -1,6 +1,6 @@
 import useAccountDelete from "@/hooks/useAccountDelete";
 import useConfirmationModal from "@/hooks/useConfirmationModal";
-import { MisskeyAccountPublic } from "@/hooks/useAccounts";
+import { MisskeyAccountPublic } from "@/types/accounts";
 import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text } from "@mantine/core";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import LoadHider from "./LoadHider";
@@ -21,7 +21,7 @@ const RegisteredAccountList = ({
 ) => {
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
     const { deleteAccount } = useAccountDelete(onAccountDeleted);
-    
+
     const confirmationModal = useConfirmationModal(async () => {
         if (!deleteTargetId) {
             console.warn('deleteTargetId is not set');

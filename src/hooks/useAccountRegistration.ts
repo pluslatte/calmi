@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MisskeyAccountPublic } from "./useAccounts";
+import { MisskeyAccountPublic } from "@/types/accounts";
 import { notifications } from "@mantine/notifications";
 import { registerAccountApi } from "@/lib/api/accounts";
 

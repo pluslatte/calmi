@@ -1,4 +1,4 @@
-import { MisskeyAccountPublic } from "@/hooks/useAccounts";
+import { MisskeyAccountPublic } from "@/types/accounts";
 
 export interface FetchAccountsApiResponse {
     accounts: MisskeyAccountPublic[];

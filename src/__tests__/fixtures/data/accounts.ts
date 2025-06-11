@@ -1,15 +1,4 @@
-import { Prisma } from "@prisma/client";
-
-type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
-    select: {
-        id: true;
-        instanceUrl: true;
-        username: true;
-        displayName: true;
-        avatarUrl: true;
-        createdAt: true;
-    }
-}>;
+import { MisskeyAccountPublic } from "@/types/accounts";
 
 interface AccountsData {
     accounts: MisskeyAccountPublic[];

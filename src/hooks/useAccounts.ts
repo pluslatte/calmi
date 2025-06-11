@@ -1,18 +1,7 @@
 import { fetchAccountsApi } from "@/lib/api/accounts";
+import { MisskeyAccountPublic } from "@/types/accounts";
 import { notifications } from "@mantine/notifications";
-import { Prisma } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
-
-export type MisskeyAccountPublic = Prisma.MisskeyAccountGetPayload<{
-    select: {
-        id: true;
-        instanceUrl: true;
-        username: true;
-        displayName: true;
-        avatarUrl: true;
-        createdAt: true;
-    }
-}>;
 
 const useAccounts = (sessionStatus: 'loading' | 'authenticated' | 'unauthenticated') => {
     const [accounts, setAccounts] = useState<MisskeyAccountPublic[]>([]);
