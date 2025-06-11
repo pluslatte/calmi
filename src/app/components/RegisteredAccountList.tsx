@@ -23,12 +23,20 @@ const RegisteredAccountList = ({
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
     const { isDeleting, deleteAccount } = useAccountDelete(onAccountDeleted);
 
-    const openDeleteModal = (accountId: string) => {
+    const openDeleteModal = (
+        accountId: string,
+        setDeleteTargetId: (targetId: string | null) => void,
+    ) => {
         setDeleteTargetId(accountId);
         open();
     };
 
-    const handlerConfirmAccountDeletion = async () => {
+    const handlerConfirmAccountDeletion = async (
+        deleteTargetId: string | null,
+        deleteAccount: (id: string) => Promise<void>,
+        close: () => void,
+        setDeleteTargetId: (id: string | null) => void,
+    ) => {
         if (!deleteTargetId) {
             console.warn('deleteTargetId is not set');
             return;
@@ -38,6 +46,15 @@ const RegisteredAccountList = ({
         close();
         setDeleteTargetId(null);
     };
+
+    const handleConfirmAccountDeletion = async () => {
+        await handlerConfirmAccountDeletion(
+            deleteTargetId,
+            deleteAccount,
+            close,
+            setDeleteTargetId,
+        )
+    }
 
     return (
         <>
@@ -78,7 +95,10 @@ const RegisteredAccountList = ({
                                             color="red"
                                             size="xs"
                                             variant="outline"
-                                            onClick={() => openDeleteModal(account.id)}
+                                            onClick={() => openDeleteModal(
+                                                account.id,
+                                                setDeleteTargetId,
+                                            )}
                                             disabled={isDeleting}
                                         >
                                             削除
@@ -94,7 +114,7 @@ const RegisteredAccountList = ({
             <DeleteConfirmationModal
                 opened={opened}
                 close={close}
-                onclick={handlerConfirmAccountDeletion}
+                onclick={handleConfirmAccountDeletion}
                 loading={isDeleting}
             />
         </>
