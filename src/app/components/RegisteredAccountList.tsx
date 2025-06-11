@@ -1,9 +1,9 @@
 import useAccountDelete from "@/hooks/useAccountDelete";
+import useConfirmationModal from "@/hooks/useConfirmationModal";
 import { MisskeyAccountPublic } from "@/hooks/useAccounts";
 import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text } from "@mantine/core";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import LoadHider from "./LoadHider";
-import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 
 interface Props {
@@ -19,42 +19,22 @@ const RegisteredAccountList = ({
     onAccountDeleted,
 }: Props
 ) => {
-    const [opened, { open, close }] = useDisclosure(false);
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-    const { isDeleting, deleteAccount } = useAccountDelete(onAccountDeleted);
-
-    const openDeleteModal = (
-        accountId: string,
-        setDeleteTargetId: (targetId: string | null) => void,
-    ) => {
-        setDeleteTargetId(accountId);
-        open();
-    };
-
-    const handlerConfirmAccountDeletion = async (
-        deleteTargetId: string | null,
-        deleteAccount: (id: string) => Promise<void>,
-        close: () => void,
-        setDeleteTargetId: (id: string | null) => void,
-    ) => {
+    const { deleteAccount } = useAccountDelete(onAccountDeleted);
+    
+    const confirmationModal = useConfirmationModal(async () => {
         if (!deleteTargetId) {
             console.warn('deleteTargetId is not set');
             return;
         }
-
         await deleteAccount(deleteTargetId);
-        close();
         setDeleteTargetId(null);
-    };
+    });
 
-    const handleConfirmAccountDeletion = async () => {
-        await handlerConfirmAccountDeletion(
-            deleteTargetId,
-            deleteAccount,
-            close,
-            setDeleteTargetId,
-        )
-    }
+    const openDeleteModal = (accountId: string) => {
+        setDeleteTargetId(accountId);
+        confirmationModal.open();
+    };
 
     return (
         <>
@@ -95,11 +75,8 @@ const RegisteredAccountList = ({
                                             color="red"
                                             size="xs"
                                             variant="outline"
-                                            onClick={() => openDeleteModal(
-                                                account.id,
-                                                setDeleteTargetId,
-                                            )}
-                                            disabled={isDeleting}
+                                            onClick={() => openDeleteModal(account.id)}
+                                            disabled={confirmationModal.isLoading}
                                         >
                                             削除
                                         </Button>
@@ -112,10 +89,10 @@ const RegisteredAccountList = ({
             </Stack>
 
             <DeleteConfirmationModal
-                opened={opened}
-                close={close}
-                onclick={handleConfirmAccountDeletion}
-                loading={isDeleting}
+                opened={confirmationModal.opened}
+                close={confirmationModal.close}
+                onclick={confirmationModal.handleConfirm}
+                loading={confirmationModal.isLoading}
             />
         </>
     )
