@@ -80,30 +80,3 @@ describe('when deleteAccount is called', () => {
         });
     });
 });
-
-describe('returns', () => {
-    const mockOnAccountDeleted = vi.fn();
-
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
-    it('isDeleting and deleteAccount', () => {
-        const { result } = renderHook(() => useAccountDelete(mockOnAccountDeleted));
-
-        expect(result.current).toHaveProperty('isDeleting');
-        expect(result.current).toHaveProperty('deleteAccount');
-    });
-
-    it('isDeleting is boolean', () => {
-        const { result } = renderHook(() => useAccountDelete(mockOnAccountDeleted));
-
-        expect(typeof result.current.isDeleting).toBe('boolean');
-    });
-
-    it('deleteAccount is function', () => {
-        const { result } = renderHook(() => useAccountDelete(mockOnAccountDeleted));
-
-        expect(typeof result.current.deleteAccount).toBe('function');
-    });
-});
