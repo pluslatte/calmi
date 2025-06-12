@@ -1,6 +1,6 @@
 import { fetchAccountsApi } from "@/lib/api/accounts";
+import { notifyFailure } from "@/lib/notifications";
 import { MisskeyAccountPublic } from "@/types/accounts";
-import { notifications } from "@mantine/notifications";
 import { useCallback, useEffect, useState } from "react";
 
 const useAccounts = (sessionStatus: 'loading' | 'authenticated' | 'unauthenticated') => {
@@ -15,11 +15,7 @@ const useAccounts = (sessionStatus: 'loading' | 'authenticated' | 'unauthenticat
             setAccounts(data.accounts);
             setActiveAccountId(data.activeAccountId);
         } catch (error) {
-            notifications.show({
-                title: 'エラー',
-                message: error instanceof Error ? error.message : '不明なエラー',
-                color: 'red',
-            });
+            notifyFailure(error);
         } finally {
             setLoadingAccounts(false);
         }

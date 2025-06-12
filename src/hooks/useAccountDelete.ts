@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { notifications } from "@mantine/notifications";
 import { deleteAccountApi } from "@/lib/api/accounts";
+import { notifyFailure, notifySuccess } from "@/lib/notifications";
 
 const useAccountDelete = (
     onAccountDeleted: () => void
@@ -11,18 +11,10 @@ const useAccountDelete = (
         setIsDeleting(true);
         try {
             await deleteAccountApi(accountId);
-            notifications.show({
-                title: '成功',
-                message: 'アカウントが削除されました',
-                color: 'green',
-            });
+            notifySuccess('アカウントが削除されました');
             onAccountDeleted();
         } catch (error) {
-            notifications.show({
-                title: 'エラー',
-                message: error instanceof Error ? error.message : 'ネットワークエラーが発生しました',
-                color: 'red',
-            });
+            notifyFailure(error);
         } finally {
             setIsDeleting(false);
         }

@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { MisskeyAccountPublic } from "@/types/accounts";
-import { notifications } from "@mantine/notifications";
 import { registerAccountApi } from "@/lib/api/accounts";
+import { notifyFailure, notifySuccess } from "@/lib/notifications";
 
 const useAccountRegistration = (onSuccess?: () => void) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -13,20 +12,10 @@ const useAccountRegistration = (onSuccess?: () => void) => {
         setIsSubmitting(true);
         try {
             const result = await registerAccountApi(instanceUrl, accessToken);
-
-            notifications.show({
-                title: '成功',
-                message: `${result.account.displayName}のアカウントが登録されました`,
-                color: 'green',
-            });
-
+            notifySuccess(`${result.account.displayName}のアカウントが登録されました`);
             onSuccess?.();
         } catch (error) {
-            notifications.show({
-                title: 'エラー',
-                message: `登録に失敗しました: ${error}`,
-                color: 'red',
-            });
+            notifyFailure(error);
             throw error;
         } finally {
             setIsSubmitting(false);
