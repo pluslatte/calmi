@@ -1,8 +1,7 @@
 'use client';
-import { signOut } from "@/../auth";
 import { Button, Container, Group, Title } from "@mantine/core";
 import React from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import useAccounts from "@/hooks/useAccounts";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
 import RegisteredAccountList from "../components/RegisteredAccountList";
@@ -28,7 +27,7 @@ const AccountManager = () => {
                     <Title order={1}>ダッシュボード</Title>
                     <Button
                         color="red"
-                        onClick={() => signOut()}
+                        onClick={() => signOut({ redirectTo: "/" })}
                     >
                         サインアウト
                     </Button>
