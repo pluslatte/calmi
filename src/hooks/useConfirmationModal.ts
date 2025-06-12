@@ -7,15 +7,12 @@ const useConfirmationModal = (onConfirm: () => Promise<void>) => {
 
     const handleConfirm = async () => {
         setIsLoading(true);
-        try {
-            await onConfirm();
-            close();
-        } catch (error) {
-            // エラーハンドリングは onConfirm 側で行う想定
-            console.error('Confirmation action failed:', error);
-        } finally {
+        await onConfirm().catch(error => {
             setIsLoading(false);
-        }
+            throw error;
+        });
+        close();
+        setIsLoading(false);
     };
 
     return {
