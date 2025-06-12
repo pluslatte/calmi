@@ -8,12 +8,15 @@ const useAccountDelete = (
 
     const deleteAccount = async (accountId: string) => {
         setIsDeleting(true);
-        await deleteAccountApi(accountId).catch(error => {
+        try {
+            await deleteAccountApi(accountId);
+            onAccountDeleted();
+        } catch (error) {
             setIsDeleting(false);
             throw error;
-        });
-        onAccountDeleted();
-        setIsDeleting(false);
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     return {
