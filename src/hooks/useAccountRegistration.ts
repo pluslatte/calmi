@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { registerAccountApi } from "@/lib/api/accounts";
-import { notifyFailure, notifySuccess } from "@/lib/notifications";
+import { registerAccountApi, RegisterAccountApiResponse } from "@/lib/api/accounts";
 
 const useAccountRegistration = (onSuccess?: () => void) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -8,18 +7,15 @@ const useAccountRegistration = (onSuccess?: () => void) => {
     const registerAccount = async (
         instanceUrl: string,
         accessToken: string,
-    ) => {
+    ): Promise<RegisterAccountApiResponse> => {
         setIsSubmitting(true);
-        try {
-            const result = await registerAccountApi(instanceUrl, accessToken);
-            notifySuccess(`${result.account.displayName}のアカウントが登録されました`);
-            onSuccess?.();
-        } catch (error) {
-            notifyFailure(error);
-            throw error;
-        } finally {
+        const result = await registerAccountApi(instanceUrl, accessToken).catch(error => {
             setIsSubmitting(false);
-        }
+            throw error;
+        });
+        onSuccess?.();
+        setIsSubmitting(false);
+        return result;
     };
 
     return {

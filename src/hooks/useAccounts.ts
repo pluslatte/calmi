@@ -1,5 +1,4 @@
 import { fetchAccountsApi } from "@/lib/api/accounts";
-import { notifyFailure } from "@/lib/notifications";
 import { MisskeyAccountPublic } from "@/types/accounts";
 import { useCallback, useEffect, useState } from "react";
 
@@ -10,15 +9,13 @@ const useAccounts = (sessionStatus: 'loading' | 'authenticated' | 'unauthenticat
 
     const refreshAccounts = useCallback(async () => {
         setLoadingAccounts(true);
-        try {
-            const data = await fetchAccountsApi();
-            setAccounts(data.accounts);
-            setActiveAccountId(data.activeAccountId);
-        } catch (error) {
-            notifyFailure(error);
-        } finally {
+        const data = await fetchAccountsApi().catch(error => {
             setLoadingAccounts(false);
-        }
+            throw error;
+        });
+        setAccounts(data.accounts);
+        setActiveAccountId(data.activeAccountId);
+        setLoadingAccounts(false);
     }, []);
 
     useEffect(() => {

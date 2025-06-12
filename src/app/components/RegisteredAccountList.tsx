@@ -5,6 +5,7 @@ import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text } from "@
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import LoadHider from "./LoadHider";
 import { useState } from "react";
+import { notifyFailure, notifySuccess } from "@/lib/notifications";
 
 interface Props {
     accounts: MisskeyAccountPublic[];
@@ -27,7 +28,12 @@ const RegisteredAccountList = ({
             console.warn('deleteTargetId is not set');
             return;
         }
-        await deleteAccount(deleteTargetId);
+        try {
+            await deleteAccount(deleteTargetId);
+            notifySuccess('アカウントが削除されました');
+        } catch (error) {
+            notifyFailure(error);
+        }
         setDeleteTargetId(null);
     });
 

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { deleteAccountApi } from "@/lib/api/accounts";
-import { notifyFailure, notifySuccess } from "@/lib/notifications";
 
 const useAccountDelete = (
     onAccountDeleted: () => void
@@ -9,15 +8,12 @@ const useAccountDelete = (
 
     const deleteAccount = async (accountId: string) => {
         setIsDeleting(true);
-        try {
-            await deleteAccountApi(accountId);
-            notifySuccess('アカウントが削除されました');
-            onAccountDeleted();
-        } catch (error) {
-            notifyFailure(error);
-        } finally {
+        await deleteAccountApi(accountId).catch(error => {
             setIsDeleting(false);
-        }
+            throw error;
+        });
+        onAccountDeleted();
+        setIsDeleting(false);
     };
 
     return {

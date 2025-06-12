@@ -1,4 +1,5 @@
 import useAccountRegistration from "@/hooks/useAccountRegistration";
+import { notifyFailure, notifySuccess } from "@/lib/notifications";
 import { Card, Title, Stack, TextInput, Button } from "@mantine/core";
 import { useState } from "react";
 
@@ -22,9 +23,10 @@ const NewAccountRegistrationForm = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await registerAccount(instanceUrl, accessToken);
+            const result = await registerAccount(instanceUrl, accessToken);
+            notifySuccess(`${result.account.displayName}のアカウントが登録されました`);
         } catch (error) {
-            console.error('Registration failed:', error);
+            notifyFailure(error);
         }
     };
 
