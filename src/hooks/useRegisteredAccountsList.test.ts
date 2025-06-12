@@ -120,7 +120,7 @@ describe('useRegisteredAccountsList', () => {
     });
 
     describe('sessionStatus change', () => {
-        it('fetches accounts when sessionStatus changes to authenticated', async () => {
+        it('fetches accounts when sessionStatus changes from loading to authenticated', async () => {
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
 
             const { result, rerender } = await act(async () => {
