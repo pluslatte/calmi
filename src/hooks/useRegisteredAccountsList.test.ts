@@ -30,16 +30,9 @@ describe('useRegisteredAccountsList', () => {
         it('automatically fetches accounts on mount', async () => {
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
 
-            const { result } = renderHook(() => useRegisteredAccountsList('authenticated'));
-
-            await waitFor(() => {
-                expect(result.current.loadingAccounts).toBe(false);
+            const { result } = await act(async () => {
+                return renderHook(() => useRegisteredAccountsList('authenticated'));
             });
-            // expect(result.current.loadingAccounts).toBe(true);
-
-            // await act(async () => {
-            //     await new Promise(resolve => setTimeout(resolve, 0));
-            // });
 
             expect(mockFetchAccountsApi).toHaveBeenCalledOnce();
             expect(result.current.accounts).toEqual(mockAccountsResponse.accounts);
@@ -51,21 +44,14 @@ describe('useRegisteredAccountsList', () => {
             const mockError = new Error('API Error');
             mockFetchAccountsApi.mockRejectedValue(mockError);
 
-            const { result } = renderHook(() => useRegisteredAccountsList('authenticated'));
-
-            await waitFor(() => {
-                expect(result.current.loadingAccounts).toBe(false);
-                expect(result.current.refreshAccounts).rejects.toThrow('API Error');
+            const { result } = await act(async () => {
+                return renderHook(() => useRegisteredAccountsList('authenticated'));
             });
-            // await expect(
-            //     act(async () => {
-            //         await new Promise(resolve => setTimeout(resolve, 0));
-            //     })
-            // ).rejects.toThrow('API Error');
 
-            expect(result.current.loadingAccounts).toBe(false);
+            expect(mockFetchAccountsApi).toHaveBeenCalledOnce();
             expect(result.current.accounts).toEqual([]);
             expect(result.current.activeAccountId).toBeNull();
+            expect(result.current.loadingAccounts).toBe(false);
         });
     });
 
@@ -146,12 +132,13 @@ describe('useRegisteredAccountsList', () => {
 
             rerender({ sessionStatus: 'authenticated' as const });
 
-            // await act(async () => {
-            //     await new Promise(resolve => setTimeout(resolve, 0));
-            // });
+            await waitFor(() => {
+                expect(mockFetchAccountsApi).toHaveBeenCalledOnce();
+            });
 
-            expect(mockFetchAccountsApi).toHaveBeenCalledOnce();
-            expect(result.current.accounts).toEqual(mockAccountsResponse.accounts);
+            await waitFor(() => {
+                expect(result.current.accounts).toEqual(mockAccountsResponse.accounts);
+            });
         });
     });
 });

@@ -1,4 +1,5 @@
 import { fetchAccountsApi } from "@/lib/api/accounts";
+import { notifyFailure } from "@/lib/notifications";
 import { MisskeyAccountPublic } from "@/types/accounts";
 import { useCallback, useEffect, useState } from "react";
 
@@ -13,14 +14,18 @@ const useRegisteredAccountsList = (sessionStatus: 'loading' | 'authenticated' | 
             setLoadingAccounts(false);
             throw error;
         });
-        setAccounts(data.accounts);
-        setActiveAccountId(data.activeAccountId);
+        if (data) {
+            setAccounts(data.accounts);
+            setActiveAccountId(data.activeAccountId);
+        }
         setLoadingAccounts(false);
     }, []);
 
     useEffect(() => {
         if (sessionStatus === 'authenticated') {
-            refreshAccounts();
+            refreshAccounts().catch((error) => {
+                notifyFailure(error);
+            });
         }
     }, [sessionStatus, refreshAccounts]);
 
