@@ -10,3 +10,5 @@
 - AUTH_GITHUB_SECRET
 - DATABASE_URL
     - SQLite
+- ALLOWED_GITHUB_USERS
+    - example `"pluslatte,your_github_username,another_username"`
