@@ -75,5 +75,23 @@ describe('when registerAccount is called', () => {
 
             expect(result.current.isSubmitting).toBe(false);
         });
+
+        it('onSuccess is NOT called', async () => {
+            const mockError = new Error('API Error');
+            mockRegisterAccountApi.mockRejectedValue(mockError);
+
+            const { result } = renderHook(() => useAccountRegistration(mockOnSuccess));
+
+            await expect(
+                act(async () => {
+                    await result.current.registerAccount(
+                        'test-instance-url',
+                        'test-token',
+                    );
+                })
+            ).rejects.toThrow('API Error');
+
+            expect(mockOnSuccess).not.toHaveBeenCalled();
+        });
     });
 });
