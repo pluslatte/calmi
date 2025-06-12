@@ -1,5 +1,5 @@
 import { render, RenderOptions } from '@testing-library/react';
-import { MantineProvider, MantineThemeOverride } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { Session } from "next-auth";
 import React, { ReactElement } from "react";
 import { SessionProvider } from "next-auth/react";

@@ -1,4 +1,4 @@
-import { resetMockSession, setMockSession } from "./__mocks__/next-auth";
+import { resetMockSession, setMockSession } from "./mocks/next-auth";
 
 import { Button } from "@mantine/core";
 import { signOut, useSession } from "next-auth/react";
@@ -67,7 +67,7 @@ describe('next-auth mock', () => {
     });
 
     test('signOut is called on button click', async () => {
-        const { mockSignOut } = await import('./__mocks__/next-auth');
+        const { mockSignOut } = await import('./mocks/next-auth');
 
         setMockSession({
             status: 'authenticated',
