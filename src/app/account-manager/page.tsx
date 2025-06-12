@@ -2,7 +2,7 @@
 import { Button, Container, Group, Title } from "@mantine/core";
 import React from "react";
 import { useSession, signOut } from "next-auth/react";
-import useAccounts from "@/hooks/useAccounts";
+import useRegisteredAccountsList from "@/hooks/useAccounts";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
 import RegisteredAccountList from "../components/RegisteredAccountList";
 import AuthenticationRequired from "../components/AuthenticationRequired";
@@ -16,7 +16,7 @@ const AccountManager = () => {
         activeAccountId,
         loadingAccounts,
         refreshAccounts,
-    } = useAccounts(status);
+    } = useRegisteredAccountsList(status);
 
     return (
         <AuthenticationRequired
