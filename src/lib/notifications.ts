@@ -8,10 +8,10 @@ export const notifySuccess = (msg: string): void => {
     });
 }
 
-export const notifyFailure = (error?: Error): void => {
+export const notifyFailure = (error?: unknown): void => {
     notifications.show({
         title: 'エラー',
-        message: error?.message || '不明なエラー',
+        message: error instanceof Error ? error.message : '不明なエラー',
         color: 'red',
     });
 }
