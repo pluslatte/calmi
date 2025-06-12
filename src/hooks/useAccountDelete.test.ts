@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import useAccountDelete from "./useAccountDelete";
 import { deleteAccountApi } from "@/lib/api/accounts";
 
@@ -16,6 +16,7 @@ describe('when deleteAccount is called', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
+
     describe('success case', () => {
         it('isDeleting state is properly cleaned', async () => {
             mockDeleteAccountApi.mockResolvedValue(undefined);
@@ -40,9 +41,9 @@ describe('when deleteAccount is called', () => {
                 await result.current.deleteAccount('test-account-id');
             });
 
-            expect(mockOnAccountDeleted).toHaveBeenCalledTimes(1);
+            expect(mockOnAccountDeleted).toHaveBeenCalledOnce();
             expect(mockDeleteAccountApi).toHaveBeenCalledWith('test-account-id');
-        })
+        });
     })
 
     describe('failure case', () => {

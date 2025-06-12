@@ -9,11 +9,10 @@ const useAccountRegistration = (onSuccess?: () => void) => {
         accessToken: string,
     ): Promise<RegisterAccountApiResponse> => {
         setIsSubmitting(true);
-        const result = await registerAccountApi(instanceUrl, accessToken).catch(error => {
-            setIsSubmitting(false);
-            throw error;
-        });
-        onSuccess?.();
+
+        const result = await registerAccountApi(instanceUrl, accessToken,);
+
+        result && onSuccess?.();
         setIsSubmitting(false);
         return result;
     };
