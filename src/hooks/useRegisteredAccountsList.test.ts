@@ -123,22 +123,21 @@ describe('useRegisteredAccountsList', () => {
         it('fetches accounts when sessionStatus changes to authenticated', async () => {
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
 
-            const { result, rerender } = renderHook(
-                ({ sessionStatus }) => useRegisteredAccountsList(sessionStatus),
-                { initialProps: { sessionStatus: 'loading' as const } }
-            );
+            const { result, rerender } = await act(async () => {
+                return renderHook(
+                    ({ sessionStatus }: { sessionStatus: 'loading' | 'authenticated' | 'unauthenticated' }) => useRegisteredAccountsList(sessionStatus),
+                    { initialProps: { sessionStatus: 'loading' as 'loading' | 'authenticated' | 'unauthenticated' } }
+                );
+            });
 
             expect(mockFetchAccountsApi).not.toHaveBeenCalled();
 
-            rerender({ sessionStatus: 'authenticated' as const });
-
-            await waitFor(() => {
-                expect(mockFetchAccountsApi).toHaveBeenCalledOnce();
+            await act(async () => {
+                rerender({ sessionStatus: 'authenticated' as const });
             });
 
-            await waitFor(() => {
-                expect(result.current.accounts).toEqual(mockAccountsResponse.accounts);
-            });
+            expect(mockFetchAccountsApi).toHaveBeenCalledOnce();
+            expect(result.current.accounts).toEqual(mockAccountsResponse.accounts);
         });
     });
 });
