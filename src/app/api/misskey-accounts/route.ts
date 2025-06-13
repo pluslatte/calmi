@@ -27,7 +27,7 @@ export async function GET() {
         orderBy: {
             createdAt: 'desc'
         }
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to fetch accounts:', error);
     })
 
@@ -35,7 +35,7 @@ export async function GET() {
         where: {
             sessionUserId: session.user.id
         }
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to fetch userSettings:', error);
     });
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const body = await request.json().catch(error => {
+    const body = await request.json().catch((error: any) => {
         throw Error('Error request.json:', error);
     })
 
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
             i: accessToken
         })
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to fetch misskey api:', error);
     })
 
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const userInfo = await misskeyResponse.json().catch(error => {
+    const userInfo = await misskeyResponse.json().catch((error: any) => {
         throw Error('Error misskeyResponse.json:', error)
     });
 
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
             instanceUrl: instanceUrl,
             username: userInfo.username,
         }
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to fetch existing accounts:', error);
     });
 
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
             avatarUrl: true,
             createdAt: true
         }
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to create new account:', error);
     });
 
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
         where: {
             sessionUserId: session.user.id
         }
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to fetch existing user settings:', error);
     })
 
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
                 sessionUserId: session.user.id,
                 activeAccountId: newAccount.id,
             }
-        }).catch(error => {
+        }).catch((error: any) => {
             throw Error('Failed to create new user setting:', error);
         })
     } else if (!userSettings.activeAccountId) {
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
             data: {
                 activeAccountId: newAccount.id
             }
-        }).catch(error => {
+        }).catch((error: any) => {
             throw Error('Failed to update user setting:', error);
         })
     }

@@ -22,7 +22,7 @@ export async function DELETE(
             id: accountId,
             sessionUserId: session.user.id
         }
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to fetch accounts:', error);
     });
 
@@ -37,7 +37,7 @@ export async function DELETE(
         where: {
             sessionUserId: session.user.id
         }
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to fetch existing user settings:', error);
     });
 
@@ -52,7 +52,7 @@ export async function DELETE(
             orderBy: {
                 createdAt: 'desc'
             }
-        }).catch(error => {
+        }).catch((error: any) => {
             throw Error('Failed to fetch other misskey account:', error);
         });
 
@@ -63,7 +63,7 @@ export async function DELETE(
             data: {
                 activeAccountId: otherAccount?.id || null
             }
-        }).catch(error => {
+        }).catch((error: any) => {
             throw Error('Failed to update user setting:', error);
         });
     }
@@ -72,7 +72,7 @@ export async function DELETE(
         where: {
             id: accountId
         }
-    }).catch(error => {
+    }).catch((error: any) => {
         throw Error('Failed to delete misskey account:', error);
     });
 
