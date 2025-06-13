@@ -1,6 +1,7 @@
 import useAccountRegistration from "@/hooks/useAccountRegistration";
 import { notifyFailure, notifySuccess } from "@/lib/notifications";
-import { Card, Title, Stack, TextInput, Button } from "@mantine/core";
+import { Card, Title, Stack, TextInput, Button, Blockquote } from "@mantine/core";
+import { IconExclamationCircle } from "@tabler/icons-react";
 import { useState } from "react";
 
 interface Props {
@@ -33,6 +34,12 @@ const NewAccountRegistrationForm = ({
     return (
         <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Title order={3} mb="md">新規アカウント登録</Title>
+            <Blockquote color="red" mb="lg">
+                APIキーがサーバー上に保持されます！<br />
+                何をしているか理解していますか？ホストは信頼できますか？<br />
+                不明な場合は、アカウントを登録しないでください。
+            </Blockquote>
+
             <form onSubmit={handleSubmit}>
                 <Stack gap="md">
                     <TextInput
