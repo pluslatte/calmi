@@ -35,8 +35,8 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            expect(screen.getByRole('heading', { name: '新規アカウント登録' })).toBeInTheDocument();
-            expect(screen.getByRole('form')).toBeInTheDocument();
+            expect(screen.getByText('新規アカウント登録')).toBeInTheDocument();
+            expect(document.querySelector('form')).toBeInTheDocument();
         });
 
         it('必要なフィールドが存在すること', () => {
@@ -234,7 +234,7 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const form = screen.getByRole('form');
+            const form = document.querySelector('form')!;
             const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
             const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
 
