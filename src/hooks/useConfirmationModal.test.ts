@@ -54,4 +54,52 @@ describe('when handleConfirm is called', () => {
             expect(result.current.opened).toBe(false);
         })
     });
+
+    describe('failure case', () => {
+        it('handleConfirm keeps modal open on error', async () => {
+            const error = new Error('Test error');
+            mockOnConfirm.mockRejectedValue(error);
+
+            const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
+
+            act(() => {
+                result.current.open();
+            });
+
+            expect(result.current.opened).toBe(true);
+
+            await act(async () => {
+                try {
+                    await result.current.handleConfirm();
+                } catch {
+                    // expected
+                }
+            });
+
+            expect(result.current.opened).toBe(true);
+        });
+
+        it('handleConfirm resets loading state on error', async () => {
+            const error = new Error('Test error');
+            mockOnConfirm.mockRejectedValue(error);
+
+            const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
+
+            expect(result.current.isLoading).toBe(false);
+
+            await act(async () => {
+                try {
+                    await result.current.handleConfirm();
+                } catch {
+                    // expected
+                }
+            });
+
+            expect(result.current.isLoading).toBe(false);
+        });
+    });
+})
+
+it('function open opens modal', () => {
+    // 書いて
 })
