@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { afterEach, beforeEach, vi } from 'vitest';
+import { vi } from 'vitest';
 
 // window.matchMedia のモック
 Object.defineProperty(window, 'matchMedia', {
@@ -14,14 +14,4 @@ Object.defineProperty(window, 'matchMedia', {
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
     })),
-});
-
-// 日付を固定
-beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2025-04-20T10:00:00Z'));
-});
-
-afterEach(() => {
-    vi.useRealTimers();
 });
