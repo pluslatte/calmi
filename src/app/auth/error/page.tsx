@@ -1,10 +1,12 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Card, Container, Title, Text, Button } from '@mantine/core';
+import { Card, Container, Title, Text, Button, Loader } from '@mantine/core';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export default function AuthErrorPage() {
+// https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
+function ErrorContent() {
     const searchParams = useSearchParams();
     const error = searchParams.get('error');
 
@@ -32,14 +34,37 @@ export default function AuthErrorPage() {
     const { title, message } = getErrorMessage(error);
 
     return (
+        <>
+            <Title order={2} style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                {title}
+            </Title>
+            <Text style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                {message}
+            </Text>
+        </>
+    );
+}
+
+function ErrorLoadingFallback() {
+    return (
+        <>
+            <Title order={2} style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                認証エラー
+            </Title>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+                <Loader size="sm" />
+            </div>
+        </>
+    );
+}
+
+export default function AuthErrorPage() {
+    return (
         <Container size="sm" style={{ marginTop: '10vh' }}>
             <Card withBorder radius="md" p="xl">
-                <Title order={2} style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                    {title}
-                </Title>
-                <Text style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    {message}
-                </Text>
+                <Suspense fallback={<ErrorLoadingFallback />}>
+                    <ErrorContent />
+                </Suspense>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <Button component={Link} href="/" variant="filled">
                         ホームに戻る
