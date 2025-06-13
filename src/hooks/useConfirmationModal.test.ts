@@ -36,16 +36,22 @@ describe('when handleConfirm is called', () => {
             expect(mockOnConfirm).toHaveBeenCalledOnce();
         });
 
-        it('handleConfirm calls close on success', async () => {
+        it('handleConfirm closes modal on success', async () => {
             mockOnConfirm.mockResolvedValue(undefined);
 
             const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
+
+            act(() => {
+                result.current.open();
+            });
+
+            expect(result.current.opened).toBe(true);
 
             await act(async () => {
                 await result.current.handleConfirm();
             });
 
-            expect(result.current.close).toHaveBeenCalledOnce();
+            expect(result.current.opened).toBe(false);
         })
     });
 })
