@@ -44,6 +44,7 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
+            // 実用的アプローチ: 全フィールドでgetByPlaceholderTextを使用（確実に動作）
             expect(screen.getByPlaceholderText('https://misskey.io')).toBeInTheDocument();
             expect(screen.getByPlaceholderText('APIキーを入力してください')).toBeInTheDocument();
             expect(screen.getByRole('button', { name: '登録' })).toBeInTheDocument();
@@ -177,7 +178,7 @@ describe('NewAccountRegistrationForm', () => {
         it('正常送信後にフィールドがクリアされること', async () => {
             const user = userEvent.setup();
             mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
-            
+
             // onSuccessコールバックがフィールドクリアを実行するようにモック
             mockUseAccountRegistration.mockImplementation((onSuccess) => ({
                 registerAccount: async (url: string, token: string) => {
@@ -266,7 +267,7 @@ describe('NewAccountRegistrationForm', () => {
             );
 
             const submitButton = screen.getByRole('button', { name: '登録' });
-            
+
             // Mantineのloadingプロパティによりボタンがdisabledになる
             expect(submitButton).toBeDisabled();
         });
@@ -284,7 +285,7 @@ describe('NewAccountRegistrationForm', () => {
         it('onAccountRegisteredコールバックが適切に呼び出されること', async () => {
             const user = userEvent.setup();
             mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
-            
+
             // onSuccessコールバックがプロップスのコールバックを呼ぶようにモック
             mockUseAccountRegistration.mockImplementation((onSuccess) => ({
                 registerAccount: async (url: string, token: string) => {
