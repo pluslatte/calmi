@@ -100,6 +100,23 @@ describe('when handleConfirm is called', () => {
     });
 })
 
-it('function open opens modal', () => {
-    // 書いて
+describe('returned function open', () => {
+    const mockOnConfirm = vi.fn();
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('opens modal', () => {
+        mockOnConfirm.mockResolvedValue(undefined);
+        const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
+
+        expect(result.current.opened).toBe(false);
+
+        act(() => {
+            result.current.open();
+        });
+
+        expect(result.current.opened).toBe(true);
+    });
 })
