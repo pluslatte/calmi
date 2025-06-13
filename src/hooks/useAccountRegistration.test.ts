@@ -18,7 +18,7 @@ describe('when registerAccount is called', () => {
     });
 
     describe('success case', () => {
-        it('isSubmitting state is properly cleaned', async () => {
+        it('cleans isSubmitting state', async () => {
             mockRegisterAccountApi.mockResolvedValue(mockRegisterResponse);
 
             const { result } = renderHook(() => useAccountRegistration(mockOnSuccess));
@@ -35,7 +35,7 @@ describe('when registerAccount is called', () => {
             expect(result.current.isSubmitting).toBe(false);
         });
 
-        it('onSuccess is called once on success', async () => {
+        it('calls onSuccess once on success', async () => {
             mockRegisterAccountApi.mockResolvedValue(mockRegisterResponse);
 
             const { result } = renderHook(() => useAccountRegistration(mockOnSuccess));
@@ -56,7 +56,7 @@ describe('when registerAccount is called', () => {
     });
 
     describe('failure case', () => {
-        it('isSubmitting state is properly cleaned', async () => {
+        it('cleans isSubmitting state', async () => {
             const mockError = new Error('API Error');
             mockRegisterAccountApi.mockRejectedValue(mockError);
 
@@ -76,7 +76,7 @@ describe('when registerAccount is called', () => {
             expect(result.current.isSubmitting).toBe(false);
         });
 
-        it('onSuccess is NOT called', async () => {
+        it('does not call onSuccess', async () => {
             const mockError = new Error('API Error');
             mockRegisterAccountApi.mockRejectedValue(mockError);
 

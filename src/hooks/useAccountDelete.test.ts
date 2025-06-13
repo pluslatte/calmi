@@ -18,7 +18,7 @@ describe('when deleteAccount is called', () => {
     });
 
     describe('success case', () => {
-        it('isDeleting state is properly cleaned', async () => {
+        it('cleans isDeleting state', async () => {
             mockDeleteAccountApi.mockResolvedValue(undefined);
 
             const { result } = renderHook(() => useAccountDelete(mockOnAccountDeleted));
@@ -32,7 +32,7 @@ describe('when deleteAccount is called', () => {
             expect(result.current.isDeleting).toBe(false);
         });
 
-        it('onAccountDeleted is called once on success', async () => {
+        it('calls onAccountDeleted once on success', async () => {
             mockDeleteAccountApi.mockResolvedValue(undefined);
 
             const { result } = renderHook(() => useAccountDelete(mockOnAccountDeleted));
@@ -47,7 +47,7 @@ describe('when deleteAccount is called', () => {
     })
 
     describe('failure case', () => {
-        it('isDeleting is properly updated', async () => {
+        it('cleans isDeleting state', async () => {
             const mockError = new Error('API Error');
             mockDeleteAccountApi.mockRejectedValue(mockError);
 
@@ -64,7 +64,7 @@ describe('when deleteAccount is called', () => {
             expect(result.current.isDeleting).toBe(false);
         });
 
-        it('onAccountDeleted is NOT called', async () => {
+        it('does not call onAccountDeleted', async () => {
             const mockError = new Error('API Error');
             mockDeleteAccountApi.mockRejectedValue(mockError);
 

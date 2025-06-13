@@ -40,7 +40,7 @@ describe('useRegisteredAccountsList', () => {
             expect(result.current.loadingAccounts).toBe(false);
         });
 
-        it('handles API error properly', async () => {
+        it('handles error, and does not fill accounts on API error', async () => {
             const mockError = new Error('API Error');
             mockFetchAccountsApi.mockRejectedValue(mockError);
 
