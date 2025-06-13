@@ -6,7 +6,6 @@ import useAccountRegistration from "@/hooks/useAccountRegistration";
 import { notifyFailure, notifySuccess } from "@/lib/notifications";
 import { mockRegisterResponse } from "@/tests/fixtures";
 
-// モックの設定
 vi.mock("@/hooks/useAccountRegistration");
 vi.mock("@/lib/notifications", () => ({
     notifySuccess: vi.fn(),
@@ -68,7 +67,7 @@ describe('NewAccountRegistrationForm', () => {
             expect(screen.getByPlaceholderText('APIキーを入力してください')).toBeInTheDocument();
         });
 
-        it('アクセストークンフィールドがパスワードタイプであること', () => {
+        it('APIキーのフィールドがパスワードタイプであること', () => {
             renderWithProviders(
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
@@ -120,7 +119,7 @@ describe('NewAccountRegistrationForm', () => {
             expect(submitButton).toBeDisabled();
         });
 
-        it('アクセストークンが空の場合、送信ボタンが無効になること', async () => {
+        it('APIキーのフィールドが空の場合、送信ボタンが無効になること', async () => {
             const user = userEvent.setup();
 
             renderWithProviders(

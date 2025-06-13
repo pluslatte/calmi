@@ -49,7 +49,7 @@ const NewAccountRegistrationForm = ({
                         required
                     />
                     <TextInput
-                        label="アクセストークン"
+                        label="APIキー"
                         placeholder="APIキーを入力してください"
                         value={accessToken}
                         onChange={(e) => setAccessToken(e.target.value)}
