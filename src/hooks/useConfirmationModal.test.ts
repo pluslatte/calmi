@@ -23,5 +23,29 @@ describe('when handleConfirm is called', () => {
 
             expect(result.current.isLoading).toBe(false);
         });
+
+        it('handleConfirm calls onConfirm', async () => {
+            mockOnConfirm.mockResolvedValue(undefined);
+
+            const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
+
+            await act(async () => {
+                await result.current.handleConfirm();
+            });
+
+            expect(mockOnConfirm).toHaveBeenCalledOnce();
+        });
+
+        it('handleConfirm calls close on success', async () => {
+            mockOnConfirm.mockResolvedValue(undefined);
+
+            const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
+
+            await act(async () => {
+                await result.current.handleConfirm();
+            });
+
+            expect(result.current.close).toHaveBeenCalledOnce();
+        })
     });
 })
