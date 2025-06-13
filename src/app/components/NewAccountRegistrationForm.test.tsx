@@ -44,8 +44,8 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            expect(screen.getByLabelText('インスタンスURL')).toBeInTheDocument();
-            expect(screen.getByLabelText('アクセストークン')).toBeInTheDocument();
+            expect(screen.getByPlaceholderText('https://misskey.io')).toBeInTheDocument();
+            expect(screen.getByPlaceholderText('APIキーを入力してください')).toBeInTheDocument();
             expect(screen.getByRole('button', { name: '登録' })).toBeInTheDocument();
         });
 
@@ -72,7 +72,7 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
             expect(tokenField).toHaveAttribute('type', 'password');
         });
     });
@@ -85,8 +85,8 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const instanceUrlField = screen.getByLabelText('インスタンスURL');
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
 
             await user.type(instanceUrlField, 'https://test.pluslatte.com');
             await user.type(tokenField, 'test-token-123');
@@ -111,7 +111,7 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
             const submitButton = screen.getByRole('button', { name: '登録' });
 
             await user.type(tokenField, 'test-token');
@@ -126,7 +126,7 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const instanceUrlField = screen.getByLabelText('インスタンスURL');
+            const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
             const submitButton = screen.getByRole('button', { name: '登録' });
 
             await user.type(instanceUrlField, 'https://test.pluslatte.com');
@@ -141,8 +141,8 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const instanceUrlField = screen.getByLabelText('インスタンスURL');
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
             const submitButton = screen.getByRole('button', { name: '登録' });
 
             await user.type(instanceUrlField, 'https://test.pluslatte.com');
@@ -161,8 +161,8 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const instanceUrlField = screen.getByLabelText('インスタンスURL');
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
             const submitButton = screen.getByRole('button', { name: '登録' });
 
             await user.type(instanceUrlField, 'https://test.pluslatte.com');
@@ -192,8 +192,8 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const instanceUrlField = screen.getByLabelText('インスタンスURL');
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
             const submitButton = screen.getByRole('button', { name: '登録' });
 
             await user.type(instanceUrlField, 'https://test.pluslatte.com');
@@ -213,8 +213,8 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const instanceUrlField = screen.getByLabelText('インスタンスURL');
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
             const submitButton = screen.getByRole('button', { name: '登録' });
 
             await user.type(instanceUrlField, 'https://test.pluslatte.com');
@@ -235,8 +235,8 @@ describe('NewAccountRegistrationForm', () => {
             );
 
             const form = screen.getByRole('form');
-            const instanceUrlField = screen.getByLabelText('インスタンスURL');
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
 
             await user.type(instanceUrlField, 'https://test.pluslatte.com');
             await user.type(tokenField, 'test-token');
@@ -299,8 +299,8 @@ describe('NewAccountRegistrationForm', () => {
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
 
-            const instanceUrlField = screen.getByLabelText('インスタンスURL');
-            const tokenField = screen.getByLabelText('アクセストークン');
+            const instanceUrlField = screen.getByPlaceholderText('https://misskey.io');
+            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
             const submitButton = screen.getByRole('button', { name: '登録' });
 
             await user.type(instanceUrlField, 'https://test.pluslatte.com');
