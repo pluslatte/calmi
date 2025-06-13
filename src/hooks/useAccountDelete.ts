@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { deleteAccountApi } from "@/lib/api/accounts";
+import { deleteAccountApi } from "@/lib/misskey-api/accounts";
 
 const useAccountDelete = (
     onAccountDeleted: () => void

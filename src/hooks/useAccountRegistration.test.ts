@@ -1,10 +1,10 @@
-import { registerAccountApi } from "@/lib/api/accounts";
+import { registerAccountApi } from "@/lib/misskey-api/accounts";
 import { mockRegisterResponse } from "@/tests/fixtures";
 import { renderHook, act } from "@testing-library/react";
 import { describe, it, vi, beforeEach, expect } from "vitest";
 import useAccountRegistration from "./useAccountRegistration";
 
-vi.mock("@/lib/api/accounts", () => ({
+vi.mock("@/lib/misskey-api/accounts", () => ({
     registerAccountApi: vi.fn(),
 }));
 

@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import useAccountDelete from "./useAccountDelete";
-import { deleteAccountApi } from "@/lib/api/accounts";
+import { deleteAccountApi } from "@/lib/misskey-api/accounts";
 
 // APIをモック化
-vi.mock("@/lib/api/accounts", () => ({
+vi.mock("@/lib/misskey-api/accounts", () => ({
     deleteAccountApi: vi.fn(),
 }));
 

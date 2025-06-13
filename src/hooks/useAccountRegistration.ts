@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { registerAccountApi, RegisterAccountApiResponse } from "@/lib/api/accounts";
+import { registerAccountApi, RegisterAccountApiResponse } from "@/lib/misskey-api/accounts";
 
 const useAccountRegistration = (onSuccess?: () => void) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
