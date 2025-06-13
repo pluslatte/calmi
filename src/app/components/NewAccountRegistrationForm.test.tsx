@@ -158,6 +158,18 @@ describe('NewAccountRegistrationForm', () => {
             const user = userEvent.setup();
             mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
 
+            // onSuccessコールバックが正しく呼ばれるようにモック
+            mockUseAccountRegistration.mockImplementation((onSuccess) => ({
+                registerAccount: async (url: string, token: string) => {
+                    const result = await mockRegisterAccount(url, token);
+                    if (result) {
+                        onSuccess?.(); // コールバックを実行
+                    }
+                    return result;
+                },
+                isSubmitting: false,
+            }));
+
             renderWithProviders(
                 <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
             );
