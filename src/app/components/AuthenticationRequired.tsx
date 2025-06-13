@@ -1,4 +1,5 @@
-import { Container, Group, Loader, Text } from "@mantine/core";
+import { Button, Container, Group, Loader, Text } from "@mantine/core";
+import Link from "next/link";
 import { ReactNode } from "react";
 
 interface PropsAuthenticationRequired {
@@ -23,6 +24,9 @@ const AuthenticationRequired = ({ status, children }: PropsAuthenticationRequire
             <Container size="md" py="xl">
                 <Group justify="center">
                     <Text>Access  Denied</Text>
+                    <Button component={Link} href="/" variant="filled">
+                        ホームに戻る
+                    </Button>
                 </Group>
             </Container>
         );
