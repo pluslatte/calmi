@@ -20,16 +20,16 @@ function MantineTestComponent() {
     return <Button>Test Button</Button>;
 }
 
-describe('test-utils renderWithProviders', () => {
+describe('test-utils の renderWithProviders', () => {
 
-    test('simply render', () => {
+    test('シンプルなレンダリング', () => {
         renderWithProviders(<TestComponent />);
         expect(screen.getByText('Hello Test World!')).toBeInTheDocument();
     });
 
     describe('SessionProvider', () => {
 
-        test('authenticated', () => {
+        test('認証された状態', () => {
             const mockSession = {
                 user: { name: 'Test User', email: 'test@example.com' },
                 expires: '2024-12-31'
@@ -42,7 +42,7 @@ describe('test-utils renderWithProviders', () => {
             expect(screen.getByText('Hello Test User')).toBeInTheDocument();
         });
 
-        test('unauthenticated', () => {
+        test('認証されていない状態', () => {
             renderWithProviders(<SessionTestComponent />, {
                 session: null
             });
@@ -52,7 +52,7 @@ describe('test-utils renderWithProviders', () => {
     });
 
     describe('MantineProvider', () => {
-        test('render a button', () => {
+        test('ボタンをレンダリングする', () => {
             renderWithProviders(<MantineTestComponent />);
 
             expect(screen.getByRole('button', { name: 'Test Button' })).toBeInTheDocument();

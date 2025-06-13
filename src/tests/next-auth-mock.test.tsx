@@ -24,12 +24,12 @@ function AuthTestComponent() {
     );
 }
 
-describe('next-auth mock', () => {
+describe('next-auth モック', () => {
     beforeEach(() => {
         resetMockSession();
     });
 
-    test('unauthenticated', () => {
+    test('認証されていない状態', () => {
         setMockSession({
             status: 'unauthenticated',
             data: null,
@@ -39,7 +39,7 @@ describe('next-auth mock', () => {
         expect(screen.getByText('Please login')).toBeInTheDocument();
     });
 
-    test('authenticated', () => {
+    test('認証された状態', () => {
         setMockSession({
             status: 'authenticated',
             data: {
@@ -56,7 +56,7 @@ describe('next-auth mock', () => {
         expect(screen.getByRole('button', { name: 'Sign Out' })).toBeInTheDocument();
     });
 
-    test('loading state', () => {
+    test('ローディング状態', () => {
         setMockSession({
             status: 'loading',
             data: null
@@ -66,7 +66,7 @@ describe('next-auth mock', () => {
         expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
 
-    test('signOut is called on button click', async () => {
+    test('ボタンクリック時に signOut が呼ばれる', async () => {
         const { mockSignOut } = await import('./mocks/next-auth');
 
         setMockSession({
