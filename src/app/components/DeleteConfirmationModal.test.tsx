@@ -12,7 +12,7 @@ describe('DeleteConfirmationModal', () => {
         mockOnClick.mockClear();
     });
 
-    it('should display modal when opened is true', () => {
+    it('opened が true の場合、モーダルを表示すること', () => {
         renderWithProviders(
             <DeleteConfirmationModal
                 opened={true}
@@ -26,7 +26,7 @@ describe('DeleteConfirmationModal', () => {
         expect(screen.getByText('このアカウントを削除してもよろしいですか？この操作は取り消せません。')).toBeInTheDocument();
     });
 
-    it('should not display modal when opened is false', () => {
+    it('opened が false の場合、モーダルを表示しないこと', () => {
         renderWithProviders(
             <DeleteConfirmationModal
                 opened={false}
@@ -38,7 +38,7 @@ describe('DeleteConfirmationModal', () => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
-    it('should display cancel and delete buttons', () => {
+    it('キャンセルと削除ボタンを表示すること', () => {
         renderWithProviders(
             <DeleteConfirmationModal
                 opened={true}
@@ -51,7 +51,7 @@ describe('DeleteConfirmationModal', () => {
         expect(screen.getByRole('button', { name: '削除' })).toBeInTheDocument();
     });
 
-    it('should call close function when cancel button is clicked', async () => {
+    it('キャンセルボタンをクリックした場合、close関数が呼ばれること', async () => {
         const user = userEvent.setup();
 
         renderWithProviders(
@@ -68,7 +68,7 @@ describe('DeleteConfirmationModal', () => {
         expect(mockClose).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onclick function when delete button is clicked', async () => {
+    it('削除ボタンをクリックした場合、onclick関数が呼ばれること', async () => {
         const user = userEvent.setup();
 
         renderWithProviders(
@@ -85,7 +85,7 @@ describe('DeleteConfirmationModal', () => {
         expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should disable delete button when loading is true', () => {
+    it('loading が true の場合、削除ボタンが無効になること', () => {
         renderWithProviders(
             <DeleteConfirmationModal
                 opened={true}
@@ -100,7 +100,7 @@ describe('DeleteConfirmationModal', () => {
         expect(deleteButton).toBeDisabled();
     });
 
-    it('should not disable delete button when loading is false', () => {
+    it('loading が false の場合、削除ボタンが無効にならないこと', () => {
         renderWithProviders(
             <DeleteConfirmationModal
                 opened={true}

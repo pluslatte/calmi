@@ -6,7 +6,7 @@ const TestChildren = () => <div>Test Children Content</div>;
 
 describe('AuthenticationRequired', () => {
 
-    it('should display authentication message when status is loading', () => {
+    it('認証状態が loading の場合、認証確認メッセージを表示すること', () => {
         renderWithProviders(
             <AuthenticationRequired status="loading">
                 <TestChildren />
@@ -17,7 +17,7 @@ describe('AuthenticationRequired', () => {
         expect(screen.queryByText('Test Children Content')).not.toBeInTheDocument();
     });
 
-    it('should display access denied message and home button when unauthenticated', () => {
+    it('未認証の場合、アクセス拒否メッセージとホームボタンを表示すること', () => {
         renderWithProviders(
             <AuthenticationRequired status="unauthenticated">
                 <TestChildren />
@@ -29,7 +29,7 @@ describe('AuthenticationRequired', () => {
         expect(screen.queryByText('Test Children Content')).not.toBeInTheDocument();
     });
 
-    it('should display children when authenticated', () => {
+    it('認証済みの場合、子コンポーネントを表示すること', () => {
         renderWithProviders(
             <AuthenticationRequired status="authenticated">
                 <TestChildren />
@@ -41,7 +41,7 @@ describe('AuthenticationRequired', () => {
         expect(screen.queryByRole('link', { name: 'ホームに戻る' })).not.toBeInTheDocument();
     });
 
-    it('should have correct link href for home button', () => {
+    it('ホームボタンのリンクが正しいhrefを持つこと', () => {
         renderWithProviders(
             <AuthenticationRequired status="unauthenticated">
                 <TestChildren />

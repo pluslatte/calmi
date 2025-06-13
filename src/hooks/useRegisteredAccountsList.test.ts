@@ -15,8 +15,8 @@ describe('useRegisteredAccountsList', () => {
         vi.clearAllMocks();
     });
 
-    describe('initial state', () => {
-        it('returns correct initial values', () => {
+    describe('初期状態', () => {
+        it('正しい初期値を返す', () => {
             const { result } = renderHook(() => useRegisteredAccountsList('unauthenticated'));
 
             expect(result.current.accounts).toEqual([]);
@@ -26,8 +26,8 @@ describe('useRegisteredAccountsList', () => {
         });
     });
 
-    describe('when sessionStatus is authenticated', () => {
-        it('automatically fetches accounts on mount', async () => {
+    describe('sessionStatus が authenticated の場合', () => {
+        it('マウント時にアカウントを自動的に取得する', async () => {
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
 
             const { result } = await act(async () => {
@@ -40,7 +40,7 @@ describe('useRegisteredAccountsList', () => {
             expect(result.current.loadingAccounts).toBe(false);
         });
 
-        it('handles error, and does not fill accounts on API error', async () => {
+        it('エラーを処理し、API エラー時にアカウントを設定しない', async () => {
             const mockError = new Error('API Error');
             mockFetchAccountsApi.mockRejectedValue(mockError);
 
@@ -55,22 +55,22 @@ describe('useRegisteredAccountsList', () => {
         });
     });
 
-    describe('when sessionStatus is not authenticated', () => {
-        it('does not fetch accounts automatically', () => {
+    describe('sessionStatus が認証されていない場合', () => {
+        it('アカウントを自動的に取得しない', () => {
             renderHook(() => useRegisteredAccountsList('unauthenticated'));
 
             expect(mockFetchAccountsApi).not.toHaveBeenCalled();
         });
 
-        it('does not fetch accounts when loading', () => {
+        it('ローディング時にアカウントを取得しない', () => {
             renderHook(() => useRegisteredAccountsList('loading'));
 
             expect(mockFetchAccountsApi).not.toHaveBeenCalled();
         });
     });
 
-    describe('refreshAccounts function', () => {
-        it('fetches accounts when called manually', async () => {
+    describe('refreshAccounts 関数', () => {
+        it('手動で呼び出されたときにアカウントを取得する', async () => {
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
 
             const { result } = renderHook(() => useRegisteredAccountsList('unauthenticated'));
@@ -87,7 +87,7 @@ describe('useRegisteredAccountsList', () => {
             expect(result.current.loadingAccounts).toBe(false);
         });
 
-        it('properly cleans loading state', async () => {
+        it('ローディング状態を適切にクリーンアップする', async () => {
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
 
             const { result } = renderHook(() => useRegisteredAccountsList('unauthenticated'));
@@ -101,7 +101,7 @@ describe('useRegisteredAccountsList', () => {
             expect(result.current.loadingAccounts).toBe(false);
         });
 
-        it('handles error and resets loading state', async () => {
+        it('エラーを処理してローディング状態をリセットする', async () => {
             const mockError = new Error('API Error');
             mockFetchAccountsApi.mockRejectedValue(mockError);
 
@@ -119,8 +119,8 @@ describe('useRegisteredAccountsList', () => {
         });
     });
 
-    describe('sessionStatus change', () => {
-        it('fetches accounts when sessionStatus changes from loading to authenticated', async () => {
+    describe('sessionStatus の変更', () => {
+        it('sessionStatus が loading から authenticated に変更されたときにアカウントを取得する', async () => {
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
 
             const { result, rerender } = await act(async () => {

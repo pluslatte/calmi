@@ -2,15 +2,15 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import useConfirmationModal from "./useConfirmationModal";
 
-describe('when handleConfirm is called', () => {
+describe('handleConfirm が呼ばれた場合', () => {
     const mockOnConfirm = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    describe('success case', () => {
-        it('cleans isLoading state', async () => {
+    describe('成功ケース', () => {
+        it('isLoading 状態をクリアすること', async () => {
             mockOnConfirm.mockResolvedValue(undefined);
 
             const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
@@ -24,7 +24,7 @@ describe('when handleConfirm is called', () => {
             expect(result.current.isLoading).toBe(false);
         });
 
-        it('handleConfirm calls onConfirm', async () => {
+        it('handleConfirm が onConfirm を呼ぶこと', async () => {
             mockOnConfirm.mockResolvedValue(undefined);
 
             const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
@@ -36,7 +36,7 @@ describe('when handleConfirm is called', () => {
             expect(mockOnConfirm).toHaveBeenCalledOnce();
         });
 
-        it('handleConfirm closes modal on success', async () => {
+        it('成功時に handleConfirm がモーダルを閉じること', async () => {
             mockOnConfirm.mockResolvedValue(undefined);
 
             const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
@@ -55,8 +55,8 @@ describe('when handleConfirm is called', () => {
         })
     });
 
-    describe('failure case', () => {
-        it('handleConfirm keeps modal open on error', async () => {
+    describe('失敗ケース', () => {
+        it('エラー時に handleConfirm がモーダルを開いたまま保つこと', async () => {
             const error = new Error('Test error');
             mockOnConfirm.mockRejectedValue(error);
 
@@ -79,7 +79,7 @@ describe('when handleConfirm is called', () => {
             expect(result.current.opened).toBe(true);
         });
 
-        it('handleConfirm resets loading state on error', async () => {
+        it('エラー時に handleConfirm がローディング状態をリセットすること', async () => {
             const error = new Error('Test error');
             mockOnConfirm.mockRejectedValue(error);
 
@@ -100,14 +100,14 @@ describe('when handleConfirm is called', () => {
     });
 })
 
-describe('returned function open', () => {
+describe('返された open 関数', () => {
     const mockOnConfirm = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    it('opens modal', () => {
+    it('モーダルを開くこと', () => {
         mockOnConfirm.mockResolvedValue(undefined);
         const { result } = renderHook(() => useConfirmationModal(mockOnConfirm));
 

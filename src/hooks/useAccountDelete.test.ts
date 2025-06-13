@@ -10,15 +10,15 @@ vi.mock("@/lib/misskey-api/accounts", () => ({
 
 const mockDeleteAccountApi = vi.mocked(deleteAccountApi);
 
-describe('when deleteAccount is called', () => {
+describe('deleteAccount が呼ばれた場合', () => {
     const mockOnAccountDeleted = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    describe('success case', () => {
-        it('cleans isDeleting state', async () => {
+    describe('成功ケース', () => {
+        it('isDeleting 状態をクリアすること', async () => {
             mockDeleteAccountApi.mockResolvedValue(undefined);
 
             const { result } = renderHook(() => useAccountDelete(mockOnAccountDeleted));
@@ -32,7 +32,7 @@ describe('when deleteAccount is called', () => {
             expect(result.current.isDeleting).toBe(false);
         });
 
-        it('calls onAccountDeleted once on success', async () => {
+        it('成功時に onAccountDeleted を一度呼ぶこと', async () => {
             mockDeleteAccountApi.mockResolvedValue(undefined);
 
             const { result } = renderHook(() => useAccountDelete(mockOnAccountDeleted));
@@ -46,8 +46,8 @@ describe('when deleteAccount is called', () => {
         });
     })
 
-    describe('failure case', () => {
-        it('cleans isDeleting state', async () => {
+    describe('失敗ケース', () => {
+        it('isDeleting 状態をクリアすること', async () => {
             const mockError = new Error('API Error');
             mockDeleteAccountApi.mockRejectedValue(mockError);
 
@@ -64,7 +64,7 @@ describe('when deleteAccount is called', () => {
             expect(result.current.isDeleting).toBe(false);
         });
 
-        it('does not call onAccountDeleted', async () => {
+        it('onAccountDeleted を呼ばないこと', async () => {
             const mockError = new Error('API Error');
             mockDeleteAccountApi.mockRejectedValue(mockError);
 

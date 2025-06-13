@@ -10,15 +10,15 @@ vi.mock("@/lib/misskey-api/accounts", () => ({
 
 const mockRegisterAccountApi = vi.mocked(registerAccountApi);
 
-describe('when registerAccount is called', () => {
+describe('registerAccount が呼ばれた場合', () => {
     const mockOnSuccess = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    describe('success case', () => {
-        it('cleans isSubmitting state', async () => {
+    describe('成功ケース', () => {
+        it('isSubmitting 状態をクリアすること', async () => {
             mockRegisterAccountApi.mockResolvedValue(mockRegisterResponse);
 
             const { result } = renderHook(() => useAccountRegistration(mockOnSuccess));
@@ -35,7 +35,7 @@ describe('when registerAccount is called', () => {
             expect(result.current.isSubmitting).toBe(false);
         });
 
-        it('calls onSuccess once on success', async () => {
+        it('成功時に onSuccess を一度呼ぶこと', async () => {
             mockRegisterAccountApi.mockResolvedValue(mockRegisterResponse);
 
             const { result } = renderHook(() => useAccountRegistration(mockOnSuccess));
@@ -55,8 +55,8 @@ describe('when registerAccount is called', () => {
         });
     });
 
-    describe('failure case', () => {
-        it('cleans isSubmitting state', async () => {
+    describe('失敗ケース', () => {
+        it('isSubmitting 状態をクリアすること', async () => {
             const mockError = new Error('API Error');
             mockRegisterAccountApi.mockRejectedValue(mockError);
 
@@ -76,7 +76,7 @@ describe('when registerAccount is called', () => {
             expect(result.current.isSubmitting).toBe(false);
         });
 
-        it('does not call onSuccess', async () => {
+        it('onSuccess を呼ばないこと', async () => {
             const mockError = new Error('API Error');
             mockRegisterAccountApi.mockRejectedValue(mockError);
 
