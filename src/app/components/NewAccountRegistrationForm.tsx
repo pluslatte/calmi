@@ -36,7 +36,7 @@ const NewAccountRegistrationForm = ({
             <Title order={3} mb="md">新規アカウント登録</Title>
             <Blockquote color="red" mb="lg">
                 APIキーがサーバー上に保持されます！<br />
-                何をしているか理解していますか？ホストは信頼できますか？<br />
+                あなたが何をしようとしているかを理解していますか？ホストは信頼できますか？<br />
                 不明な場合は、アカウントを登録しないでください。
             </Blockquote>
 
