@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/../auth";
 import prisma from "@/lib/prisma";
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
     const session = await auth();
     if (!session?.user?.id) {
         return NextResponse.json(
@@ -11,6 +11,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         );
     }
 
+    const params = await context.params;
     const accountId = params.id;
 
     const account = await prisma.misskeyAccount.findFirst({
