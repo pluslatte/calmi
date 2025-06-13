@@ -1,7 +1,6 @@
 import useAccountRegistration from "@/hooks/useAccountRegistration";
 import { notifyFailure, notifySuccess } from "@/lib/notifications";
 import { Card, Title, Stack, TextInput, Button, Blockquote } from "@mantine/core";
-import { IconExclamationCircle } from "@tabler/icons-react";
 import { useState } from "react";
 
 interface Props {
