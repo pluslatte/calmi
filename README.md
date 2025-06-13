@@ -1,6 +1,6 @@
 # calmi
 開発中...  
-静かに Misskey を使いたい人のためのクライアント
+静かに Misskey を使いたい人のためのプロキシ & クライアント
 
 ## Environment Variables to set
 - AUTH_SECRET
