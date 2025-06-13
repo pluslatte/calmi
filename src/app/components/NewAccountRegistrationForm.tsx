@@ -43,7 +43,7 @@ const NewAccountRegistrationForm = ({
                 <Stack gap="md">
                     <TextInput
                         label="インスタンスURL"
-                        placeholder="https://misskey.io"
+                        placeholder="https://virtualkemomimi.net"
                         value={instanceUrl}
                         onChange={(e) => setInstanceUrl(e.target.value)}
                         required
