@@ -1,33 +1,26 @@
-import useAccountRegistration from "@/hooks/useAccountRegistration";
-import { notifyFailure, notifySuccess } from "@/lib/notifications";
+import { registerAccountApi } from "@/lib/misskey-api/accounts";
+import { notifySuccess } from "@/lib/notifications";
 import { Card, Title, Stack, TextInput, Button, Blockquote } from "@mantine/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-interface Props {
-    onAccountRegistered: () => void;
-}
+const NewAccountRegistrationForm = () => {
+    const queryClient = useQueryClient();
 
-const NewAccountRegistrationForm = ({
-    onAccountRegistered,
-}: Props
-) => {
     const [instanceUrl, setInstanceUrl] = useState('');
     const [accessToken, setAccessToken] = useState('');
 
-    const { registerAccount, isSubmitting } = useAccountRegistration(() => {
-        setInstanceUrl('');
-        setAccessToken('');
-        onAccountRegistered();
+    const registerMutation = useMutation({
+        mutationFn: registerAccountApi,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['registered-accounts'] });
+            notifySuccess("アカウントを追加しました");
+        },
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const result = await registerAccount(instanceUrl, accessToken);
-            notifySuccess(`${result.account.displayName}のアカウントが登録されました`);
-        } catch (error) {
-            notifyFailure(error);
-        }
+        registerMutation.mutate({ instanceUrl, accessToken });
     };
 
     return (
@@ -58,7 +51,7 @@ const NewAccountRegistrationForm = ({
                     />
                     <Button
                         type="submit"
-                        loading={isSubmitting}
+                        loading={registerMutation.isPending}
                         disabled={!instanceUrl || !accessToken}
                     >
                         登録
