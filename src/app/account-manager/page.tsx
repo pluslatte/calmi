@@ -2,13 +2,12 @@
 import { Button, Container, Group, Loader, Text, Title } from "@mantine/core";
 import React from "react";
 import { useSession, signOut } from "next-auth/react";
-import useRegisteredAccountsList from "@/hooks/useRegisteredAccountsList";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
 import RegisteredAccountList from "../components/RegisteredAccountList";
 import AuthenticationRequired from "../components/AuthenticationRequired";
-import { notifyFailure, notifySuccess } from "@/lib/notifications";
+import { notifySuccess } from "@/lib/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteAccountApi, fetchAccountsApi, registerAccountApi, RegisterAccountApiResponse } from "@/lib/misskey-api/accounts";
+import { deleteAccountApi, fetchAccountsApi } from "@/lib/misskey-api/accounts";
 import { queryKeys } from "../queryKeys";
 
 const AccountManager = () => {
