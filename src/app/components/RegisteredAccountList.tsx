@@ -3,19 +3,34 @@ import { MisskeyAccountPublic } from "@/types/accounts";
 import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text } from "@mantine/core";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { useState } from "react";
+import { deleteAccountApi } from "@/lib/misskey-api/accounts";
+import { notifySuccess } from "@/lib/notifications";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { queryKeys } from "../queryKeys";
 
 interface Props {
     accounts: MisskeyAccountPublic[];
     activeAccountId: string | null;
-    handlerDelete: (accountId: string) => void;
 }
 const RegisteredAccountList = ({
     accounts,
     activeAccountId,
-    handlerDelete,
 }: Props
 ) => {
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+    const queryClient = useQueryClient();
+    const deleteMutation = useMutation({
+        mutationFn: deleteAccountApi,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.api.misskeyAccounts() });
+            notifySuccess("アカウントを削除しました");
+        },
+    });
+
+    const handlerDelete = (accountId: string) => {
+        deleteMutation.mutate(accountId)
+    };
 
     const confirmationModal = useConfirmationModal(async () => {
         if (!deleteTargetId) {

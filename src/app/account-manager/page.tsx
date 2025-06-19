@@ -5,30 +5,17 @@ import { useSession, signOut } from "next-auth/react";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
 import RegisteredAccountList from "../components/RegisteredAccountList";
 import AuthenticationRequired from "../components/AuthenticationRequired";
-import { notifySuccess } from "@/lib/notifications";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteAccountApi, fetchAccountsApi } from "@/lib/misskey-api/accounts";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAccountsApi } from "@/lib/misskey-api/accounts";
 import { queryKeys } from "../queryKeys";
 
 const AccountManager = () => {
     const { status } = useSession();
 
-    const queryClient = useQueryClient();
     const queryResult = useQuery({
         queryKey: queryKeys.api.misskeyAccounts(),
         queryFn: fetchAccountsApi,
     });
-    const deleteMutation = useMutation({
-        mutationFn: deleteAccountApi,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.api.misskeyAccounts() });
-            notifySuccess("アカウントを削除しました");
-        },
-    });
-
-    const handlerDelete = (accountId: string) => {
-        deleteMutation.mutate(accountId)
-    };
 
     if (queryResult.isPending) {
         return (
@@ -68,7 +55,6 @@ const AccountManager = () => {
                 <RegisteredAccountList
                     accounts={queryResult.data.accounts}
                     activeAccountId={queryResult.data.activeAccountId}
-                    handlerDelete={handlerDelete}
                 />
 
                 <NewAccountRegistrationForm />
