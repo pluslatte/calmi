@@ -2,36 +2,28 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderWithProviders, screen } from "@/tests/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import NewAccountRegistrationForm from "./NewAccountRegistrationForm";
-import useAccountRegistration from "@/hooks/useAccountRegistration";
 import { notifyFailure, notifySuccess } from "@/lib/notifications";
 import { mockRegisterResponse } from "@/tests/fixtures";
 
-vi.mock("@/hooks/useAccountRegistration");
 vi.mock("@/lib/notifications", () => ({
     notifySuccess: vi.fn(),
     notifyFailure: vi.fn(),
 }));
 
-const mockUseAccountRegistration = vi.mocked(useAccountRegistration);
 const mockNotifySuccess = vi.mocked(notifySuccess);
 const mockNotifyFailure = vi.mocked(notifyFailure);
 
 describe('NewAccountRegistrationForm', () => {
-    const mockOnAccountRegistered = vi.fn();
     const mockRegisterAccount = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        mockUseAccountRegistration.mockReturnValue({
-            registerAccount: mockRegisterAccount,
-            isSubmitting: false,
-        });
     });
 
     describe('1. コンポーネントレンダリング', () => {
         it('フォームが正しく表示されること', () => {
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             expect(screen.getByText('新規アカウント登録')).toBeInTheDocument();
@@ -40,7 +32,7 @@ describe('NewAccountRegistrationForm', () => {
 
         it('必要なフィールドが存在すること', () => {
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             // 実用的アプローチ: 全フィールドでgetByPlaceholderTextを使用（確実に動作）
@@ -51,7 +43,7 @@ describe('NewAccountRegistrationForm', () => {
 
         it('警告メッセージが表示されること', () => {
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             expect(screen.getByText(/APIキーがサーバー上に保持されます/)).toBeInTheDocument();
@@ -60,7 +52,7 @@ describe('NewAccountRegistrationForm', () => {
 
         it('フィールドに正しいプレースホルダーが設定されていること', () => {
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             expect(screen.getByPlaceholderText('https://virtualkemomimi.net')).toBeInTheDocument();
@@ -69,7 +61,7 @@ describe('NewAccountRegistrationForm', () => {
 
         it('APIキーのフィールドがパスワードタイプであること', () => {
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
@@ -82,7 +74,7 @@ describe('NewAccountRegistrationForm', () => {
             const user = userEvent.setup();
 
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             const instanceUrlField = screen.getByPlaceholderText('https://virtualkemomimi.net');
@@ -97,7 +89,7 @@ describe('NewAccountRegistrationForm', () => {
 
         it('フィールドが空の場合、送信ボタンが無効になること', () => {
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             const submitButton = screen.getByRole('button', { name: '登録' });
@@ -108,7 +100,7 @@ describe('NewAccountRegistrationForm', () => {
             const user = userEvent.setup();
 
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
@@ -123,7 +115,7 @@ describe('NewAccountRegistrationForm', () => {
             const user = userEvent.setup();
 
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             const instanceUrlField = screen.getByPlaceholderText('https://virtualkemomimi.net');
@@ -138,7 +130,7 @@ describe('NewAccountRegistrationForm', () => {
             const user = userEvent.setup();
 
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             const instanceUrlField = screen.getByPlaceholderText('https://virtualkemomimi.net');
@@ -153,55 +145,12 @@ describe('NewAccountRegistrationForm', () => {
     });
 
     describe('3. フォーム送信', () => {
-        it('正常送信時の処理が正しく実行されること', async () => {
-            const user = userEvent.setup();
-            mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
-
-            // onSuccessコールバックが正しく呼ばれるようにモック
-            mockUseAccountRegistration.mockImplementation((onSuccess) => ({
-                registerAccount: async (url: string, token: string) => {
-                    const result = await mockRegisterAccount(url, token);
-                    if (result) {
-                        onSuccess?.(); // コールバックを実行
-                    }
-                    return result;
-                },
-                isSubmitting: false,
-            }));
-
-            renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
-            );
-
-            const instanceUrlField = screen.getByPlaceholderText('https://virtualkemomimi.net');
-            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
-            const submitButton = screen.getByRole('button', { name: '登録' });
-
-            await user.type(instanceUrlField, 'https://test.pluslatte.com');
-            await user.type(tokenField, 'test-token');
-            await user.click(submitButton);
-
-            expect(mockRegisterAccount).toHaveBeenCalledWith('https://test.pluslatte.com', 'test-token');
-            expect(mockNotifySuccess).toHaveBeenCalledWith(`${mockRegisterResponse.account.displayName}のアカウントが登録されました`);
-            expect(mockOnAccountRegistered).toHaveBeenCalledTimes(1);
-        });
-
         it('正常送信後にフィールドがクリアされること', async () => {
             const user = userEvent.setup();
             mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
 
-            // onSuccessコールバックがフィールドクリアを実行するようにモック
-            mockUseAccountRegistration.mockImplementation((onSuccess) => ({
-                registerAccount: async (url: string, token: string) => {
-                    const result = await mockRegisterAccount(url, token);
-                    onSuccess?.(); // コールバックを実行
-                    return result;
-                },
-                isSubmitting: false,
-            }));
-
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             const instanceUrlField = screen.getByPlaceholderText('https://virtualkemomimi.net');
@@ -221,10 +170,6 @@ describe('NewAccountRegistrationForm', () => {
             const testError = new Error('登録エラー');
             mockRegisterAccount.mockRejectedValue(testError);
 
-            renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
-            );
-
             const instanceUrlField = screen.getByPlaceholderText('https://virtualkemomimi.net');
             const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
             const submitButton = screen.getByRole('button', { name: '登録' });
@@ -235,7 +180,6 @@ describe('NewAccountRegistrationForm', () => {
 
             expect(mockRegisterAccount).toHaveBeenCalledWith('https://test.pluslatte.com', 'test-token');
             expect(mockNotifyFailure).toHaveBeenCalledWith(testError);
-            expect(mockOnAccountRegistered).not.toHaveBeenCalled();
         });
 
         it('フォーム送信時にpreventDefaultが呼ばれること', async () => {
@@ -243,7 +187,7 @@ describe('NewAccountRegistrationForm', () => {
             mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
 
             renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
+                <NewAccountRegistrationForm />
             );
 
             const form = document.querySelector('form')!;
@@ -267,59 +211,8 @@ describe('NewAccountRegistrationForm', () => {
     });
 
     describe('4. Hook統合', () => {
-        it('isSubmitting状態がローディング表示に反映されること', () => {
-            mockUseAccountRegistration.mockReturnValue({
-                registerAccount: mockRegisterAccount,
-                isSubmitting: true,
-            });
-
-            renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
-            );
-
-            const submitButton = screen.getByRole('button', { name: '登録' });
-
-            // Mantineのloadingプロパティによりボタンがdisabledになる
-            expect(submitButton).toBeDisabled();
-        });
-
-        it('useAccountRegistrationに正しいコールバックが渡されること', () => {
-            renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
-            );
-
-            expect(mockUseAccountRegistration).toHaveBeenCalledWith(expect.any(Function));
-        });
-    });
-
-    describe('5. Props処理', () => {
-        it('onAccountRegisteredコールバックが適切に呼び出されること', async () => {
-            const user = userEvent.setup();
-            mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
-
-            // onSuccessコールバックがプロップスのコールバックを呼ぶようにモック
-            mockUseAccountRegistration.mockImplementation((onSuccess) => ({
-                registerAccount: async (url: string, token: string) => {
-                    const result = await mockRegisterAccount(url, token);
-                    onSuccess?.(); // コールバックを実行
-                    return result;
-                },
-                isSubmitting: false,
-            }));
-
-            renderWithProviders(
-                <NewAccountRegistrationForm onAccountRegistered={mockOnAccountRegistered} />
-            );
-
-            const instanceUrlField = screen.getByPlaceholderText('https://virtualkemomimi.net');
-            const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
-            const submitButton = screen.getByRole('button', { name: '登録' });
-
-            await user.type(instanceUrlField, 'https://test.pluslatte.com');
-            await user.type(tokenField, 'test-token');
-            await user.click(submitButton);
-
-            expect(mockOnAccountRegistered).toHaveBeenCalledTimes(1);
+        it('ボタンのローディング表示', () => {
+            throw new Error('Unimplemented');
         });
     });
 });

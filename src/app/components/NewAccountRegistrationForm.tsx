@@ -15,6 +15,8 @@ const NewAccountRegistrationForm = () => {
         mutationFn: registerAccountApi,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.api.misskeyAccounts() });
+            setInstanceUrl('');
+            setAccessToken('');
             notifySuccess("アカウントを追加しました");
         },
     });
