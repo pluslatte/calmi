@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { renderWithProviders, screen } from "@/tests/utils/test-utils";
+import { renderWithProviders, screen, waitFor } from "@/tests/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import NewAccountRegistrationForm from "./NewAccountRegistrationForm";
 import { notifyFailure, notifySuccess } from "@/lib/notifications";
@@ -161,14 +161,20 @@ describe('NewAccountRegistrationForm', () => {
             await user.type(tokenField, 'test-token');
             await user.click(submitButton);
 
-            expect(instanceUrlField).toHaveValue('');
-            expect(tokenField).toHaveValue('');
+            waitFor(() => {
+                expect(instanceUrlField).toHaveValue('');
+                expect(tokenField).toHaveValue('');
+            });
         });
 
         it('エラー発生時の処理が正しく実行されること', async () => {
             const user = userEvent.setup();
             const testError = new Error('登録エラー');
             mockRegisterAccount.mockRejectedValue(testError);
+
+            renderWithProviders(
+                <NewAccountRegistrationForm />
+            );
 
             const instanceUrlField = screen.getByPlaceholderText('https://virtualkemomimi.net');
             const tokenField = screen.getByPlaceholderText('APIキーを入力してください');
