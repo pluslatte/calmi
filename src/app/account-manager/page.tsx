@@ -9,19 +9,20 @@ import AuthenticationRequired from "../components/AuthenticationRequired";
 import { notifyFailure, notifySuccess } from "@/lib/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteAccountApi, fetchAccountsApi, registerAccountApi, RegisterAccountApiResponse } from "@/lib/misskey-api/accounts";
+import { queryKeys } from "../queryKeys";
 
 const AccountManager = () => {
     const { status } = useSession();
 
     const queryClient = useQueryClient();
     const queryResult = useQuery({
-        queryKey: ['registered-accounts'],
+        queryKey: queryKeys.api.misskeyAccounts(),
         queryFn: fetchAccountsApi,
     });
     const deleteMutation = useMutation({
         mutationFn: deleteAccountApi,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['registered-accounts'] });
+            queryClient.invalidateQueries({ queryKey: queryKeys.api.misskeyAccounts() });
             notifySuccess("アカウントを削除しました");
         },
     });

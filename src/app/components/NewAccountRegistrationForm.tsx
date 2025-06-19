@@ -3,6 +3,7 @@ import { notifySuccess } from "@/lib/notifications";
 import { Card, Title, Stack, TextInput, Button, Blockquote } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { queryKeys } from "../queryKeys";
 
 const NewAccountRegistrationForm = () => {
     const queryClient = useQueryClient();
@@ -13,7 +14,7 @@ const NewAccountRegistrationForm = () => {
     const registerMutation = useMutation({
         mutationFn: registerAccountApi,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['registered-accounts'] });
+            queryClient.invalidateQueries({ queryKey: queryKeys.api.misskeyAccounts() });
             notifySuccess("アカウントを追加しました");
         },
     });
