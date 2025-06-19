@@ -22,6 +22,7 @@
     "@mantine/notifications": "^7.17.8",
     "@prisma/client": "^6.9.0",
     "@tabler/icons-react": "^3.34.0",
+    "@tanstack/react-query": "^5.80.7",
     "date-fns": "^4.1.0",
     "immer": "^10.1.1",
     "mfm-js": "^0.24.0",
@@ -35,6 +36,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@tanstack/eslint-plugin-query": "^5.78.0",
+    "@tanstack/react-query-devtools": "^5.80.7",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
