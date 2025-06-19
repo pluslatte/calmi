@@ -1,5 +1,5 @@
 import { registerAccountApi } from "@/lib/misskey-api/accounts";
-import { notifySuccess } from "@/lib/notifications";
+import { notifySuccess, notifyFailure } from "@/lib/notifications";
 import { Card, Title, Stack, TextInput, Button, Blockquote } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -13,11 +13,14 @@ const NewAccountRegistrationForm = () => {
 
     const registerMutation = useMutation({
         mutationFn: registerAccountApi,
-        onSuccess: () => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.api.misskeyAccounts() });
             setInstanceUrl('');
             setAccessToken('');
-            notifySuccess("アカウントを追加しました");
+            notifySuccess(`アカウントを追加しました: ${data.account.username}`);
+        },
+        onError: (error) => {
+            notifyFailure(error);
         },
     });
 

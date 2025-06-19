@@ -3,6 +3,7 @@ import { renderWithProviders, screen, waitFor } from "@/tests/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import NewAccountRegistrationForm from "./NewAccountRegistrationForm";
 import { notifyFailure, notifySuccess } from "@/lib/notifications";
+import { registerAccountApi } from "@/lib/misskey-api/accounts";
 import { mockRegisterResponse } from "@/tests/fixtures";
 
 vi.mock("@/lib/notifications", () => ({
@@ -10,12 +11,15 @@ vi.mock("@/lib/notifications", () => ({
     notifyFailure: vi.fn(),
 }));
 
+vi.mock("@/lib/misskey-api/accounts", () => ({
+    registerAccountApi: vi.fn(),
+}));
+
 const mockNotifySuccess = vi.mocked(notifySuccess);
 const mockNotifyFailure = vi.mocked(notifyFailure);
+const mockRegisterAccountApi = vi.mocked(registerAccountApi);
 
 describe('NewAccountRegistrationForm', () => {
-    const mockRegisterAccount = vi.fn();
-
     beforeEach(() => {
         vi.clearAllMocks();
     });
@@ -147,7 +151,7 @@ describe('NewAccountRegistrationForm', () => {
     describe('3. フォーム送信', () => {
         it('正常送信後にフィールドがクリアされること', async () => {
             const user = userEvent.setup();
-            mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
+            mockRegisterAccountApi.mockResolvedValue(mockRegisterResponse);
 
             renderWithProviders(
                 <NewAccountRegistrationForm />
@@ -161,7 +165,7 @@ describe('NewAccountRegistrationForm', () => {
             await user.type(tokenField, 'test-token');
             await user.click(submitButton);
 
-            waitFor(() => {
+            await waitFor(() => {
                 expect(instanceUrlField).toHaveValue('');
                 expect(tokenField).toHaveValue('');
             });
@@ -170,7 +174,7 @@ describe('NewAccountRegistrationForm', () => {
         it('エラー発生時の処理が正しく実行されること', async () => {
             const user = userEvent.setup();
             const testError = new Error('登録エラー');
-            mockRegisterAccount.mockRejectedValue(testError);
+            mockRegisterAccountApi.mockRejectedValue(testError);
 
             renderWithProviders(
                 <NewAccountRegistrationForm />
@@ -184,13 +188,15 @@ describe('NewAccountRegistrationForm', () => {
             await user.type(tokenField, 'test-token');
             await user.click(submitButton);
 
-            expect(mockRegisterAccount).toHaveBeenCalledWith('https://test.pluslatte.com', 'test-token');
-            expect(mockNotifyFailure).toHaveBeenCalledWith(testError);
+            await waitFor(() => {
+                expect(mockRegisterAccountApi).toHaveBeenCalledWith({ instanceUrl: 'https://test.pluslatte.com', accessToken: 'test-token' });
+                expect(mockNotifyFailure).toHaveBeenCalledWith(testError);
+            });
         });
 
         it('フォーム送信時にpreventDefaultが呼ばれること', async () => {
             const user = userEvent.setup();
-            mockRegisterAccount.mockResolvedValue(mockRegisterResponse);
+            mockRegisterAccountApi.mockResolvedValue(mockRegisterResponse);
 
             renderWithProviders(
                 <NewAccountRegistrationForm />
