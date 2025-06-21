@@ -1,5 +1,4 @@
 import useConfirmationModal from "@/hooks/useConfirmationModal";
-import { MisskeyAccountPublic } from "@/types/accounts";
 import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text, Loader } from "@mantine/core";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { useState } from "react";
