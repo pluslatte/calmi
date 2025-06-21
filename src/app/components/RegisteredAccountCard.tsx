@@ -23,10 +23,10 @@ const RegisteredAccountCard: React.FC<RegisteredAccountCardProps> = ({
             <Group justify="space-between">
                 <Group gap="md">
                     <Avatar
-                        src={account.avatarUrl}
+                        src={account.avatarUrl || "/favicon.ico"}
                         size="md"
                         radius="xl"
-                        alt={account.avatarUrl || "avatar"}
+                        alt={`${account.displayName || account.username}のアバター`}
                     />
                     <div>
                         <Text fw={500}>{account.displayName}</Text>
