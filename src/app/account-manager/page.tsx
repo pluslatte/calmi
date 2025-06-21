@@ -2,21 +2,12 @@
 import { Button, Container, Group, Title } from "@mantine/core";
 import React from "react";
 import { useSession, signOut } from "next-auth/react";
-import useRegisteredAccountsList from "@/hooks/useRegisteredAccountsList";
 import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
 import RegisteredAccountList from "../components/RegisteredAccountList";
 import AuthenticationRequired from "../components/AuthenticationRequired";
-import { notifyFailure } from "@/lib/notifications";
 
 const AccountManager = () => {
-    const { data: session, status } = useSession();
-
-    const {
-        accounts,
-        activeAccountId,
-        loadingAccounts,
-        refreshAccounts,
-    } = useRegisteredAccountsList(status);
+    const { status } = useSession();
 
     return (
         <AuthenticationRequired
@@ -24,7 +15,7 @@ const AccountManager = () => {
         >
             <Container size="md" py="xl">
                 <Group justify="space-between" mb="xl">
-                    <Title order={1}>ダッシュボード</Title>
+                    <Title order={1}>アカウントマネージャ</Title>
                     <Button
                         color="red"
                         onClick={() => signOut({ redirectTo: "/" })}
@@ -33,20 +24,9 @@ const AccountManager = () => {
                     </Button>
                 </Group>
 
-                <RegisteredAccountList
-                    accounts={accounts}
-                    activeAccountId={activeAccountId}
-                    loading={loadingAccounts}
-                    onAccountDeleted={async () => {
-                        await refreshAccounts().catch(notifyFailure);
-                    }}
-                />
+                <RegisteredAccountList />
 
-                <NewAccountRegistrationForm
-                    onAccountRegistered={async () => {
-                        await refreshAccounts().catch(notifyFailure);
-                    }}
-                />
+                <NewAccountRegistrationForm />
             </Container>
         </AuthenticationRequired>
     );

@@ -1,10 +1,4 @@
-import { MantineProvider } from "@mantine/core"
-import { theme } from "@/lib/mantine-theme"
-import { Notifications } from "@mantine/notifications"
-import { SessionProvider } from "next-auth/react"
-
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
+import Providers from "./providers";
 
 export const metadata = {
   title: 'calmi',
@@ -22,12 +16,9 @@ export default function RootLayout({
         <title>calmi</title>
       </head>
       <body>
-        <SessionProvider>
-          <MantineProvider theme={theme} forceColorScheme="dark">
-            <Notifications position="bottom-center" />
-            {children}
-          </MantineProvider>
-        </SessionProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

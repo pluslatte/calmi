@@ -33,9 +33,13 @@ export const deleteAccountApi = async (accountId: string): Promise<void> => {
     }
 };
 
-export const registerAccountApi = async (
-    instanceUrl: string,
-    accessToken: string,
+export const registerAccountApi = async ({
+    instanceUrl,
+    accessToken
+}: {
+    instanceUrl: string;
+    accessToken: string;
+}
 ): Promise<RegisterAccountApiResponse> => {
     const response = await fetch('/api/misskey-accounts', {
         method: 'POST',
