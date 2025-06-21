@@ -3,7 +3,7 @@ import { renderWithProviders, screen } from "@/tests/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import ConfirmationModal from "./ConfirmationModal";
 
-describe('DeleteConfirmationModal', () => {
+describe('ConfirmationModal', () => {
     const mockClose = vi.fn();
     const mockOnClick = vi.fn();
 
@@ -77,8 +77,8 @@ describe('DeleteConfirmationModal', () => {
             />
         );
 
-        const deleteButton = screen.getByRole('button', { name: '確定' });
-        await user.click(deleteButton);
+        const confirmButton = screen.getByRole('button', { name: '確定' });
+        await user.click(confirmButton);
 
         expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
@@ -94,9 +94,9 @@ describe('DeleteConfirmationModal', () => {
             />
         );
 
-        const deleteButton = screen.getByRole('button', { name: '確定' });
-        await user.click(deleteButton);
+        const confirmButton = screen.getByRole('button', { name: '確定' });
+        await user.click(confirmButton);
 
-        expect(mockOnClick).toHaveBeenCalledTimes(1);
+        expect(mockClose).toHaveBeenCalledTimes(1);
     });
 });

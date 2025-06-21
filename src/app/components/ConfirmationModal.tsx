@@ -27,7 +27,10 @@ const ConfirmationModal = ({
                 </Button>
                 <Button
                     color="red"
-                    onClick={onclick}
+                    onClick={() => {
+                        onclick();
+                        close();
+                    }}
                 >
                     確定
                 </Button>
