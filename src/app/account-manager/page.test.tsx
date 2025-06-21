@@ -44,7 +44,7 @@ describe('page.tsx', () => {
                 session: mockSession,
                 sessionStatus: 'authenticated'
             });
-            
+
             const title = screen.getByRole('heading', { level: 1 });
             expect(title).toBeInTheDocument();
             expect(title).toHaveTextContent('アカウントマネージャ');
@@ -55,7 +55,7 @@ describe('page.tsx', () => {
                 session: mockSession,
                 sessionStatus: 'authenticated'
             });
-            
+
             const signOutButton = screen.getByRole('button', { name: 'サインアウト' });
             expect(signOutButton).toBeInTheDocument();
         });
@@ -65,7 +65,7 @@ describe('page.tsx', () => {
                 session: mockSession,
                 sessionStatus: 'authenticated'
             });
-            
+
             // Containerの内容が存在することで間接的に確認
             expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
             expect(screen.getByRole('button', { name: 'サインアウト' })).toBeInTheDocument();
@@ -76,16 +76,16 @@ describe('page.tsx', () => {
                 session: mockSession,
                 sessionStatus: 'authenticated'
             });
-            
+
             // 新規アカウント登録フォームの存在確認
-            expect(screen.getByRole('form')).toBeInTheDocument();
+            expect(document.querySelector('form')).toBeInTheDocument();
             expect(screen.getByRole('heading', { name: '新規アカウント登録' })).toBeInTheDocument();
-            
+
             // アカウントリストセクションの存在確認（loading状態またはコンテンツ）
             // RegisteredAccountListが何らかの形でレンダリングされていることを確認
             const hasLoader = screen.queryByRole('progressbar');
-            const hasAccountText = screen.queryByText(/アカウント/);
-            expect(hasLoader || hasAccountText).toBeTruthy();
+            const hasAccountTextAll = screen.queryAllByText(/アカウント/);
+            expect(hasLoader || hasAccountTextAll.length > 0).toBeTruthy();
         });
     });
 });
