@@ -1,6 +1,7 @@
 import useConfirmationModal from "@/hooks/useConfirmationModal";
-import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text, Loader } from "@mantine/core";
+import { Stack, Title, Alert, Loader } from "@mantine/core";
 import ConfirmationModal from "./ConfirmationModal";
+import RegisteredAccountCard from "./RegisteredAccountCard";
 import { useState } from "react";
 import { deleteAccountApi, fetchAccountsApi } from "@/lib/misskey-api/accounts";
 import { notifySuccess } from "@/lib/notifications";
@@ -45,9 +46,9 @@ const RegisteredAccountList = () => {
     return (
         <div>
             {isPending && (
-                <Group justify="center">
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <Loader size="lg" />
-                </Group>
+                </div>
             )}
 
             {isError && (
@@ -66,42 +67,13 @@ const RegisteredAccountList = () => {
                         </Alert>
                     ) : (
                         data.accounts.map((account) => (
-                            <Card key={account.id} shadow="sm" padding="lg" radius="md" withBorder>
-                                <Group justify="space-between">
-                                    <Group gap="md">
-                                        <Avatar
-                                            src={account.avatarUrl}
-                                            size="md"
-                                            radius="xl"
-                                        />
-                                        <div>
-                                            <Text fw={500}>{account.displayName}</Text>
-                                            <Text size="sm" c="dimmed">
-                                                @{account.username}
-                                            </Text>
-                                            <Text size="xs" c="dimmed">
-                                                {account.instanceUrl}
-                                            </Text>
-                                        </div>
-                                    </Group>
-
-                                    <Group gap="sm">
-                                        {account.id === data.activeAccountId && (
-                                            <Badge color="green">アクティブ</Badge>
-                                        )}
-                                        <Button
-                                            color="red"
-                                            size="xs"
-                                            variant="outline"
-                                            onClick={() => openDeleteModal(account.id)}
-                                            loading={deleteMutation.isPending}
-                                            disabled={deleteMutation.isPending}
-                                        >
-                                            削除
-                                        </Button>
-                                    </Group>
-                                </Group>
-                            </Card>
+                            <RegisteredAccountCard
+                                key={account.id}
+                                account={account}
+                                isActive={account.id === data.activeAccountId}
+                                onDelete={openDeleteModal}
+                                isDeleting={deleteMutation.isPending}
+                            />
                         ))
                     )}
                 </Stack>

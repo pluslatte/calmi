@@ -134,7 +134,7 @@ describe("RegisteredAccountList", () => {
 
             await waitFor(() => {
                 mockMisskeyAccounts.forEach((account) => {
-                    const avatar = screen.getAllByRole("img", { name: "" });
+                    const avatar = screen.getAllByRole("img", { name: account.avatarUrl || 'avatar' });
                     expect(avatar.length > 0);
                 });
             });
