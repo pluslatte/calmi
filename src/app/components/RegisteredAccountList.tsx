@@ -94,7 +94,7 @@ const RegisteredAccountList = () => {
                                             size="xs"
                                             variant="outline"
                                             onClick={() => openDeleteModal(account.id)}
-                                            disabled={confirmationModal.isLoading}
+                                            disabled={deleteMutation.isPending}
                                         >
                                             削除
                                         </Button>

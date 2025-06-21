@@ -205,6 +205,10 @@ describe("RegisteredAccountList", () => {
             const deleteButtons = screen.getAllByRole("button", { name: "削除" });
             await user.click(deleteButtons[0]);
 
+            await waitFor(() => {
+                expect(screen.getByRole("dialog")).toBeInTheDocument();
+            });
+
             // 確認モーダルでキャンセル
             const cancelButton = screen.getByRole("button", { name: "キャンセル" });
             await user.click(cancelButton);
@@ -231,8 +235,12 @@ describe("RegisteredAccountList", () => {
             const deleteButtons = screen.getAllByRole("button", { name: "削除" });
             await user.click(deleteButtons[0]);
 
+            await waitFor(() => {
+                expect(screen.getByRole("dialog")).toBeInTheDocument();
+            });
+
             // 確認モーダルで削除実行
-            const confirmDeleteButton = screen.getByRole("button", { name: "削除" });
+            const confirmDeleteButton = screen.getByRole("button", { name: "削除を確定" });
             await user.click(confirmDeleteButton);
 
             // 削除処理中は削除ボタンが無効
@@ -260,7 +268,11 @@ describe("RegisteredAccountList", () => {
             const deleteButtons = screen.getAllByRole("button", { name: "削除" });
             await user.click(deleteButtons[0]);
 
-            const confirmDeleteButton = screen.getByRole("button", { name: "削除" });
+            await waitFor(() => {
+                expect(screen.getByRole("dialog")).toBeInTheDocument();
+            });
+
+            const confirmDeleteButton = screen.getByRole("button", { name: "削除を確定" });
             await user.click(confirmDeleteButton);
 
             await waitFor(() => {
