@@ -144,7 +144,7 @@ describe("RegisteredAccountList", () => {
     describe("削除機能", () => {
         beforeEach(() => {
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
-            mockDeleteAccountApi.mockResolvedValue({});
+            mockDeleteAccountApi.mockResolvedValue(undefined);
         });
 
         it("削除ボタンをクリックすると確認モーダルを開くこと", async () => {
@@ -239,7 +239,7 @@ describe("RegisteredAccountList", () => {
             const user = userEvent.setup();
 
             mockFetchAccountsApi.mockResolvedValue(mockAccountsResponse);
-            mockDeleteAccountApi.mockResolvedValue({});
+            mockDeleteAccountApi.mockResolvedValue(undefined);
 
             renderWithProviders(<RegisteredAccountList />);
 
