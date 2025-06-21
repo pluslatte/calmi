@@ -1,22 +1,36 @@
 import useConfirmationModal from "@/hooks/useConfirmationModal";
 import { MisskeyAccountPublic } from "@/types/accounts";
-import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text } from "@mantine/core";
+import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text, Loader } from "@mantine/core";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { useState } from "react";
-import { deleteAccountApi } from "@/lib/misskey-api/accounts";
+import { deleteAccountApi, fetchAccountsApi } from "@/lib/misskey-api/accounts";
 import { notifySuccess } from "@/lib/notifications";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
 
-interface Props {
-    accounts: MisskeyAccountPublic[];
-    activeAccountId: string | null;
-}
-const RegisteredAccountList = ({
-    accounts,
-    activeAccountId,
-}: Props
-) => {
+const RegisteredAccountList = () => {
+    const { data, isPending, isError } = useQuery({
+        queryKey: queryKeys.api.misskeyAccounts(),
+        queryFn: fetchAccountsApi,
+    });
+
+    if (isPending) {
+        return (
+            <Group justify="center">
+                <Loader size="lg" />
+            </Group>
+        );
+    }
+
+    if (isError) {
+        return (
+            <Alert color="red">
+                アカウント情報の取得に失敗しました
+            </Alert>
+        );
+    }
+
+    const { accounts, activeAccountId } = data;
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
     const queryClient = useQueryClient();
