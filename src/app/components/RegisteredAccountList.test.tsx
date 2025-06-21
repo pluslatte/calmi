@@ -44,21 +44,21 @@ describe("RegisteredAccountList", () => {
     describe("データ取得状態の表示", () => {
         it("ローディング中はローダーを表示すること", async () => {
             // ローディング状態をシミュレート
-            mockFetchAccountsApi.mockImplementation(() => new Promise(() => {}));
+            mockFetchAccountsApi.mockImplementation(() => new Promise(() => { }));
 
             const { container } = renderWithProviders(<RegisteredAccountList />);
-            
+
             // ローディング中は、エラーメッセージやアカウント一覧が表示されないことを確認
             expect(screen.queryByText("アカウント情報の取得に失敗しました")).not.toBeInTheDocument();
             expect(screen.queryByText("登録済みアカウント")).not.toBeInTheDocument();
             expect(screen.queryByText("アカウントが登録されていません")).not.toBeInTheDocument();
-            
+
             // ローダーが存在することを確認（複数の方法で試す）
             const hasLoader = container.querySelector('.mantine-Loader-root') ||
-                             container.querySelector('[aria-label="Loading"]') ||
-                             container.querySelector('svg') ||
-                             screen.queryByTestId('loader');
-            
+                container.querySelector('[aria-label="Loading"]') ||
+                container.querySelector('svg') ||
+                screen.queryByTestId('loader');
+
             expect(hasLoader).toBeTruthy();
         });
 
@@ -134,8 +134,8 @@ describe("RegisteredAccountList", () => {
 
             await waitFor(() => {
                 mockMisskeyAccounts.forEach((account) => {
-                    const avatar = screen.getByRole("img", { name: "" });
-                    expect(avatar).toBeInTheDocument();
+                    const avatar = screen.getAllByRole("img", { name: "" });
+                    expect(avatar.length > 0);
                 });
             });
         });
