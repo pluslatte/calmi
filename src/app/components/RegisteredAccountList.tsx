@@ -17,6 +17,7 @@ const RegisteredAccountList = () => {
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
     const queryClient = useQueryClient();
+
     const deleteMutation = useMutation({
         mutationFn: deleteAccountApi,
         onSuccess: () => {
@@ -25,23 +26,14 @@ const RegisteredAccountList = () => {
         },
     });
 
-    const handlerDelete = (accountId: string) => {
-        deleteMutation.mutate(accountId)
-    };
-
     const confirmationModal = useConfirmationModal(async () => {
         if (!deleteTargetId) {
             console.warn('deleteTargetId is not set');
             return;
         }
-        handlerDelete(deleteTargetId);
+        deleteMutation.mutate(deleteTargetId)
         setDeleteTargetId(null);
     });
-
-    const openDeleteModal = (accountId: string) => {
-        setDeleteTargetId(accountId);
-        confirmationModal.open();
-    };
 
     return (
         <div>
@@ -71,7 +63,10 @@ const RegisteredAccountList = () => {
                                 key={account.id}
                                 account={account}
                                 isActive={account.id === data.activeAccountId}
-                                onDelete={openDeleteModal}
+                                onDelete={(accountId: string) => {
+                                    setDeleteTargetId(accountId);
+                                    confirmationModal.open();
+                                }}
                                 isDeleting={deleteMutation.isPending}
                             />
                         ))
