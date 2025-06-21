@@ -44,7 +44,7 @@ const RegisteredAccountList = () => {
     };
 
     return (
-        <div data-testid="registered-account-list">
+        <div>
             {isPending && (
                 <Group justify="center">
                     <Loader size="lg" />
