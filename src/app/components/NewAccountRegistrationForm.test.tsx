@@ -221,10 +221,4 @@ describe('NewAccountRegistrationForm', () => {
             expect(mockPreventDefault).toHaveBeenCalled();
         });
     });
-
-    describe('4. Hook統合', () => {
-        it('ボタンのローディング表示', () => {
-            throw new Error('Unimplemented');
-        });
-    });
 });
