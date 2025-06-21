@@ -77,8 +77,8 @@ describe('page.tsx', () => {
                 sessionStatus: 'authenticated'
             });
             
-            // RegisteredAccountListコンポーネントの「登録済みアカウント」タイトルで存在確認
-            expect(screen.getByRole('heading', { name: '登録済みアカウント' })).toBeInTheDocument();
+            // RegisteredAccountListコンポーネントがdata-testidで確認できる
+            expect(screen.getByTestId('registered-account-list')).toBeInTheDocument();
         });
 
         it('NewAccountRegistrationFormコンポーネントがレンダリングされること', () => {
@@ -87,8 +87,8 @@ describe('page.tsx', () => {
                 sessionStatus: 'authenticated'
             });
             
-            // NewAccountRegistrationFormコンポーネントの「新規アカウント登録」タイトルで存在確認
-            expect(screen.getByRole('heading', { name: '新規アカウント登録' })).toBeInTheDocument();
+            // NewAccountRegistrationFormコンポーネントがdata-testidで確認できる
+            expect(screen.getByTestId('new-account-registration-form')).toBeInTheDocument();
         });
     });
 });

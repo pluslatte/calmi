@@ -14,23 +14,6 @@ const RegisteredAccountList = () => {
         queryFn: fetchAccountsApi,
     });
 
-    if (isPending) {
-        return (
-            <Group justify="center">
-                <Loader size="lg" />
-            </Group>
-        );
-    }
-
-    if (isError) {
-        return (
-            <Alert color="red">
-                アカウント情報の取得に失敗しました
-            </Alert>
-        );
-    }
-
-    const { accounts, activeAccountId } = data;
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
     const queryClient = useQueryClient();
@@ -61,54 +44,68 @@ const RegisteredAccountList = () => {
     };
 
     return (
-        <>
-            <Stack gap="md" mb="xl">
-                <Title order={2} size="h3">登録済みアカウント</Title>
+        <div data-testid="registered-account-list">
+            {isPending && (
+                <Group justify="center">
+                    <Loader size="lg" />
+                </Group>
+            )}
 
-                {accounts.length === 0 ? (
-                    <Alert color="blue">
-                        アカウントが登録されていません。下記のフォームから登録してください。
-                    </Alert>
-                ) : (
-                    accounts.map((account) => (
-                        <Card key={account.id} shadow="sm" padding="lg" radius="md" withBorder>
-                            <Group justify="space-between">
-                                <Group gap="md">
-                                    <Avatar
-                                        src={account.avatarUrl}
-                                        size="md"
-                                        radius="xl"
-                                    />
-                                    <div>
-                                        <Text fw={500}>{account.displayName}</Text>
-                                        <Text size="sm" c="dimmed">
-                                            @{account.username}
-                                        </Text>
-                                        <Text size="xs" c="dimmed">
-                                            {account.instanceUrl}
-                                        </Text>
-                                    </div>
-                                </Group>
+            {isError && (
+                <Alert color="red">
+                    アカウント情報の取得に失敗しました
+                </Alert>
+            )}
 
-                                <Group gap="sm">
-                                    {account.id === activeAccountId && (
-                                        <Badge color="green">アクティブ</Badge>
-                                    )}
-                                    <Button
-                                        color="red"
-                                        size="xs"
-                                        variant="outline"
-                                        onClick={() => openDeleteModal(account.id)}
-                                        disabled={confirmationModal.isLoading}
-                                    >
-                                        削除
-                                    </Button>
+            {data && (
+                <Stack gap="md" mb="xl">
+                    <Title order={2} size="h3">登録済みアカウント</Title>
+
+                    {data.accounts.length === 0 ? (
+                        <Alert color="blue">
+                            アカウントが登録されていません。下記のフォームから登録してください。
+                        </Alert>
+                    ) : (
+                        data.accounts.map((account) => (
+                            <Card key={account.id} shadow="sm" padding="lg" radius="md" withBorder>
+                                <Group justify="space-between">
+                                    <Group gap="md">
+                                        <Avatar
+                                            src={account.avatarUrl}
+                                            size="md"
+                                            radius="xl"
+                                        />
+                                        <div>
+                                            <Text fw={500}>{account.displayName}</Text>
+                                            <Text size="sm" c="dimmed">
+                                                @{account.username}
+                                            </Text>
+                                            <Text size="xs" c="dimmed">
+                                                {account.instanceUrl}
+                                            </Text>
+                                        </div>
+                                    </Group>
+
+                                    <Group gap="sm">
+                                        {account.id === data.activeAccountId && (
+                                            <Badge color="green">アクティブ</Badge>
+                                        )}
+                                        <Button
+                                            color="red"
+                                            size="xs"
+                                            variant="outline"
+                                            onClick={() => openDeleteModal(account.id)}
+                                            disabled={confirmationModal.isLoading}
+                                        >
+                                            削除
+                                        </Button>
+                                    </Group>
                                 </Group>
-                            </Group>
-                        </Card>
-                    ))
-                )}
-            </Stack>
+                            </Card>
+                        ))
+                    )}
+                </Stack>
+            )}
 
             <DeleteConfirmationModal
                 opened={confirmationModal.opened}
@@ -116,7 +113,7 @@ const RegisteredAccountList = () => {
                 onclick={confirmationModal.handleConfirm}
                 loading={confirmationModal.isLoading}
             />
-        </>
+        </div>
     )
 }
 

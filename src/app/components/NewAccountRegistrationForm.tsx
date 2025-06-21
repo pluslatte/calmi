@@ -30,7 +30,7 @@ const NewAccountRegistrationForm = () => {
     };
 
     return (
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Card shadow="sm" padding="lg" radius="md" withBorder data-testid="new-account-registration-form">
             <Title order={3} mb="md">新規アカウント登録</Title>
             <Blockquote color="red" mb="lg">
                 APIキーがサーバー上に保持されます！<br />
