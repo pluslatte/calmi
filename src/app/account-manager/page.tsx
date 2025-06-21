@@ -43,7 +43,7 @@ const AccountManager = () => {
         >
             <Container size="md" py="xl">
                 <Group justify="space-between" mb="xl">
-                    <Title order={1}>ダッシュボード</Title>
+                    <Title order={1}>アカウントマネージャ</Title>
                     <Button
                         color="red"
                         onClick={() => signOut({ redirectTo: "/" })}
