@@ -32,4 +32,63 @@ describe('page.tsx', () => {
             expect(screen.getByText("アカウントマネージャ")).toBeInTheDocument();
         });
     });
+
+    describe('HTML構造の確認', () => {
+        const mockSession = {
+            user: { name: 'Test User', email: 'test@example.com' },
+            expires: '2024-12-31',
+        };
+
+        it('ページタイトルがh1要素として正しく表示されること', () => {
+            renderWithProviders(<AccountManager />, {
+                session: mockSession,
+                sessionStatus: 'authenticated'
+            });
+            
+            const title = screen.getByRole('heading', { level: 1 });
+            expect(title).toBeInTheDocument();
+            expect(title).toHaveTextContent('アカウントマネージャ');
+        });
+
+        it('サインアウトボタンが存在すること', () => {
+            renderWithProviders(<AccountManager />, {
+                session: mockSession,
+                sessionStatus: 'authenticated'
+            });
+            
+            const signOutButton = screen.getByRole('button', { name: 'サインアウト' });
+            expect(signOutButton).toBeInTheDocument();
+        });
+
+        it('Container要素が適切にレンダリングされること', () => {
+            renderWithProviders(<AccountManager />, {
+                session: mockSession,
+                sessionStatus: 'authenticated'
+            });
+            
+            // Containerの内容が存在することで間接的に確認
+            expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: 'サインアウト' })).toBeInTheDocument();
+        });
+
+        it('RegisteredAccountListコンポーネントがレンダリングされること', () => {
+            renderWithProviders(<AccountManager />, {
+                session: mockSession,
+                sessionStatus: 'authenticated'
+            });
+            
+            // RegisteredAccountListコンポーネントの「登録済みアカウント」タイトルで存在確認
+            expect(screen.getByRole('heading', { name: '登録済みアカウント' })).toBeInTheDocument();
+        });
+
+        it('NewAccountRegistrationFormコンポーネントがレンダリングされること', () => {
+            renderWithProviders(<AccountManager />, {
+                session: mockSession,
+                sessionStatus: 'authenticated'
+            });
+            
+            // NewAccountRegistrationFormコンポーネントの「新規アカウント登録」タイトルで存在確認
+            expect(screen.getByRole('heading', { name: '新規アカウント登録' })).toBeInTheDocument();
+        });
+    });
 });
