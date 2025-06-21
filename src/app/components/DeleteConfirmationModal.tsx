@@ -28,7 +28,7 @@ const DeleteConfirmationModal = ({
                     loading={loading}
                     disabled={loading}
                 >
-                    削除
+                    削除を確定
                 </Button>
             </Group>
         </Modal>

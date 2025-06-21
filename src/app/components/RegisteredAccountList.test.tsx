@@ -159,8 +159,10 @@ describe("RegisteredAccountList", () => {
             const deleteButtons = screen.getAllByRole("button", { name: "削除" });
             await user.click(deleteButtons[0]);
 
-            expect(screen.getByRole("dialog")).toBeInTheDocument();
-            expect(screen.getByText("アカウント削除の確認")).toBeInTheDocument();
+            await waitFor(() => {
+                expect(screen.getByRole("dialog")).toBeInTheDocument();
+                expect(screen.getByText("アカウント削除の確認")).toBeInTheDocument();
+            })
         });
 
         it("確認モーダルで削除を実行すると、APIが呼ばれて成功通知が表示されること", async () => {
@@ -176,8 +178,12 @@ describe("RegisteredAccountList", () => {
             const deleteButtons = screen.getAllByRole("button", { name: "削除" });
             await user.click(deleteButtons[0]);
 
+            await waitFor(() => {
+                expect(screen.getByRole("dialog")).toBeInTheDocument();
+            });
+
             // 確認モーダルで削除実行
-            const confirmDeleteButton = screen.getByRole("button", { name: "削除" });
+            const confirmDeleteButton = screen.getByRole("button", { name: "削除を確定" });
             await user.click(confirmDeleteButton);
 
             await waitFor(() => {
