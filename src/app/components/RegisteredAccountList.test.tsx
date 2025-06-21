@@ -183,7 +183,7 @@ describe("RegisteredAccountList", () => {
             });
 
             // 確認モーダルで削除実行
-            const confirmDeleteButton = screen.getByRole("button", { name: "削除を確定" });
+            const confirmDeleteButton = screen.getByRole("button", { name: "確定" });
             await user.click(confirmDeleteButton);
 
             await waitFor(() => {
@@ -240,7 +240,7 @@ describe("RegisteredAccountList", () => {
             });
 
             // 確認モーダルで削除実行
-            const confirmDeleteButton = screen.getByRole("button", { name: "削除を確定" });
+            const confirmDeleteButton = screen.getByRole("button", { name: "確定" });
             await user.click(confirmDeleteButton);
 
             // 削除処理中は削除ボタンが無効
@@ -272,7 +272,7 @@ describe("RegisteredAccountList", () => {
                 expect(screen.getByRole("dialog")).toBeInTheDocument();
             });
 
-            const confirmDeleteButton = screen.getByRole("button", { name: "削除を確定" });
+            const confirmDeleteButton = screen.getByRole("button", { name: "確定" });
             await user.click(confirmDeleteButton);
 
             await waitFor(() => {

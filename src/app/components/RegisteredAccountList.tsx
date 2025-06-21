@@ -1,6 +1,6 @@
 import useConfirmationModal from "@/hooks/useConfirmationModal";
 import { Stack, Title, Alert, Card, Group, Avatar, Badge, Button, Text, Loader } from "@mantine/core";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import ConfirmationModal from "./ConfirmationModal";
 import { useState } from "react";
 import { deleteAccountApi, fetchAccountsApi } from "@/lib/misskey-api/accounts";
 import { notifySuccess } from "@/lib/notifications";
@@ -106,11 +106,12 @@ const RegisteredAccountList = () => {
                 </Stack>
             )}
 
-            <DeleteConfirmationModal
+            <ConfirmationModal
                 opened={confirmationModal.opened}
                 close={confirmationModal.close}
                 onclick={confirmationModal.handleConfirm}
-                loading={confirmationModal.isLoading}
+                title="アカウント削除の確認"
+                message="アカウントの登録を解除しますか？この操作は取り消せません。"
             />
         </div>
     )
