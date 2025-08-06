@@ -24,8 +24,8 @@ const AuthenticationRequired = ({ status, children }: PropsAuthenticationRequire
             <Container size="md" py="xl">
                 <Group justify="center">
                     <Text>Access  Denied</Text>
-                    <Button component={Link} href="/" variant="filled">
-                        ホームに戻る
+                    <Button component={Link} href="/auth" variant="filled">
+                        ログイン
                     </Button>
                 </Group>
             </Container>
