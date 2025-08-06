@@ -1,3 +1,4 @@
+"use client";
 import { registerAccountApi } from "@/lib/misskey-api/accounts";
 import { notifySuccess, notifyFailure } from "@/lib/notifications";
 import { Card, Title, Stack, TextInput, Button, Blockquote } from "@mantine/core";

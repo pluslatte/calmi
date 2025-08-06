@@ -1,3 +1,4 @@
+"use client";
 import useConfirmationModal from "@/hooks/useConfirmationModal";
 import { Stack, Title, Alert, Loader } from "@mantine/core";
 import ConfirmationModal from "./ConfirmationModal";
