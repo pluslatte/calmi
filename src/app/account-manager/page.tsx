@@ -2,8 +2,8 @@
 import { Button, Container, Group, Title } from "@mantine/core";
 import React from "react";
 import { signOut } from "next-auth/react";
-import NewAccountRegistrationForm from "../../components/NewAccountRegistrationForm";
-import RegisteredAccountList from "../../components/RegisteredAccountList";
+import NewAccountRegistrationForm from "../components/NewAccountRegistrationForm";
+import RegisteredAccountList from "../components/RegisteredAccountList";
 
 const AccountManager = () => {
     return (
@@ -12,7 +12,7 @@ const AccountManager = () => {
                 <Title order={1}>アカウントマネージャ</Title>
                 <Button
                     color="red"
-                    onClick={() => signOut({ redirectTo: "/" })}
+                    onClick={() => signOut({ redirectTo: "/auth" })}
                 >
                     サインアウト
                 </Button>
