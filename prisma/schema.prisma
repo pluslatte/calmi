@@ -11,7 +11,7 @@ model MisskeyAccount {
     id            String   @id @default(cuid())
     sessionUserId String   @map("session_user_id")
     instanceUrl   String   @map("instance_url")
-    accessToken   String   @map("access_token") // 暗号化済み
+    accessToken   String   @map("access_token") // 暗号化したい
     username      String
     displayName   String   @map("display_name")
     avatarUrl     String?  @map("avatar_url")
