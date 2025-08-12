@@ -1,5 +1,5 @@
 "use client";
-import { registerAccountApi } from "@/lib/misskey-api/accounts";
+import { registerAccountApi } from "@/lib/db/misskey-accounts";
 import { notifySuccess, notifyFailure } from "@/lib/notifications";
 import { Card, Title, Stack, TextInput, Button, Blockquote } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

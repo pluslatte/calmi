@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import useRegisteredAccountsList from "./useRegisteredAccountsList";
-import { fetchAccountsApi } from "@/lib/misskey-api/accounts";
+import { fetchAccountsApi } from "@/lib/db/misskey-accounts";
 import { mockAccountsResponse } from "@/tests/fixtures";
 
-vi.mock("@/lib/misskey-api/accounts", () => ({
+vi.mock("@/lib/db/misskey-accounts", () => ({
     fetchAccountsApi: vi.fn(),
 }));
 

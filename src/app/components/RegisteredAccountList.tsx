@@ -4,7 +4,7 @@ import { Stack, Title, Alert, Loader } from "@mantine/core";
 import ConfirmationModal from "./ConfirmationModal";
 import RegisteredAccountCard from "./RegisteredAccountCard";
 import { useState } from "react";
-import { deleteAccountApi, fetchAccountsApi } from "@/lib/misskey-api/accounts";
+import { deleteAccountApi, fetchAccountsApi } from "@/lib/db/misskey-accounts";
 import { notifySuccess } from "@/lib/notifications";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";

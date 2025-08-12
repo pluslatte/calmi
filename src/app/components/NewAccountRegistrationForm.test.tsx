@@ -3,7 +3,7 @@ import { renderWithProviders, screen, waitFor } from "@/tests/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import NewAccountRegistrationForm from "./NewAccountRegistrationForm";
 import { notifyFailure, notifySuccess } from "@/lib/notifications";
-import { registerAccountApi } from "@/lib/misskey-api/accounts";
+import { registerAccountApi } from "@/lib/db/misskey-accounts";
 import { mockRegisterResponse } from "@/tests/fixtures";
 
 vi.mock("@/lib/notifications", () => ({
@@ -11,7 +11,7 @@ vi.mock("@/lib/notifications", () => ({
     notifyFailure: vi.fn(),
 }));
 
-vi.mock("@/lib/misskey-api/accounts", () => ({
+vi.mock("@/lib/db/misskey-accounts", () => ({
     registerAccountApi: vi.fn(),
 }));
 

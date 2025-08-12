@@ -6,7 +6,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { mockAccountsResponse, mockMisskeyAccounts } from "@/tests/fixtures/data/accounts";
 
 // vi.mockは関数を直接定義する必要がある
-vi.mock("@/lib/misskey-api/accounts", () => ({
+vi.mock("@/lib/db/misskey-accounts", () => ({
     fetchAccountsApi: vi.fn(),
     deleteAccountApi: vi.fn(),
 }));
@@ -16,7 +16,7 @@ vi.mock("@/lib/notifications", () => ({
 }));
 
 // モック関数を取得
-import { fetchAccountsApi, deleteAccountApi } from "@/lib/misskey-api/accounts";
+import { fetchAccountsApi, deleteAccountApi } from "@/lib/db/misskey-accounts";
 import { notifySuccess } from "@/lib/notifications";
 
 const mockFetchAccountsApi = vi.mocked(fetchAccountsApi);

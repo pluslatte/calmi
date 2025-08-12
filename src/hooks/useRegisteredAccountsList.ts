@@ -1,4 +1,4 @@
-import { fetchAccountsApi } from "@/lib/misskey-api/accounts";
+import { fetchAccountsApi } from "@/lib/db/misskey-accounts";
 import { notifyFailure } from "@/lib/notifications";
 import { MisskeyAccountPublic } from "@/types/accounts";
 import { useCallback, useEffect, useState } from "react";
