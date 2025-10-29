@@ -1,13 +1,19 @@
-use axum::{Json, extract::Path, http::StatusCode};
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
 
-use crate::types::InboxActivity;
-use crate::users;
+use crate::activitypub::types::InboxActivity;
+use crate::app_state::AppState;
+use crate::domain::user::UserRepository;
 
 pub async fn inbox_handler(
     Path(username): Path<String>,
+    State(state): State<AppState>,
     Json(activity): Json<InboxActivity>,
 ) -> Result<StatusCode, StatusCode> {
-    if !users::user_exists(&username) {
+    if !UserRepository::exists(&state.storage, &username) {
         return Err(StatusCode::NOT_FOUND);
     }
 

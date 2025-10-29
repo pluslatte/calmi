@@ -1,37 +1,42 @@
 use axum::{Router, routing};
 
-mod handlers;
-mod types;
-mod users;
+mod activitypub;
+mod app_state;
+mod config;
+mod domain;
+mod storage;
+mod web;
 
 #[tokio::main]
 async fn main() {
-    let post_store = users::create_post_store();
+    let config = config::Config::default();
+    let storage = storage::memory::MemoryStorage::new();
+    let state = app_state::AppState::new(config, storage);
 
     let app = Router::new()
         .route("/", routing::get(|| async { "ActivityPub Server" }))
         .route(
             "/.well-known/webfinger",
-            routing::get(handlers::webfinger::webfinger),
+            routing::get(web::handlers::webfinger::webfinger),
         )
         .route(
             "/users/{username}",
-            routing::get(handlers::actor::actor_handler),
+            routing::get(web::handlers::actor::actor_handler),
         )
         .route(
             "/users/{username}/inbox",
-            routing::post(handlers::inbox::inbox_handler),
+            routing::post(web::handlers::inbox::inbox_handler),
         )
         .route(
             "/users/{username}/outbox",
-            routing::get(handlers::outbox::outbox_handler)
-                .post(handlers::outbox::create_post_handler),
+            routing::get(web::handlers::outbox::outbox_handler)
+                .post(web::handlers::outbox::create_post_handler),
         )
         .route(
             "/users/{username}/statuses/{id}",
-            routing::get(handlers::note::note_handler),
+            routing::get(web::handlers::note::note_handler),
         )
-        .with_state(post_store);
+        .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
