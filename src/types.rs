@@ -49,7 +49,6 @@ pub struct ActorObject {
 #[derive(Debug, Deserialize)]
 pub struct InboxActivity {
     #[serde(rename = "type")]
-    #[allow(dead_code)]
     pub activity_type: String,
 }
 
@@ -65,6 +64,8 @@ pub struct OutboxCollection {
     pub first: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last: Option<String>,
+    #[serde(rename = "orderedItems", skip_serializing_if = "Option::is_none")]
+    pub ordered_items: Option<Vec<CreateActivity>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

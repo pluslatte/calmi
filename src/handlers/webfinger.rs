@@ -18,22 +18,13 @@ pub async fn webfinger(
         return Err(StatusCode::NOT_FOUND);
     }
 
-    let mut links = vec![
-        Link {
-            rel: "http://webfinger.net/rel/profile-page".to_string(),
-            r#type: Some("text/html".to_string()),
-            href: Some(format!("https://{}/~{}/", DOMAIN, username)),
-            titles: None,
-            properties: None,
-        },
-        Link {
-            rel: "self".to_string(),
-            r#type: Some("application/activity+json".to_string()),
-            href: Some(format!("https://{}/users/{}", DOMAIN, username)),
-            titles: None,
-            properties: None,
-        },
-    ];
+    let mut links = vec![Link {
+        rel: "self".to_string(),
+        r#type: Some("application/activity+json".to_string()),
+        href: Some(format!("https://{}/users/{}", DOMAIN, username)),
+        titles: None,
+        properties: None,
+    }];
 
     if !params.rel.is_empty() {
         links.retain(|link| params.rel.contains(&link.rel));

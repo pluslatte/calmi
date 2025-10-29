@@ -18,6 +18,22 @@ pub async fn outbox_handler(
     }
 
     let posts = users::get_posts(&store, &username);
+    let activities: Vec<CreateActivity> = posts
+        .iter()
+        .map(|note| {
+            let activity_id = format!("{}/activity", note.id);
+            CreateActivity {
+                context: None,
+                id: activity_id,
+                r#type: "Create".to_string(),
+                actor: note.attributed_to.clone(),
+                published: note.published.clone(),
+                to: note.to.clone().unwrap_or_default(),
+                cc: note.cc.clone(),
+                object: note.clone(),
+            }
+        })
+        .collect();
 
     let outbox = OutboxCollection {
         context: "https://www.w3.org/ns/activitystreams".to_string(),
@@ -26,6 +42,7 @@ pub async fn outbox_handler(
         total_items: posts.len() as u32,
         first: None,
         last: None,
+        ordered_items: Some(activities),
     };
 
     Ok(Json(outbox))
