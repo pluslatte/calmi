@@ -61,4 +61,54 @@ pub struct OutboxCollection {
     pub r#type: String,
     #[serde(rename = "totalItems")]
     pub total_items: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub first: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Note {
+    #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
+    pub context: Option<Vec<String>>,
+    pub id: String,
+    pub r#type: String,
+    pub content: String,
+    pub published: String,
+    #[serde(rename = "attributedTo")]
+    pub attributed_to: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub to: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cc: Option<Vec<String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateActivity {
+    #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
+    pub context: Option<Vec<String>>,
+    pub id: String,
+    pub r#type: String,
+    pub actor: String,
+    pub published: String,
+    pub to: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cc: Option<Vec<String>>,
+    pub object: Note,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateNoteRequest {
+    pub r#type: String,
+    pub object: CreateNoteObject,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateNoteObject {
+    pub r#type: String,
+    pub content: String,
+    #[serde(default)]
+    pub to: Vec<String>,
+    #[serde(default)]
+    pub cc: Vec<String>,
 }

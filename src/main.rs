@@ -6,6 +6,8 @@ mod users;
 
 #[tokio::main]
 async fn main() {
+    let post_store = users::create_post_store();
+
     let app = Router::new()
         .route("/", routing::get(|| async { "ActivityPub Server" }))
         .route(
@@ -22,8 +24,14 @@ async fn main() {
         )
         .route(
             "/users/{username}/outbox",
-            routing::get(handlers::outbox::outbox_handler),
-        );
+            routing::get(handlers::outbox::outbox_handler)
+                .post(handlers::outbox::create_post_handler),
+        )
+        .route(
+            "/users/{username}/statuses/{id}",
+            routing::get(handlers::note::note_handler),
+        )
+        .with_state(post_store);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
