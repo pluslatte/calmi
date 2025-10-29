@@ -41,10 +41,7 @@ pub fn get_user_info(username: &str) -> Option<UserInfo> {
 
 pub fn add_post(store: &PostStore, username: &str, note: Note) {
     let mut posts = store.lock().unwrap();
-    posts
-        .entry(username.to_string())
-        .or_insert_with(Vec::new)
-        .push(note);
+    posts.entry(username.to_string()).or_default().push(note);
 }
 
 pub fn get_posts(store: &PostStore, username: &str) -> Vec<Note> {
