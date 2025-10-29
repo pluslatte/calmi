@@ -4,9 +4,9 @@ use axum::{
     http::StatusCode,
 };
 
-use crate::activitypub::types::InboxActivity;
 use crate::app_state::AppState;
 use crate::domain::user::UserRepository;
+use crate::web::types::InboxActivity;
 
 pub async fn inbox_handler(
     Path(username): Path<String>,

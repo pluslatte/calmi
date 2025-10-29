@@ -4,8 +4,7 @@ use axum::{
     http::StatusCode,
 };
 
-use crate::activitypub::types::{WebFingerQuery, WebFingerResponse};
-use crate::activitypub::webfinger::build_webfinger_response;
+use crate::activitypub::webfinger::{WebFingerQuery, WebFingerResponse, build_webfinger_response};
 use crate::app_state::AppState;
 use crate::domain::user::UserRepository;
 
