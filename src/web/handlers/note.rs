@@ -25,7 +25,7 @@ pub async fn note_handler(
     let post = PostRepository::find_by_id(&state.storage, &username, &post_id)
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    let mut note = build_note(&state.config, &post);
+    let mut note = build_note(&post);
     note.context = Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
 
     Ok(Json(note))

@@ -2,7 +2,7 @@ use crate::activitypub::types::{CreateActivity, Note, OutboxCollection};
 use crate::config::Config;
 use crate::domain::post::Post;
 
-pub fn build_note(config: &Config, post: &Post) -> Note {
+pub fn build_note(post: &Post) -> Note {
     Note {
         context: None,
         id: post.id.clone(),
@@ -23,8 +23,8 @@ pub fn build_note(config: &Config, post: &Post) -> Note {
     }
 }
 
-pub fn build_create_activity(config: &Config, post: &Post) -> CreateActivity {
-    let note = build_note(config, post);
+pub fn build_create_activity(post: &Post) -> CreateActivity {
+    let note = build_note(post);
     let activity_id = format!("{}/activity", post.id);
 
     CreateActivity {
@@ -48,10 +48,7 @@ pub fn build_outbox_collection(
     username: &str,
     posts: &[Post],
 ) -> OutboxCollection {
-    let activities: Vec<CreateActivity> = posts
-        .iter()
-        .map(|post| build_create_activity(config, post))
-        .collect();
+    let activities: Vec<CreateActivity> = posts.iter().map(build_create_activity).collect();
 
     OutboxCollection {
         context: "https://www.w3.org/ns/activitystreams".to_string(),

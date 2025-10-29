@@ -69,7 +69,7 @@ pub async fn create_post_handler(
 
     PostRepository::save(&state.storage, &username, post.clone());
 
-    let mut activity = build_create_activity(&state.config, &post);
+    let mut activity = build_create_activity(&post);
     activity.context = Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
 
     Ok(Json(activity))
