@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::activitypub::activity::build_note;
-use crate::activitypub::types::Note;
+use crate::activitypub::types::NoteObject;
 use crate::app_state::AppState;
 use crate::domain::post::PostRepository;
 use crate::domain::user::UserRepository;
@@ -13,7 +13,7 @@ use crate::domain::user::UserRepository;
 pub async fn note_handler(
     Path((username, id)): Path<(String, String)>,
     State(state): State<AppState>,
-) -> Result<Json<Note>, StatusCode> {
+) -> Result<Json<NoteObject>, StatusCode> {
     if !UserRepository::exists(&state.storage, &username) {
         return Err(StatusCode::NOT_FOUND);
     }
@@ -26,7 +26,7 @@ pub async fn note_handler(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let mut note = build_note(&post);
-    note.object.context = Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
+    note.base.context = Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
 
     Ok(Json(note))
 }

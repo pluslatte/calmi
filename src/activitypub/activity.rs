@@ -1,10 +1,12 @@
-use crate::activitypub::types::{Activity, Create, Note, Object, OrderedCollection};
+use crate::activitypub::types::{
+    Activity, ActivityBase, CreateActivity, NoteObject, Object, ObjectBase, OrderedCollection,
+};
 use crate::config::Config;
 use crate::domain::post::Post;
 
-pub fn build_note(post: &Post) -> Note {
-    Note {
-        object: Object {
+pub fn build_note(post: &Post) -> NoteObject {
+    NoteObject {
+        base: ObjectBase {
             context: None,
             id: post.id.clone(),
             r#type: "Note".to_string(),
@@ -25,13 +27,13 @@ pub fn build_note(post: &Post) -> Note {
     }
 }
 
-pub fn build_create_activity(post: &Post) -> Create {
+pub fn build_create_activity(post: &Post) -> Activity {
     let note = build_note(post);
     let activity_id = format!("{}/activity", post.id);
 
-    Create {
-        activity: Activity {
-            object: Object {
+    Activity::Create(CreateActivity {
+        activity: ActivityBase {
+            object: ObjectBase {
                 context: None,
                 id: activity_id,
                 r#type: "Create".to_string(),
@@ -45,8 +47,8 @@ pub fn build_create_activity(post: &Post) -> Create {
             actor: post.author_id.clone(),
             published: post.published.clone(),
         },
-        object: note,
-    }
+        object: Object::Note(note),
+    })
 }
 
 pub fn build_outbox_collection(
@@ -54,7 +56,7 @@ pub fn build_outbox_collection(
     username: &str,
     posts: &[Post],
 ) -> OrderedCollection {
-    let activities: Vec<Create> = posts.iter().map(build_create_activity).collect();
+    let activities: Vec<Activity> = posts.iter().map(build_create_activity).collect();
 
     OrderedCollection {
         context: "https://www.w3.org/ns/activitystreams".to_string(),

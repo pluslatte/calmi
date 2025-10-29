@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 ///            startTime, summary, tag, updated, url, to, bto, cc, bcc, mediaType, id, type
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Object {
+pub struct ObjectBase {
     #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
     pub context: Option<Vec<String>>,
     pub id: String,
@@ -18,15 +18,37 @@ pub struct Object {
     pub cc: Option<Vec<String>>,
 }
 
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
+/// Represents a short written work typically less than a single paragraph in length
+/// Extends: Object
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NoteObject {
+    #[serde(flatten)]
+    pub base: ObjectBase,
+    pub content: String,
+    pub attributed_to: String,
+    pub published: String,
+}
+
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-object
+/// Object types that can be used in ActivityStreams
+/// This enum allows type-safe representation of different Object types
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Object {
+    Note(NoteObject),
+}
+
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-activity
 /// Extends: Object
 /// Properties: actor, object, target, result, origin, instrument
 ///            + Inherits all properties from Object
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Activity {
+pub struct ActivityBase {
     #[serde(flatten)]
-    pub object: Object,
+    pub object: ObjectBase,
     pub actor: String,
     pub published: String,
 }
@@ -37,24 +59,18 @@ pub struct Activity {
 /// Properties: Inherits all properties from Activity (which includes Object properties)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Create {
+pub struct CreateActivity {
     #[serde(flatten)]
-    pub activity: Activity,
-    pub object: Note,
+    pub activity: ActivityBase,
+    pub object: Object,
 }
 
-/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
-/// Represents a short written work typically less than a single paragraph in length
-/// Extends: Object
-/// Properties: Inherits all properties from Object
+/// Activity types
+/// This enum allows type-safe representation of different Activity types
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Note {
-    #[serde(flatten)]
-    pub object: Object,
-    pub content: String,
-    pub attributed_to: String,
-    pub published: String,
+#[serde(untagged)]
+pub enum Activity {
+    Create(CreateActivity),
 }
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
@@ -62,9 +78,9 @@ pub struct Note {
 /// Extends: Object
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Actor {
+pub struct ActorObject {
     #[serde(flatten)]
-    pub object: Object,
+    pub base: ObjectBase,
     pub preferred_username: String,
     pub name: String,
     pub summary: String,
@@ -87,5 +103,5 @@ pub struct OrderedCollection {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub ordered_items: Option<Vec<Create>>,
+    pub ordered_items: Option<Vec<Activity>>,
 }

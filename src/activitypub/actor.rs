@@ -1,10 +1,10 @@
-use crate::activitypub::types::{Actor, Object};
+use crate::activitypub::types::{ActorObject, ObjectBase};
 use crate::config::Config;
 use crate::domain::user::User;
 
-pub fn build_actor(config: &Config, user: &User) -> Actor {
-    Actor {
-        object: Object {
+pub fn build_actor(config: &Config, user: &User) -> ActorObject {
+    ActorObject {
+        base: ObjectBase {
             context: Some(vec![
                 "https://www.w3.org/ns/activitystreams".to_string(),
                 "https://w3id.org/security/v1".to_string(),

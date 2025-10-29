@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::activitypub::activity::{build_create_activity, build_outbox_collection};
-use crate::activitypub::types::{Create, OrderedCollection};
+use crate::activitypub::types::{Activity, OrderedCollection};
 use crate::app_state::AppState;
 use crate::domain::post::{Post, PostRepository};
 use crate::domain::user::UserRepository;
@@ -29,7 +29,7 @@ pub async fn create_post_handler(
     Path(username): Path<String>,
     State(state): State<AppState>,
     Json(request): Json<CreateNoteRequest>,
-) -> Result<Json<Create>, StatusCode> {
+) -> Result<Json<Activity>, StatusCode> {
     if !UserRepository::exists(&state.storage, &username) {
         return Err(StatusCode::NOT_FOUND);
     }
@@ -71,7 +71,9 @@ pub async fn create_post_handler(
     PostRepository::save(&state.storage, &username, post.clone());
 
     let mut activity = build_create_activity(&post);
-    activity.activity.object.context =
+
+    let Activity::Create(ref mut create) = activity;
+    create.activity.object.context =
         Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
 
     Ok(Json(activity))
