@@ -26,7 +26,7 @@ pub async fn note_handler(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let mut note = build_note(&post);
-    note.context = Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
+    note.object.context = Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
 
     Ok(Json(note))
 }
