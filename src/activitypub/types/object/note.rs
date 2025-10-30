@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::super::base::ObjectBase;
+use super::super::object::ObjectBase;
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
 /// Note extends Object

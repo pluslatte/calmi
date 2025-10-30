@@ -1,7 +1,7 @@
-use crate::activitypub::types::base::ObjectBase;
 use crate::activitypub::types::enums::{
     ActivityExtended, ObjectBased, ObjectExtended, ObjectOrString,
 };
+use crate::activitypub::types::object::ObjectBase;
 use crate::activitypub::types::object::create::Create;
 use crate::activitypub::types::object::note::Note;
 use crate::activitypub::types::object::ordered_collection::OrderedCollection;

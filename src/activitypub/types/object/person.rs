@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use super::super::base::ObjectBase;
 use super::super::enums::ObjectOrString;
+use super::super::object::ObjectBase;
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-person
 /// Person extends Object

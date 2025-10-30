@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+use super::object::Object;
 use super::object::activity::Activity;
 use super::object::collection::Collection;
 use super::object::create::Create;
 use super::object::note::Note;
-use super::object::object::Object;
 use super::object::ordered_collection::OrderedCollection;
 use super::object::person::Person;
 

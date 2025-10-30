@@ -1,5 +1,5 @@
-use crate::activitypub::types::base::ObjectBase;
 use crate::activitypub::types::enums::ObjectOrString;
+use crate::activitypub::types::object::ObjectBase;
 use crate::activitypub::types::object::person::Person;
 use crate::config::Config;
 use crate::domain::user::User;
