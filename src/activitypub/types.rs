@@ -37,33 +37,44 @@ pub enum CollectionExtended {
     OrderedCollection(OrderedCollection),
 }
 
+/// https://www.w3.org/TR/activitystreams-core/#object
+/// - All properties are optional
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Object {
     #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
     pub context: Option<Vec<String>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `id` property
+    /// - `id` is a globally unique identifier for the object
+    pub id: String,
 
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub to: Option<Vec<String>>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `type` property
+    /// - `type` indicates the type of the object
+    #[serde(rename = "type")]
+    pub r#type: String,
 }
 
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-person
+/// Person extends Object
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Person {
     #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
     pub context: Option<Vec<String>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `id` property
+    /// - `id` is a globally unique identifier for the object
+    pub id: String,
 
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `type` property
+    /// - `type` indicates the type of the object
+    #[serde(rename = "type")]
+    pub r#type: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -75,17 +86,24 @@ pub struct Person {
     pub outbox: Option<Box<ObjectOrString>>,
 }
 
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
+/// Note extends Object
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Note {
     #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
     pub context: Option<Vec<String>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `id` property
+    /// - `id` is a globally unique identifier for the object
+    pub id: String,
 
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `type` property
+    /// - `type` indicates the type of the object
+    #[serde(rename = "type")]
+    pub r#type: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub to: Option<Vec<String>>,
@@ -100,17 +118,24 @@ pub struct Note {
     pub published: Option<String>,
 }
 
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-activity
+/// Activity extends Object
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Activity {
     #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
     pub context: Option<Vec<String>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `id` property
+    /// - `id` is a globally unique identifier for the object
+    pub id: String,
 
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `type` property
+    /// - `type` indicates the type of the object
+    #[serde(rename = "type")]
+    pub r#type: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub actor: Option<Box<ObjectOrString>>,
@@ -119,17 +144,25 @@ pub struct Activity {
     pub object: Option<Box<ObjectExtended>>,
 }
 
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-create
+/// Create extends Activity
+/// Activity extends Object
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Create {
     #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
     pub context: Option<Vec<String>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `id` property
+    /// - `id` is a globally unique identifier for the object
+    pub id: String,
 
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `type` property
+    /// - `type` indicates the type of the object
+    #[serde(rename = "type")]
+    pub r#type: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub actor: Option<Box<ObjectOrString>>,
@@ -138,33 +171,48 @@ pub struct Create {
     pub object: Option<Box<ObjectOrString>>,
 }
 
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-collection
+/// Collection extends Object
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Collection {
     #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
     pub context: Option<Vec<String>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `id` property
+    /// - `id` is a globally unique identifier for the object
+    pub id: String,
 
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `type` property
+    /// - `type` indicates the type of the object
+    #[serde(rename = "type")]
+    pub r#type: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub total_items: Option<usize>,
 }
 
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-orderedcollection
+/// OrderedCollection extends Collection
+/// Collection extends Object
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderedCollection {
     #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
     pub context: Option<Vec<String>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `id` property
+    /// - `id` is a globally unique identifier for the object
+    pub id: String,
 
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    /// https://www.w3.org/TR/activitypub/#obj-id
+    /// - ActivityPub specification requires `type` property
+    /// - `type` indicates the type of the object
+    #[serde(rename = "type")]
+    pub r#type: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub total_items: Option<usize>,
