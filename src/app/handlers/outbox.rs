@@ -4,8 +4,10 @@ use axum::{
     http::StatusCode,
 };
 
-use crate::activitypub::activity::{build_create_activity, build_outbox_collection};
-use crate::activitypub::types::{ActivityExtended, OrderedCollection};
+use crate::activitypub::{
+    activity::{build_create_activity, build_outbox_collection},
+    types::{enums::ActivityExtended, object::ordered_collection::OrderedCollection},
+};
 use crate::app::types::CreateNoteRequest;
 use crate::app_state::AppState;
 use crate::domain::post::{Post, PostRepository};

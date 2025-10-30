@@ -4,7 +4,7 @@ use axum::{
     http::StatusCode,
 };
 
-use crate::activitypub::{activity::build_note, types::Note};
+use crate::activitypub::{activity::build_note, types::object::note::Note};
 use crate::app_state::AppState;
 use crate::domain::post::PostRepository;
 use crate::domain::user::UserRepository;
