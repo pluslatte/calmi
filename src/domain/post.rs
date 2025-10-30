@@ -5,7 +5,6 @@ pub struct Post {
     pub published: String,
     pub author_id: String,
     pub to: Vec<String>,
-    pub cc: Vec<String>,
 }
 
 impl Post {
@@ -15,7 +14,6 @@ impl Post {
         published: String,
         author_id: String,
         to: Vec<String>,
-        cc: Vec<String>,
     ) -> Self {
         Self {
             id,
@@ -23,7 +21,6 @@ impl Post {
             published,
             author_id,
             to,
-            cc,
         }
     }
 }

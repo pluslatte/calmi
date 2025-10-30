@@ -18,6 +18,4 @@ pub struct CreateNoteObject {
     pub content: String,
     #[serde(default)]
     pub to: Vec<String>,
-    #[serde(default)]
-    pub cc: Vec<String>,
 }

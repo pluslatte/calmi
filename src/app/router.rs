@@ -12,7 +12,7 @@ pub fn create_router(state: AppState) -> Router {
         )
         .route(
             "/users/{username}",
-            routing::get(handlers::actor::actor_handler),
+            routing::get(handlers::actor::person_handler),
         )
         .route(
             "/users/{username}/inbox",

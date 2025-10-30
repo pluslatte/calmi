@@ -2,16 +2,11 @@
 pub struct User {
     pub username: String,
     pub name: String,
-    pub summary: String,
 }
 
 impl User {
-    pub fn new(username: String, name: String, summary: String) -> Self {
-        Self {
-            username,
-            name,
-            summary,
-        }
+    pub fn new(username: String, name: String) -> Self {
+        Self { username, name }
     }
 }
 

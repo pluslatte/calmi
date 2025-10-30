@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::activitypub::activity::{build_create_activity, build_outbox_collection};
-use crate::activitypub::types::{Activity, OrderedCollection};
+use crate::activitypub::types::{ActivityExtended, OrderedCollection};
 use crate::app::types::CreateNoteRequest;
 use crate::app_state::AppState;
 use crate::domain::post::{Post, PostRepository};
@@ -29,7 +29,7 @@ pub async fn create_post_handler(
     Path(username): Path<String>,
     State(state): State<AppState>,
     Json(request): Json<CreateNoteRequest>,
-) -> Result<Json<Activity>, StatusCode> {
+) -> Result<Json<ActivityExtended>, StatusCode> {
     if !UserRepository::exists(&state.storage, &username) {
         return Err(StatusCode::NOT_FOUND);
     }
@@ -53,28 +53,19 @@ pub async fn create_post_handler(
         request.object.to
     };
 
-    let cc = if request.object.cc.is_empty() {
-        vec![]
-    } else {
-        request.object.cc
-    };
-
     let post = Post::new(
         note_id.clone(),
         request.object.content,
         now.clone(),
         actor_id.clone(),
         to.clone(),
-        cc.clone(),
     );
 
     PostRepository::save(&state.storage, &username, post.clone());
 
     let mut activity = build_create_activity(&post);
 
-    let Activity::Create(ref mut create) = activity;
-    create.activity.object.context =
-        Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
+    activity.context = Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]);
 
-    Ok(Json(activity))
+    Ok(Json(ActivityExtended::Create(activity)))
 }

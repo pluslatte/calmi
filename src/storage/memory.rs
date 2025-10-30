@@ -14,27 +14,15 @@ impl MemoryStorage {
 
         users.insert(
             "alice".to_string(),
-            User::new(
-                "alice".to_string(),
-                "Alice".to_string(),
-                "Hello! I'm Alice.".to_string(),
-            ),
+            User::new("alice".to_string(), "Alice".to_string()),
         );
         users.insert(
             "bob".to_string(),
-            User::new(
-                "bob".to_string(),
-                "Bob".to_string(),
-                "Bob here, nice to meet you.".to_string(),
-            ),
+            User::new("bob".to_string(), "Bob".to_string()),
         );
         users.insert(
             "carol".to_string(),
-            User::new(
-                "carol".to_string(),
-                "Carol".to_string(),
-                "Carol's account.".to_string(),
-            ),
+            User::new("carol".to_string(), "Carol".to_string()),
         );
 
         Self {
