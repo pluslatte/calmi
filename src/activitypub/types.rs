@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
 pub enum ApObjectOrString {
     Object(ActivityPubObject),
     Str(String),

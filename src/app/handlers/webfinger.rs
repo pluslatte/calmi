@@ -1,17 +1,18 @@
 use axum::{
     Json,
     extract::{Query, State},
-    http::StatusCode,
+    http::{StatusCode, header},
+    response::{IntoResponse, Response},
 };
 
-use crate::activitypub::webfinger::{WebFingerQuery, WebFingerResponse, build_webfinger_response};
+use crate::activitypub::webfinger::{WebFingerQuery, build_webfinger_response};
 use crate::app_state::AppState;
 use crate::domain::user::UserRepository;
 
 pub async fn webfinger(
     Query(query): Query<WebFingerQuery>,
     State(state): State<AppState>,
-) -> Result<Json<WebFingerResponse>, StatusCode> {
+) -> Result<Response, StatusCode> {
     let resource = &query.resource;
 
     if !resource.starts_with("acct:") {
@@ -37,5 +38,9 @@ pub async fn webfinger(
     }
 
     let response = build_webfinger_response(&state.config, username);
-    Ok(Json(response))
+    Ok((
+        [(header::CONTENT_TYPE, "application/jrd+json")],
+        Json(response),
+    )
+        .into_response())
 }
