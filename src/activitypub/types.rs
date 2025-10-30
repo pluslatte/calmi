@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum ApObjectOrString {
-    Object(ActivityPubObject),
+pub enum ObjectOrString {
+    Object(ObjectBased),
     Str(String),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum ActivityPubObject {
+pub enum ObjectBased {
     Object(ObjectExtended),
     Activity(ActivityExtended),
     Collection(CollectionExtended),
@@ -53,8 +53,8 @@ pub struct Person {
     #[serde(rename = "type")]
     pub r#type: Option<String>,
     pub name: Option<String>,
-    pub inbox: Option<Box<ApObjectOrString>>,
-    pub outbox: Option<Box<ApObjectOrString>>,
+    pub inbox: Option<Box<ObjectOrString>>,
+    pub outbox: Option<Box<ObjectOrString>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -79,7 +79,7 @@ pub struct Activity {
     pub id: Option<String>,
     #[serde(rename = "type")]
     pub r#type: Option<String>,
-    pub actor: Option<Box<ApObjectOrString>>,
+    pub actor: Option<Box<ObjectOrString>>,
     pub object: Option<Box<ObjectExtended>>,
 }
 
@@ -91,8 +91,8 @@ pub struct Create {
     pub id: Option<String>,
     #[serde(rename = "type")]
     pub r#type: Option<String>,
-    pub actor: Option<Box<ApObjectOrString>>,
-    pub object: Option<Box<ApObjectOrString>>,
+    pub actor: Option<Box<ObjectOrString>>,
+    pub object: Option<Box<ObjectOrString>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -115,5 +115,5 @@ pub struct OrderedCollection {
     #[serde(rename = "type")]
     pub r#type: Option<String>,
     pub total_items: Option<usize>,
-    pub ordered_items: Option<Vec<ApObjectOrString>>,
+    pub ordered_items: Option<Vec<ObjectOrString>>,
 }

@@ -1,6 +1,5 @@
 use crate::activitypub::types::{
-    ActivityExtended, ActivityPubObject, ApObjectOrString, Create, Note, ObjectExtended,
-    OrderedCollection,
+    ActivityExtended, Create, Note, ObjectBased, ObjectExtended, ObjectOrString, OrderedCollection,
 };
 use crate::config::Config;
 use crate::domain::post::Post;
@@ -29,10 +28,10 @@ pub fn build_create_activity(post: &Post) -> Create {
         context: None,
         id: Some(activity_id),
         r#type: Some("Create".to_string()),
-        actor: Some(Box::new(ApObjectOrString::Str(post.author_id.clone()))),
-        object: Some(Box::new(ApObjectOrString::Object(
-            ActivityPubObject::Object(ObjectExtended::Note(note)),
-        ))),
+        actor: Some(Box::new(ObjectOrString::Str(post.author_id.clone()))),
+        object: Some(Box::new(ObjectOrString::Object(ObjectBased::Object(
+            ObjectExtended::Note(note),
+        )))),
     }
 }
 
@@ -52,7 +51,7 @@ pub fn build_outbox_collection(
             activities
                 .iter()
                 .map(|activity| {
-                    ApObjectOrString::Object(ActivityPubObject::Activity(ActivityExtended::Create(
+                    ObjectOrString::Object(ObjectBased::Activity(ActivityExtended::Create(
                         activity.clone(),
                     )))
                 })
