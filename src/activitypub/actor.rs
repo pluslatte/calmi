@@ -1,15 +1,17 @@
-use crate::activitypub::types::{ObjectOrString, Person};
+use crate::activitypub::types::{ActivityPubBase, ObjectOrString, Person};
 use crate::config::Config;
 use crate::domain::user::User;
 
 pub fn build_person(config: &Config, user: &User) -> Person {
     Person {
-        context: Some(vec![
-            "https://www.w3.org/ns/activitystreams".to_string(),
-            "https://w3id.org/security/v1".to_string(),
-        ]),
-        id: format!("{}/users/{}", config.base_url, user.username),
-        r#type: "Person".to_string(),
+        base: ActivityPubBase {
+            context: Some(vec![
+                "https://www.w3.org/ns/activitystreams".to_string(),
+                "https://w3id.org/security/v1".to_string(),
+            ]),
+            id: format!("{}/users/{}", config.base_url, user.username),
+            r#type: "Person".to_string(),
+        },
         name: Some(user.name.clone()),
         inbox: Some(Box::new(ObjectOrString::Str(format!(
             "{}/users/{}/inbox",
