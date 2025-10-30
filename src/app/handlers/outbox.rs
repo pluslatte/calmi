@@ -6,10 +6,10 @@ use axum::{
 
 use crate::activitypub::activity::{build_create_activity, build_outbox_collection};
 use crate::activitypub::types::{Activity, OrderedCollection};
+use crate::app::types::CreateNoteRequest;
 use crate::app_state::AppState;
 use crate::domain::post::{Post, PostRepository};
 use crate::domain::user::UserRepository;
-use crate::web::types::CreateNoteRequest;
 
 pub async fn outbox_handler(
     Path(username): Path<String>,
