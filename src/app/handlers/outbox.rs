@@ -40,27 +40,21 @@ pub async fn create_post_handler(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let now = chrono::Utc::now().to_rfc3339();
-    let post_id = format!("{}", chrono::Utc::now().timestamp_millis());
-
-    let note_id = format!(
-        "{}/users/{}/statuses/{}",
-        state.config.base_url, username, post_id
-    );
-    let actor_id = format!("{}/users/{}", state.config.base_url, username);
-
-    let to = if request.object.to.is_empty() {
-        vec!["https://www.w3.org/ns/activitystreams#Public".to_string()]
-    } else {
-        request.object.to
-    };
-
     let post = Post::new(
-        note_id.clone(),
+        format!(
+            "{}/users/{}/statuses/{}",
+            state.config.base_url,
+            username,
+            chrono::Utc::now().timestamp_millis()
+        ),
         request.object.content,
-        now.clone(),
-        actor_id.clone(),
-        to.clone(),
+        chrono::Utc::now().to_rfc3339(),
+        format!("{}/users/{}", state.config.base_url, username),
+        if request.object.to.is_empty() {
+            vec!["https://www.w3.org/ns/activitystreams#Public".to_string()]
+        } else {
+            request.object.to
+        },
     );
 
     PostRepository::save(&state.storage, &username, post.clone());
