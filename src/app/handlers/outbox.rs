@@ -6,7 +6,7 @@ use axum::{
 
 use crate::activitypub::{
     activity::{build_create_activity, build_outbox_collection},
-    types::{enums::ActivityExtended, object::ordered_collection::OrderedCollection},
+    types::object::{create::Create, ordered_collection::OrderedCollection},
 };
 use crate::app::types::CreateNoteRequest;
 use crate::app_state::AppState;
@@ -31,7 +31,7 @@ pub async fn create_post_handler(
     Path(username): Path<String>,
     State(state): State<AppState>,
     Json(request): Json<CreateNoteRequest>,
-) -> Result<Json<ActivityExtended>, StatusCode> {
+) -> Result<Json<Create>, StatusCode> {
     if !UserRepository::exists(&state.storage, &username) {
         return Err(StatusCode::NOT_FOUND);
     }
@@ -61,5 +61,5 @@ pub async fn create_post_handler(
 
     let activity = build_create_activity(&post);
 
-    Ok(Json(ActivityExtended::Create(activity)))
+    Ok(Json(activity))
 }

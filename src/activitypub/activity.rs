@@ -1,6 +1,4 @@
-use crate::activitypub::types::enums::{
-    ActivityExtended, ObjectBased, ObjectExtended, ObjectOrString,
-};
+use crate::activitypub::types::enums::{ObjectBased, ObjectOrString};
 use crate::activitypub::types::object::create::Create;
 use crate::activitypub::types::object::note::Note;
 use crate::activitypub::types::object::ordered_collection::OrderedCollection;
@@ -32,9 +30,7 @@ pub fn build_create_activity(post: &Post) -> Create {
         id: activity_id,
         r#type: "Create".to_string(),
         actor: Some(Box::new(ObjectOrString::Str(post.author_id.clone()))),
-        object: Some(Box::new(ObjectOrString::Object(ObjectBased::Object(
-            ObjectExtended::Note(note),
-        )))),
+        object: Some(Box::new(ObjectOrString::Object(ObjectBased::Note(note)))),
     }
 }
 
@@ -53,11 +49,7 @@ pub fn build_outbox_collection(
         ordered_items: Some(
             activities
                 .iter()
-                .map(|activity| {
-                    ObjectOrString::Object(ObjectBased::Activity(ActivityExtended::Create(
-                        activity.clone(),
-                    )))
-                })
+                .map(|activity| ObjectOrString::Object(ObjectBased::Create(activity.clone())))
                 .collect(),
         ),
     }
