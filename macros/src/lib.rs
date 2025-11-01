@@ -48,13 +48,13 @@ fn generate_object_base_fields(derive_input: &DeriveInput) -> Result<TokenStream
         pub context: Option<Vec<String>>,
 
         /// https://www.w3.org/TR/activitypub/#obj-id
-        /// ActivityPub specification requires `id` property
-        /// `id` is a globally unique identifier for the object
+        /// - ActivityPub specification requires `id` property
+        /// - `id` is a globally unique identifier for the object
         pub id: String,
 
         /// https://www.w3.org/TR/activitypub/#obj-id
-        /// ActivityPub specification requires `type` property
-        /// `type` indicates the type of the object
+        /// - ActivityPub specification requires `type` property
+        /// - `type` indicates the type of the object
         #[serde(rename = "type")]
         pub r#type: String
     };
