@@ -50,13 +50,14 @@ fn generate_object_base_fields(derive_input: &DeriveInput) -> Result<TokenStream
         /// https://www.w3.org/TR/activitypub/#obj-id
         /// - ActivityPub specification requires `id` property
         /// - `id` is a globally unique identifier for the object
-        pub id: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub id: Option<String>,
 
         /// https://www.w3.org/TR/activitypub/#obj-id
         /// - ActivityPub specification requires `type` property
         /// - `type` indicates the type of the object
-        #[serde(rename = "type")]
-        pub r#type: String
+        #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+        pub r#type: Option<String>
     };
 
     let fields_output = if existing_fields.is_empty() {

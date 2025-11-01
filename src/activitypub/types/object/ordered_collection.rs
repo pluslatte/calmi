@@ -1,7 +1,7 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use super::super::enums::ObjectOrString;
+use super::super::enums::ObjectOrStringOrLink;
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-orderedcollection
 /// OrderedCollection extends Collection
@@ -14,5 +14,5 @@ pub struct OrderedCollection {
     pub total_items: Option<usize>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub ordered_items: Option<Vec<ObjectOrString>>,
+    pub ordered_items: Option<Vec<ObjectOrStringOrLink>>,
 }

@@ -1,7 +1,7 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use super::super::enums::ObjectOrString;
+use super::super::enums::ObjectOrStringOrLink;
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-create
 /// Create extends Activity
@@ -11,8 +11,8 @@ use super::super::enums::ObjectOrString;
 #[serde(rename_all = "camelCase")]
 pub struct Create {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub actor: Option<Box<ObjectOrString>>,
+    pub actor: Option<Box<ObjectOrStringOrLink>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub object: Option<Box<ObjectOrString>>,
+    pub object: Option<Box<ObjectOrStringOrLink>>,
 }

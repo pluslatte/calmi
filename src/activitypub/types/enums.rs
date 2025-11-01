@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::activitypub::types::link::Link;
 use crate::activitypub::types::object::Object;
 use crate::activitypub::types::object::activity::Activity;
 use crate::activitypub::types::object::collection::Collection;
@@ -17,9 +18,10 @@ pub enum SingleOrMultiple<T> {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum ObjectOrString {
+pub enum ObjectOrStringOrLink {
     Object(ObjectBased),
     Str(String),
+    Link(Link),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

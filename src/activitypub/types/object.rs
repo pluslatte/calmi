@@ -29,8 +29,8 @@ mod tests {
         let object: Result<Object, _> = serde_json::from_str(json);
         match &object {
             Ok(obj) => {
-                assert_eq!(obj.id, "http://example.org/object/1");
-                assert_eq!(obj.r#type, "Object");
+                assert_eq!(obj.id, "http://example.org/object/1".to_string().into());
+                assert_eq!(obj.r#type, "Object".to_string().into());
             }
             Err(e) => panic!("Failure: {}", e),
         }
@@ -45,8 +45,8 @@ mod tests {
         let object: Result<Object, _> = serde_json::from_str(json);
         match &object {
             Ok(obj) => {
-                assert_eq!(obj.id, "http://example.org/foo");
-                assert_eq!(obj.r#type, "Note");
+                assert_eq!(obj.id, "http://example.org/foo".to_string().into());
+                assert_eq!(obj.r#type, "Note".to_string().into());
             }
             Err(e) => panic!("Failure: {}", e),
         }
@@ -63,7 +63,7 @@ mod tests {
         match &object {
             Ok(obj) => {
                 assert!(obj.context.is_some());
-                assert_eq!(obj.id, "http://example.org/foo");
+                assert_eq!(obj.id, "http://example.org/foo".to_string().into());
                 if let Some(SingleOrMultiple::Single(ctx)) = &obj.context {
                     assert_eq!(ctx, "https://www.w3.org/ns/activitystreams");
                 } else {
@@ -97,7 +97,7 @@ mod tests {
                     }
                     _ => panic!("Expected multiple contexts"),
                 }
-                assert_eq!(obj.id, "http://example.org/foo");
+                assert_eq!(obj.id, "http://example.org/foo".to_string().into());
             }
             Err(e) => panic!("Failure: {}", e),
         }
@@ -120,8 +120,8 @@ mod tests {
         let object: Result<Object, _> = serde_json::from_str(json);
         match &object {
             Ok(obj) => {
-                assert_eq!(obj.id, "http://example.org/foo");
-                assert_eq!(obj.r#type, "Note");
+                assert_eq!(obj.id, "http://example.org/foo".to_string().into());
+                assert_eq!(obj.r#type, "Note".to_string().into());
                 if let Some(SingleOrMultiple::Single(ctx)) = &obj.context {
                     assert_eq!(ctx, "https://www.w3.org/ns/activitystreams");
                 } else {
