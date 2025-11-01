@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use crate::activitypub::types::enums::{
-    LinkOrStringUrl, ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple,
+    LinkOrStringUrl, ObjectOrLinkOrStringUrl, ObjectOrStringUrl, SingleOrMultiple,
 };
 /// https://www.w3.org/TR/activitystreams-vocabulary/#properties
 /// ActivityStreams 2.0 Properties
@@ -201,7 +201,7 @@ pub type Result = SingleOrMultiple<ObjectOrLinkOrStringUrl>;
 /// Domain: Object
 /// Range: Collection
 /// Functional: True
-pub type Replies = ObjectBased;
+pub type Replies = ObjectOrStringUrl;
 
 /// One or more "tags" that have been associated with an objects.
 /// URI: https://www.w3.org/ns/activitystreams#tag
@@ -265,7 +265,7 @@ pub type Duration = String;
 /// Domain: Link
 /// Range: xsd:nonNegativeInteger
 /// Functional: True
-pub type Height = u32;
+pub type Height = usize;
 
 /// The target resource pointed to by a Link.
 /// URI: https://www.w3.org/ns/activitystreams#href
@@ -348,7 +348,7 @@ pub type Rel = SingleOrMultiple<String>;
 /// Domain: OrderedCollectionPage
 /// Range: xsd:nonNegativeInteger
 /// Functional: True
-pub type StartIndex = u32;
+pub type StartIndex = usize;
 
 /// A natural language summarization of the object encoded as HTML.
 /// URI: https://www.w3.org/ns/activitystreams#summary
@@ -361,7 +361,7 @@ pub type Summary = String;
 /// Domain: Collection
 /// Range: xsd:nonNegativeInteger
 /// Functional: True
-pub type TotalItems = u32;
+pub type TotalItems = usize;
 
 /// Specifies the measurement units for the radius and altitude properties on a Place object.
 /// URI: https://www.w3.org/ns/activitystreams#units
@@ -382,7 +382,7 @@ pub type Updated = String;
 /// Domain: Link
 /// Range: xsd:nonNegativeInteger
 /// Functional: True
-pub type Width = u32;
+pub type Width = usize;
 
 /// On a Relationship object, the subject property identifies one of the connected individuals.
 /// URI: https://www.w3.org/ns/activitystreams#subject
@@ -395,14 +395,14 @@ pub type Subject = ObjectOrLinkOrStringUrl;
 /// URI: https://www.w3.org/ns/activitystreams#relationship
 /// Domain: Relationship
 /// Range: Object
-pub type Relationship = SingleOrMultiple<ObjectBased>;
+pub type Relationship = SingleOrMultiple<ObjectOrStringUrl>;
 
 /// On a Profile object, the describes property identifies the object described by the Profile.
 /// URI: https://www.w3.org/ns/activitystreams#describes
 /// Domain: Profile
 /// Range: Object
 /// Functional: True
-pub type Describes = ObjectBased;
+pub type Describes = ObjectOrStringUrl;
 
 /// On a Tombstone object, the formerType property identifies the type of the object that was deleted.
 /// URI: https://www.w3.org/ns/activitystreams#formerType

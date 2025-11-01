@@ -1,4 +1,4 @@
-use crate::activitypub::types::enums::{ObjectBased, ObjectOrStringOrLink, SingleOrMultiple};
+use crate::activitypub::types::enums::{ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple};
 use crate::activitypub::types::object::create::Create;
 use crate::activitypub::types::object::note::Note;
 use crate::activitypub::types::object::ordered_collection::OrderedCollection;
@@ -16,9 +16,16 @@ pub fn build_note(post: &Post) -> Note {
         to: if post.to.is_empty() {
             None
         } else {
-            Some(post.to.clone())
+            Some(Box::new(SingleOrMultiple::Multiple(
+                post.to
+                    .iter()
+                    .map(|s| ObjectOrLinkOrStringUrl::Str(s.clone()))
+                    .collect(),
+            )))
         },
-        attributed_to: Some(post.author_id.clone()),
+        attributed_to: Some(Box::new(SingleOrMultiple::Single(
+            ObjectOrLinkOrStringUrl::Str(post.author_id.clone()),
+        ))),
         content: Some(post.content.clone()),
         published: Some(post.published.clone()),
     }
@@ -34,10 +41,12 @@ pub fn build_create_activity(post: &Post) -> Create {
         ])),
         id: Some(activity_id),
         r#type: Some("Create".to_string()),
-        actor: Some(Box::new(ObjectOrStringOrLink::Str(post.author_id.clone()))),
-        object: Some(Box::new(ObjectOrStringOrLink::Object(ObjectBased::Note(
-            note,
-        )))),
+        actor: Some(Box::new(SingleOrMultiple::Single(
+            ObjectOrLinkOrStringUrl::Str(post.author_id.clone()),
+        ))),
+        object: Some(Box::new(SingleOrMultiple::Single(
+            ObjectOrLinkOrStringUrl::Object(ObjectBased::Note(note)),
+        ))),
     }
 }
 
@@ -58,7 +67,9 @@ pub fn build_outbox_collection(
         ordered_items: Some(
             activities
                 .iter()
-                .map(|activity| ObjectOrStringOrLink::Object(ObjectBased::Create(activity.clone())))
+                .map(|activity| {
+                    ObjectOrLinkOrStringUrl::Object(ObjectBased::Create(activity.clone()))
+                })
                 .collect(),
         ),
     }

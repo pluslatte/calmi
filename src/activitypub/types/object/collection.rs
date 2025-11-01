@@ -1,6 +1,8 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
+use crate::activitypub::properties::TotalItems;
+
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-collection
 /// Collection extends Object
 #[object_based]
@@ -8,5 +10,5 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct Collection {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub total_items: Option<usize>,
+    pub total_items: Option<TotalItems>,
 }

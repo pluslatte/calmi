@@ -1,8 +1,8 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::types::enums::ObjectBased;
-use crate::activitypub::types::enums::ObjectOrStringOrLink;
+use crate::activitypub::properties::Actor;
+use crate::activitypub::properties::ObjectProperty;
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-activity
 /// Activity extends Object
@@ -11,8 +11,8 @@ use crate::activitypub::types::enums::ObjectOrStringOrLink;
 #[serde(rename_all = "camelCase")]
 pub struct Activity {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub actor: Option<Box<ObjectOrStringOrLink>>,
+    pub actor: Option<Box<Actor>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub object: Option<Box<ObjectBased>>,
+    pub object: Option<Box<ObjectProperty>>,
 }

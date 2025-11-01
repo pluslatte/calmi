@@ -1,7 +1,9 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use super::super::enums::ObjectOrStringOrLink;
+use crate::activitypub::properties::Name;
+
+use super::super::enums::ObjectOrLinkOrStringUrl;
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-person
 /// Person extends Object
@@ -10,11 +12,11 @@ use super::super::enums::ObjectOrStringOrLink;
 #[serde(rename_all = "camelCase")]
 pub struct Person {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
+    pub name: Option<Name>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inbox: Option<Box<ObjectOrStringOrLink>>,
+    pub inbox: Option<Box<ObjectOrLinkOrStringUrl>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub outbox: Option<Box<ObjectOrStringOrLink>>,
+    pub outbox: Option<Box<ObjectOrLinkOrStringUrl>>,
 }

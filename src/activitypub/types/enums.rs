@@ -18,10 +18,24 @@ pub enum SingleOrMultiple<T> {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum ObjectOrStringOrLink {
+pub enum ObjectOrLinkOrStringUrl {
+    Object(ObjectBased),
+    Link(Link),
+    Str(String),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum ObjectOrStringUrl {
     Object(ObjectBased),
     Str(String),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum LinkOrStringUrl {
     Link(Link),
+    Str(String),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
