@@ -1,10 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
-pub struct InboxActivity {
-    #[serde(rename = "type")]
-    pub activity_type: String,
-}
+pub struct InboxActivity {}
 
 #[derive(Debug, Deserialize)]
 pub struct CreateNoteRequest {
