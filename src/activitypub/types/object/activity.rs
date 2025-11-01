@@ -1,6 +1,7 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
+use super::OneOrMany;
 use crate::activitypub::types::enums::ObjectBased;
 use crate::activitypub::types::enums::ObjectOrString;
 

@@ -10,6 +10,13 @@ use crate::activitypub::types::object::person::Person;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
+pub enum OneOrMany {
+    Single(String),
+    Multiple(Vec<String>),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
 pub enum ObjectOrString {
     Object(ObjectBased),
     Str(String),

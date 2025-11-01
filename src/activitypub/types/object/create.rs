@@ -2,6 +2,7 @@ use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
 use super::super::enums::ObjectOrString;
+use super::OneOrMany;
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-create
 /// Create extends Activity

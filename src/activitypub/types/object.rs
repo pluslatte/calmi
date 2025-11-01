@@ -5,6 +5,7 @@ pub mod note;
 pub mod ordered_collection;
 pub mod person;
 
+use crate::activitypub::types::enums::OneOrMany;
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
@@ -63,6 +64,11 @@ mod tests {
             Ok(obj) => {
                 assert!(obj.context.is_some());
                 assert_eq!(obj.id, "http://example.org/foo");
+                if let Some(OneOrMany::Single(ctx)) = &obj.context {
+                    assert_eq!(ctx, "https://www.w3.org/ns/activitystreams");
+                } else {
+                    panic!("Expected single context");
+                }
             }
             Err(e) => panic!("Failure: {}", e),
         }
@@ -82,7 +88,15 @@ mod tests {
         match &object {
             Ok(obj) => {
                 assert!(obj.context.is_some());
-                assert_eq!(obj.context.as_ref().unwrap().len(), 2);
+
+                match &obj.context {
+                    Some(OneOrMany::Multiple(ctxs)) => {
+                        assert_eq!(ctxs.len(), 2);
+                        assert_eq!(ctxs[0], "https://www.w3.org/ns/activitystreams");
+                        assert_eq!(ctxs[1], "https://w3id.org/security/v1");
+                    }
+                    _ => panic!("Expected multiple contexts"),
+                }
                 assert_eq!(obj.id, "http://example.org/foo");
             }
             Err(e) => panic!("Failure: {}", e),
@@ -108,6 +122,11 @@ mod tests {
             Ok(obj) => {
                 assert_eq!(obj.id, "http://example.org/foo");
                 assert_eq!(obj.r#type, "Note");
+                if let Some(OneOrMany::Single(ctx)) = &obj.context {
+                    assert_eq!(ctx, "https://www.w3.org/ns/activitystreams");
+                } else {
+                    panic!("Expected single context");
+                }
             }
             Err(e) => panic!("Failure: {}", e),
         }
