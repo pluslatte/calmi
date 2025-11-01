@@ -1,7 +1,6 @@
 use crate::activitypub::types::enums::{
     ActivityExtended, ObjectBased, ObjectExtended, ObjectOrString,
 };
-use crate::activitypub::types::object::ObjectBase;
 use crate::activitypub::types::object::create::Create;
 use crate::activitypub::types::object::note::Note;
 use crate::activitypub::types::object::ordered_collection::OrderedCollection;
@@ -10,11 +9,9 @@ use crate::domain::post::Post;
 
 pub fn build_note(post: &Post) -> Note {
     Note {
-        base: ObjectBase {
-            context: Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]),
-            id: post.id.clone(),
-            r#type: "Note".to_string(),
-        },
+        context: Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]),
+        id: post.id.clone(),
+        r#type: "Note".to_string(),
         to: if post.to.is_empty() {
             None
         } else {
@@ -31,11 +28,9 @@ pub fn build_create_activity(post: &Post) -> Create {
     let activity_id = format!("{}/activity", post.id);
 
     Create {
-        base: ObjectBase {
-            context: Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]),
-            id: activity_id,
-            r#type: "Create".to_string(),
-        },
+        context: Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]),
+        id: activity_id,
+        r#type: "Create".to_string(),
         actor: Some(Box::new(ObjectOrString::Str(post.author_id.clone()))),
         object: Some(Box::new(ObjectOrString::Object(ObjectBased::Object(
             ObjectExtended::Note(note),
@@ -51,11 +46,9 @@ pub fn build_outbox_collection(
     let activities: Vec<Create> = posts.iter().map(build_create_activity).collect();
 
     OrderedCollection {
-        base: ObjectBase {
-            context: Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]),
-            id: format!("{}/users/{}/outbox", config.base_url, username),
-            r#type: "OrderedCollection".to_string(),
-        },
+        context: Some(vec!["https://www.w3.org/ns/activitystreams".to_string()]),
+        id: format!("{}/users/{}/outbox", config.base_url, username),
+        r#type: "OrderedCollection".to_string(),
         total_items: Some(posts.len()),
         ordered_items: Some(
             activities

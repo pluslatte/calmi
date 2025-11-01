@@ -40,7 +40,11 @@ fn generate_object_fields(derive_input: &DeriveInput) -> Result<TokenStream, syn
         ty: syn::parse_quote!(Option<Vec<String>>),
     };
     let field_id = Field {
-        attrs: vec![],
+        attrs: vec![
+            parse_quote!(#[doc = "https://www.w3.org/TR/activitypub/#obj-id"]),
+            parse_quote!(#[doc = "ActivityPub specification requires `id` property"]),
+            parse_quote!(#[doc = "`id` is a globally unique identifier for the object"]),
+        ],
         vis: Visibility::Public(token::Pub::default()),
         mutability: FieldMutability::None,
         ident: Some(Ident::new("id", proc_macro2::Span::call_site())),
@@ -48,7 +52,12 @@ fn generate_object_fields(derive_input: &DeriveInput) -> Result<TokenStream, syn
         ty: syn::parse_quote!(String),
     };
     let field_type = Field {
-        attrs: vec![parse_quote!(#[serde(rename = "type")])],
+        attrs: vec![
+            parse_quote!(#[serde(rename = "type")]),
+            parse_quote!(#[doc = "https://www.w3.org/TR/activitypub/#obj-id"]),
+            parse_quote!(#[doc = "ActivityPub specification requires `type` property"]),
+            parse_quote!(#[doc = "`type` indicates the type of the object"]),
+        ],
         vis: Visibility::Public(token::Pub::default()),
         mutability: FieldMutability::None,
         ident: Some(Ident::new("r#type", proc_macro2::Span::call_site())),
