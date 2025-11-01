@@ -45,7 +45,7 @@ fn generate_object_base_fields(derive_input: &DeriveInput) -> Result<TokenStream
 
     let common_fields_of_object = quote! {
         #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
-        pub context: Option<crate::activitypub::types::enums::OneOrMany>,
+        pub context: Option<crate::activitypub::types::enums::SingleOrMultiple<String>>,
 
         /// https://www.w3.org/TR/activitypub/#obj-id
         /// - ActivityPub specification requires `id` property

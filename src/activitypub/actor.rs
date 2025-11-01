@@ -1,11 +1,11 @@
-use crate::activitypub::types::enums::{OneOrMany, ObjectOrString};
+use crate::activitypub::types::enums::{ObjectOrString, SingleOrMultiple};
 use crate::activitypub::types::object::person::Person;
 use crate::config::Config;
 use crate::domain::user::User;
 
 pub fn build_person(config: &Config, user: &User) -> Person {
     Person {
-        context: Some(OneOrMany::Multiple(vec![
+        context: Some(SingleOrMultiple::Multiple(vec![
             "https://www.w3.org/ns/activitystreams".to_string(),
             "https://w3id.org/security/v1".to_string(),
         ])),

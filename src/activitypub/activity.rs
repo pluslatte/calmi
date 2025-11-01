@@ -1,4 +1,4 @@
-use crate::activitypub::types::enums::{ObjectBased, ObjectOrString, OneOrMany};
+use crate::activitypub::types::enums::{ObjectBased, ObjectOrString, SingleOrMultiple};
 use crate::activitypub::types::object::create::Create;
 use crate::activitypub::types::object::note::Note;
 use crate::activitypub::types::object::ordered_collection::OrderedCollection;
@@ -7,7 +7,7 @@ use crate::domain::post::Post;
 
 pub fn build_note(post: &Post) -> Note {
     Note {
-        context: Some(OneOrMany::Multiple(vec![
+        context: Some(SingleOrMultiple::Multiple(vec![
             "https://www.w3.org/ns/activitystreams".to_string(),
         ])),
         id: post.id.clone(),
@@ -28,7 +28,7 @@ pub fn build_create_activity(post: &Post) -> Create {
     let activity_id = format!("{}/activity", post.id);
 
     Create {
-        context: Some(OneOrMany::Multiple(vec![
+        context: Some(SingleOrMultiple::Multiple(vec![
             "https://www.w3.org/ns/activitystreams".to_string(),
         ])),
         id: activity_id,
@@ -46,7 +46,7 @@ pub fn build_outbox_collection(
     let activities: Vec<Create> = posts.iter().map(build_create_activity).collect();
 
     OrderedCollection {
-        context: Some(OneOrMany::Multiple(vec![
+        context: Some(SingleOrMultiple::Multiple(vec![
             "https://www.w3.org/ns/activitystreams".to_string(),
         ])),
         id: format!("{}/users/{}/outbox", config.base_url, username),

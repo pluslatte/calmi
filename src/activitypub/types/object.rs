@@ -18,7 +18,7 @@ pub struct Object {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::activitypub::types::enums::OneOrMany;
+    use crate::activitypub::types::enums::SingleOrMultiple;
 
     #[test]
     fn deserialize_minimal_object() {
@@ -64,7 +64,7 @@ mod tests {
             Ok(obj) => {
                 assert!(obj.context.is_some());
                 assert_eq!(obj.id, "http://example.org/foo");
-                if let Some(OneOrMany::Single(ctx)) = &obj.context {
+                if let Some(SingleOrMultiple::Single(ctx)) = &obj.context {
                     assert_eq!(ctx, "https://www.w3.org/ns/activitystreams");
                 } else {
                     panic!("Expected single context");
@@ -90,7 +90,7 @@ mod tests {
                 assert!(obj.context.is_some());
 
                 match &obj.context {
-                    Some(OneOrMany::Multiple(ctxs)) => {
+                    Some(SingleOrMultiple::Multiple(ctxs)) => {
                         assert_eq!(ctxs.len(), 2);
                         assert_eq!(ctxs[0], "https://www.w3.org/ns/activitystreams");
                         assert_eq!(ctxs[1], "https://w3id.org/security/v1");
@@ -122,7 +122,7 @@ mod tests {
             Ok(obj) => {
                 assert_eq!(obj.id, "http://example.org/foo");
                 assert_eq!(obj.r#type, "Note");
-                if let Some(OneOrMany::Single(ctx)) = &obj.context {
+                if let Some(SingleOrMultiple::Single(ctx)) = &obj.context {
                     assert_eq!(ctx, "https://www.w3.org/ns/activitystreams");
                 } else {
                     panic!("Expected single context");
