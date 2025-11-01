@@ -28,7 +28,7 @@ pub struct Link {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::activitypub::types::enums::SingleOrMultiple;
+    use crate::activitypub::types::enums::{ObjectOrLinkOrStringUrl, SingleOrMultiple};
 
     #[test]
     fn deserialize_minimal_link() {
@@ -101,11 +101,8 @@ mod tests {
         match &link {
             Ok(l) => {
                 assert!(l.context.is_some());
-                if let Some(ref ctx) = l.context {
-                    if let SingleOrMultiple::Single(
-                        crate::activitypub::types::enums::ObjectOrLinkOrStringUrl::Str(ref s),
-                    ) = **ctx
-                    {
+                if let Some(ctx) = &l.context {
+                    if let SingleOrMultiple::Single(ObjectOrLinkOrStringUrl::Str(ref s)) = **ctx {
                         assert_eq!(s, "https://www.w3.org/ns/activitystreams");
                     } else {
                         panic!("Expected single string context");
@@ -134,18 +131,12 @@ mod tests {
                     match **ctx {
                         SingleOrMultiple::Multiple(ref ctxs) => {
                             assert_eq!(ctxs.len(), 2);
-                            if let crate::activitypub::types::enums::ObjectOrLinkOrStringUrl::Str(
-                                ref s0,
-                            ) = ctxs[0]
-                            {
+                            if let ObjectOrLinkOrStringUrl::Str(ref s0) = ctxs[0] {
                                 assert_eq!(s0, "https://www.w3.org/ns/activitystreams");
                             } else {
                                 panic!("Expected string context");
                             }
-                            if let crate::activitypub::types::enums::ObjectOrLinkOrStringUrl::Str(
-                                ref s1,
-                            ) = ctxs[1]
-                            {
+                            if let ObjectOrLinkOrStringUrl::Str(ref s1) = ctxs[1] {
                                 assert_eq!(s1, "https://w3id.org/security/v1");
                             } else {
                                 panic!("Expected string context");
@@ -299,10 +290,7 @@ mod tests {
                 assert_eq!(l.r#type, Some("Link".to_string()));
                 assert_eq!(l.href, Some("http://example.org/abc".to_string()));
                 if let Some(ref ctx) = l.context {
-                    if let SingleOrMultiple::Single(
-                        crate::activitypub::types::enums::ObjectOrLinkOrStringUrl::Str(ref s),
-                    ) = **ctx
-                    {
+                    if let SingleOrMultiple::Single(ObjectOrLinkOrStringUrl::Str(ref s)) = **ctx {
                         assert_eq!(s, "https://www.w3.org/ns/activitystreams");
                     } else {
                         panic!("Expected single string context");
