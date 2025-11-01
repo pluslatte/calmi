@@ -1,7 +1,7 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::properties::{Actor, ObjectProperty};
+use crate::activitypub::types::properties::{Actor, ObjectProperty};
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-create
 /// Create extends Activity

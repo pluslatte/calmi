@@ -1,7 +1,7 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::properties::Name;
+use crate::activitypub::types::properties::Name;
 
 use super::super::enums::ObjectOrLinkOrStringUrl;
 

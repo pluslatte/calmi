@@ -1,7 +1,7 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::properties::{AttributedTo, Content, Published, To};
+use crate::activitypub::types::properties::{AttributedTo, Content, Published, To};
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
 /// Note extends Object

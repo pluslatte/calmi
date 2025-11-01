@@ -1,7 +1,7 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::properties::{OrderedItems, TotalItems};
+use crate::activitypub::types::properties::{OrderedItems, TotalItems};
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-orderedcollection
 /// OrderedCollection extends Collection

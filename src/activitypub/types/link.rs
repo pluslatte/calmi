@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::properties::{Context, Href, MediaType, Name, Rel, Type};
+use crate::activitypub::types::properties::{Context, Href, MediaType, Name, Rel, Type};
 
 /// https://www.w3.org/TR/activitystreams-core/#link
 #[derive(Serialize, Deserialize, Debug, Clone)]
