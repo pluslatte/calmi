@@ -5,7 +5,6 @@ pub mod note;
 pub mod ordered_collection;
 pub mod person;
 
-use crate::activitypub::types::enums::OneOrMany;
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
@@ -19,6 +18,7 @@ pub struct Object {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::activitypub::types::enums::OneOrMany;
 
     #[test]
     fn deserialize_minimal_object() {
