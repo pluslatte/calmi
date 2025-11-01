@@ -1,9 +1,7 @@
-mod activitypub;
-mod app;
-mod app_state;
-mod config;
-mod domain;
-mod storage;
+use calmi::app;
+use calmi::app_state;
+use calmi::config;
+use calmi::storage;
 
 #[tokio::main]
 async fn main() {
