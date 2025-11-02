@@ -7,7 +7,7 @@ use axum::{
 
 use crate::activitypub::webfinger::{WebFingerQuery, build_webfinger_response};
 use crate::app_state::AppState;
-use crate::domain::user::UserRepository;
+use crate::domain::repositories::user::UserRepository;
 
 pub async fn webfinger(
     Query(query): Query<WebFingerQuery>,
@@ -33,7 +33,14 @@ pub async fn webfinger(
         return Err(StatusCode::NOT_FOUND);
     }
 
-    if !UserRepository::exists(&state.storage, username) {
+    let user_exists = state
+        .storage
+        .find_by_username(username)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .is_some();
+
+    if !user_exists {
         return Err(StatusCode::NOT_FOUND);
     }
 

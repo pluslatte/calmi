@@ -20,7 +20,7 @@ async fn main() {
     };
 
     let config = config::Config::default();
-    let storage = storage::memory::MemoryStorage::new();
+    let storage = storage::postgres::PostgresStorage::new(db);
     let state = app_state::AppState::new(config, storage);
 
     let app = app::router::create_router(state);

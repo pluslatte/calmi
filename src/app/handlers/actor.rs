@@ -7,14 +7,18 @@ use axum::{
 
 use crate::activitypub::actor::build_person;
 use crate::app_state::AppState;
-use crate::domain::user::UserRepository;
+use crate::domain::repositories::user::UserRepository;
 
 pub async fn person_handler(
     Path(username): Path<String>,
     State(state): State<AppState>,
 ) -> Result<Response, StatusCode> {
-    let user =
-        UserRepository::find_by_username(&state.storage, &username).ok_or(StatusCode::NOT_FOUND)?;
+    let user = state
+        .storage
+        .find_by_username(&username)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
 
     let actor = build_person(&state.config, &user);
     Ok((

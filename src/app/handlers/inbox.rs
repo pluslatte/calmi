@@ -6,14 +6,21 @@ use axum::{
 
 use crate::app::types::InboxActivity;
 use crate::app_state::AppState;
-use crate::domain::user::UserRepository;
+use crate::domain::repositories::user::UserRepository;
 
 pub async fn inbox_handler(
     Path(username): Path<String>,
     State(state): State<AppState>,
     Json(activity): Json<InboxActivity>,
 ) -> Result<StatusCode, StatusCode> {
-    if !UserRepository::exists(&state.storage, &username) {
+    let user_exists = state
+        .storage
+        .find_by_username(&username)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .is_some();
+
+    if !user_exists {
         return Err(StatusCode::NOT_FOUND);
     }
 

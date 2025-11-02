@@ -28,7 +28,7 @@ pub fn build_note(post: &entities::note::Model) -> activitypub::types::object::n
             ObjectOrLinkOrStringUrl::Str(post.author_id.clone()),
         ))),
         content: Some(post.content.clone()),
-        published: Some(post.published.clone()),
+        published: Some(post.created_at.to_rfc3339()),
     }
 }
 
@@ -54,7 +54,7 @@ pub fn build_create_activity(post: &entities::note::Model) -> Create {
 pub fn build_outbox_collection(
     config: &Config,
     username: &str,
-    posts: &[Post],
+    posts: &[entities::note::Model],
 ) -> OrderedCollection {
     let activities: Vec<Create> = posts.iter().map(build_create_activity).collect();
 

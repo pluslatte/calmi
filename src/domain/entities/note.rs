@@ -10,6 +10,7 @@ pub struct Model {
     pub content: String,
     pub author_id: String,
     pub created_at: DateTime,
+    pub to: Vec<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
