@@ -11,11 +11,11 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(User::Table)
                     .if_not_exists()
-                    .col(string(User::Id).primary_key())
-                    .col(string(User::DisplayName))
-                    .col(string(User::Username).unique_key())
-                    .col(string(User::InboxUrl))
-                    .col(string(User::OutboxUrl))
+                    .col(string_len(User::Id, 2048).primary_key())
+                    .col(string_len(User::DisplayName, 255))
+                    .col(string_len(User::Username, 255).unique_key())
+                    .col(string_len(User::InboxUrl, 2048))
+                    .col(string_len(User::OutboxUrl, 2048))
                     .to_owned(),
             )
             .await

@@ -11,10 +11,16 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Note::Table)
                     .if_not_exists()
-                    .col(string(Note::Id).primary_key())
-                    .col(string(Note::Content))
-                    .col(string(Note::AuthorId))
+                    .col(string_len(Note::Id, 2048).primary_key())
+                    .col(text(Note::Content))
+                    .col(string_len(Note::AuthorId, 2048))
                     .col(date_time(Note::CreatedAt))
+                    .col(
+                        ColumnDef::new(Note::To)
+                            .array(ColumnType::String(StringLen::N(2048)))
+                            .not_null()
+                            .default("{}"),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_note_author_id")
@@ -40,6 +46,7 @@ enum Note {
     Content,
     AuthorId,
     CreatedAt,
+    To,
 }
 
 #[derive(DeriveIden)]
