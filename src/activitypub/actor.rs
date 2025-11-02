@@ -1,9 +1,9 @@
 use crate::activitypub::types::enums::{ObjectOrLinkOrStringUrl, SingleOrMultiple};
 use crate::activitypub::types::object::person::Person;
 use crate::config::Config;
-use crate::domain::user::User;
+use crate::domain::entities;
 
-pub fn build_person(config: &Config, user: &User) -> Person {
+pub fn build_person(config: &Config, user: &entities::user::Model) -> Person {
     Person {
         context: Some(SingleOrMultiple::Multiple(vec![
             "https://www.w3.org/ns/activitystreams".to_string(),

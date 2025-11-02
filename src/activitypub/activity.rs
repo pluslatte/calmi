@@ -1,12 +1,13 @@
-use crate::activitypub::types::enums::{ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple};
-use crate::activitypub::types::object::create::Create;
-use crate::activitypub::types::object::note::Note;
-use crate::activitypub::types::object::ordered_collection::OrderedCollection;
+use crate::activitypub;
+use crate::activitypub::types::{
+    enums::{ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple},
+    object::{create::Create, ordered_collection::OrderedCollection},
+};
 use crate::config::Config;
-use crate::domain::note::Post;
+use crate::domain::entities;
 
-pub fn build_note(post: &Post) -> Note {
-    Note {
+pub fn build_note(post: &entities::note::Model) -> activitypub::types::object::note::Note {
+    activitypub::types::object::note::Note {
         context: SingleOrMultiple::Multiple(vec![
             "https://www.w3.org/ns/activitystreams".to_string(),
         ])
@@ -31,7 +32,7 @@ pub fn build_note(post: &Post) -> Note {
     }
 }
 
-pub fn build_create_activity(post: &Post) -> Create {
+pub fn build_create_activity(post: &entities::note::Model) -> Create {
     let note = build_note(post);
     let activity_id = format!("{}/activity", post.id);
 
