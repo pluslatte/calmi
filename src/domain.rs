@@ -1,2 +1,2 @@
-pub mod post;
-pub mod user;
+pub mod entities;
+pub mod repositories;

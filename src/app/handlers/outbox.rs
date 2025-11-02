@@ -10,7 +10,7 @@ use crate::activitypub::{
 };
 use crate::app::types::CreateNoteRequest;
 use crate::app_state::AppState;
-use crate::domain::post::{Post, PostRepository};
+use crate::domain::note::{Post, PostRepository};
 use crate::domain::user::UserRepository;
 
 pub async fn outbox_handler(

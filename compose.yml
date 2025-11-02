@@ -4,7 +4,7 @@ services:
     container_name: calmi-postgres
     environment:
       POSTGRES_USER: calmi
-      POSTGRES_PASSWORD: calmi_dev_password
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: calmi_dev
     ports:
       - "5432:5432"

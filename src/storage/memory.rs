@@ -1,4 +1,4 @@
-use crate::domain::{post::*, user::*};
+use crate::domain::{note::*, user::*};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 

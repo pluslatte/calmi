@@ -3,7 +3,7 @@ use crate::activitypub::types::object::create::Create;
 use crate::activitypub::types::object::note::Note;
 use crate::activitypub::types::object::ordered_collection::OrderedCollection;
 use crate::config::Config;
-use crate::domain::post::Post;
+use crate::domain::note::Post;
 
 pub fn build_note(post: &Post) -> Note {
     Note {

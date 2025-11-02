@@ -6,7 +6,7 @@ use axum::{
 
 use crate::activitypub::{activity::build_note, types::object::note::Note};
 use crate::app_state::AppState;
-use crate::domain::post::PostRepository;
+use crate::domain::note::PostRepository;
 use crate::domain::user::UserRepository;
 
 pub async fn note_handler(
