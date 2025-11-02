@@ -4,24 +4,33 @@ use axum::{
     http::StatusCode,
 };
 
-use crate::activitypub::{activity::build_note, types::object::note::Note};
 use crate::app_state::AppState;
-use crate::domain::note::PostRepository;
-use crate::domain::user::UserRepository;
+use crate::{
+    activitypub::{activity::build_note, types::object::note::Note},
+    domain::repositories::{note::NoteRepository, user::UserRepository},
+};
 
 pub async fn note_handler(
     Path((username, id)): Path<(String, String)>,
     State(state): State<AppState>,
 ) -> Result<Json<Note>, StatusCode> {
-    if !UserRepository::exists(&state.storage, &username) {
-        return Err(StatusCode::NOT_FOUND);
-    }
+    let user_repository: &dyn UserRepository = &state.storage;
+    let user = user_repository
+        .find_by_id(&username)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
 
     let post_id = format!(
         "{}/users/{}/statuses/{}",
-        state.config.base_url, username, id
+        state.config.base_url, &user.username, id
     );
-    let post = PostRepository::find_by_id(&state.storage, &username, &post_id)
+
+    let note_repository: &dyn NoteRepository = &state.storage;
+    let post = note_repository
+        .find_by_id(&post_id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let note = build_note(&post);

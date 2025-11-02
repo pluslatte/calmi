@@ -28,7 +28,7 @@ pub fn build_note(post: &entities::note::Model) -> activitypub::types::object::n
             ObjectOrLinkOrStringUrl::Str(post.author_id.clone()),
         ))),
         content: Some(post.content.clone()),
-        published: Some(post.created_at.to_rfc3339()),
+        published: Some(post.created_at.and_utc().to_rfc3339()),
     }
 }
 

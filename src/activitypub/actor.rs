@@ -11,7 +11,7 @@ pub fn build_person(config: &Config, user: &entities::user::Model) -> Person {
         ])),
         id: Some(format!("{}/users/{}", config.base_url, user.username)),
         r#type: Some("Person".to_string()),
-        name: Some(user.name.clone()),
+        name: Some(user.display_name.clone()),
         inbox: Some(Box::new(ObjectOrLinkOrStringUrl::Str(format!(
             "{}/users/{}/inbox",
             config.base_url, user.username
