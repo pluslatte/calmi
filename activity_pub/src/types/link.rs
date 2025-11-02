@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::types::properties::{Context, Href, MediaType, Name, Rel, Type};
+use crate::types::properties::{Context, Href, MediaType, Name, Rel, Type};
 
 /// https://www.w3.org/TR/activitystreams-core/#link
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -28,7 +28,7 @@ pub struct Link {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::activitypub::types::enums::{ObjectOrLinkOrStringUrl, SingleOrMultiple};
+    use crate::types::enums::{ObjectOrLinkOrStringUrl, SingleOrMultiple};
 
     #[test]
     fn deserialize_minimal_link() {

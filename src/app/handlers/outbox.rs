@@ -4,14 +4,11 @@ use axum::{
     http::StatusCode,
 };
 
-use crate::activitypub::{
-    activity::{build_create_activity, build_outbox_collection},
-    types::object::{create::Create, ordered_collection::OrderedCollection},
-};
-use crate::app::types::CreateNoteRequest;
-use crate::app_state::AppState;
 use crate::domain::entities::note;
 use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
+use crate::{activitypub::build_create_activity, app_state::AppState};
+use crate::{activitypub::build_outbox_collection, app::types::CreateNoteRequest};
+use calmi_activity_pub::types::object::{create::Create, ordered_collection::OrderedCollection};
 use chrono;
 use sea_orm::Set;
 

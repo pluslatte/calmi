@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::types::link::Link;
-use crate::activitypub::types::object::Object;
-use crate::activitypub::types::object::activity::Activity;
-use crate::activitypub::types::object::collection::Collection;
-use crate::activitypub::types::object::create::Create;
-use crate::activitypub::types::object::note::Note;
-use crate::activitypub::types::object::ordered_collection::OrderedCollection;
-use crate::activitypub::types::object::person::Person;
+use crate::types::link::Link;
+use crate::types::object::Object;
+use crate::types::object::activity::Activity;
+use crate::types::object::collection::Collection;
+use crate::types::object::create::Create;
+use crate::types::object::note::Note;
+use crate::types::object::ordered_collection::OrderedCollection;
+use crate::types::object::person::Person;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]

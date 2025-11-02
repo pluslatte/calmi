@@ -1,7 +1,7 @@
 use calmi_macros::object_based;
 use serde::{Deserialize, Serialize};
 
-use crate::activitypub::types::properties::TotalItems;
+use crate::types::properties::TotalItems;
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-collection
 /// Collection extends Object

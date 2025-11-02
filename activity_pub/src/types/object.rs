@@ -18,7 +18,7 @@ pub struct Object {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::activitypub::types::enums::SingleOrMultiple;
+    use crate::types::enums::SingleOrMultiple;
 
     #[test]
     fn deserialize_minimal_object() {

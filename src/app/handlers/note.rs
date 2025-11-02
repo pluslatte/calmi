@@ -3,12 +3,10 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
 };
+use calmi_activity_pub::types::object::note::Note;
 
-use crate::app_state::AppState;
-use crate::{
-    activitypub::{activity::build_note, types::object::note::Note},
-    domain::repositories::{note::NoteRepository, user::UserRepository},
-};
+use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
+use crate::{activitypub::build_note, app_state::AppState};
 
 pub async fn note_handler(
     Path((username, id)): Path<(String, String)>,

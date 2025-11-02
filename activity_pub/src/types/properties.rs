@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use crate::activitypub::types::enums::{
+use crate::types::enums::{
     LinkOrStringUrl, ObjectOrLinkOrStringUrl, ObjectOrStringUrl, SingleOrMultiple,
 };
 /// https://www.w3.org/TR/activitystreams-vocabulary/#properties

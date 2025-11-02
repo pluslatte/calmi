@@ -510,7 +510,7 @@ dependencies = [
  "async-trait",
  "axum",
  "axum-test",
- "calmi_macros",
+ "calmi_activity_pub",
  "chrono",
  "migration",
  "sea-orm",
@@ -519,6 +519,15 @@ dependencies = [
  "tokio",
  "url",
  "uuid",
+]
+
+[[package]]
+name = "calmi_activity_pub"
+version = "0.1.0"
+dependencies = [
+ "calmi_macros",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

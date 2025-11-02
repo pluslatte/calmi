@@ -1,7 +1,7 @@
-use crate::activitypub::types::enums::{ObjectOrLinkOrStringUrl, SingleOrMultiple};
-use crate::activitypub::types::object::person::Person;
 use crate::config::Config;
 use crate::domain::entities;
+use calmi_activity_pub::types::enums::{ObjectOrLinkOrStringUrl, SingleOrMultiple};
+use calmi_activity_pub::types::object::person::Person;
 
 pub fn build_person(config: &Config, user: &entities::user::Model) -> Person {
     Person {
