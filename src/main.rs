@@ -5,6 +5,8 @@ use calmi::storage;
 
 #[tokio::main]
 async fn main() {
+    let database_url = std::env::var("DATABASE_URL").expect("Database URL must be set");
+
     let config = config::Config::default();
     let storage = storage::memory::MemoryStorage::new();
     let state = app_state::AppState::new(config, storage);
