@@ -510,7 +510,7 @@ dependencies = [
  "async-trait",
  "axum",
  "axum-test",
- "calmi_activity_pub",
+ "calmi_activity_streams",
  "chrono",
  "migration",
  "sea-orm",
@@ -522,7 +522,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "calmi_activity_pub"
+name = "calmi_activity_streams"
 version = "0.1.0"
 dependencies = [
  "calmi_macros",

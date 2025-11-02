@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "migration", "activity_pub"]
+members = [".", "migration", "activity_streams"]
 
 [package]
 name = "calmi"
@@ -7,7 +7,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-calmi_activity_pub = { path = "activity_pub" }
+calmi_activity_streams = { path = "activity_streams" }
 
 axum = "0.8.6"
 chrono = "0.4.42"

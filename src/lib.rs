@@ -1,4 +1,4 @@
-pub mod activitypub;
+pub mod activity_streams_mapper;
 pub mod app;
 pub mod app_state;
 pub mod config;

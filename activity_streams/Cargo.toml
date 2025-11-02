@@ -1,5 +1,5 @@
 [package]
-name = "calmi_activity_pub"
+name = "calmi_activity_streams"
 version = "0.1.0"
 edition = "2024"
 

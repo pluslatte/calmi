@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::domain::entities;
-use calmi_activity_pub::types::{
+use calmi_activity_streams::types::{
     enums::{ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple},
     object::person::Person,
     object::{create::Create, note::Note, ordered_collection::OrderedCollection},

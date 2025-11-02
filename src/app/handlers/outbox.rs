@@ -6,9 +6,11 @@ use axum::{
 
 use crate::domain::entities::note;
 use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
-use crate::{activitypub::build_create_activity, app_state::AppState};
-use crate::{activitypub::build_outbox_collection, app::types::CreateNoteRequest};
-use calmi_activity_pub::types::object::{create::Create, ordered_collection::OrderedCollection};
+use crate::{activity_streams_mapper::build_create_activity, app_state::AppState};
+use crate::{activity_streams_mapper::build_outbox_collection, app::types::CreateNoteRequest};
+use calmi_activity_streams::types::object::{
+    create::Create, ordered_collection::OrderedCollection,
+};
 use chrono;
 use sea_orm::Set;
 
