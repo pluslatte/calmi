@@ -1,20 +1,39 @@
 use axum_test::TestServer;
-use sea_orm::{ActiveModelTrait, Database, DatabaseConnection};
+use sea_orm::{ActiveModelTrait, ConnectionTrait, Database, DatabaseConnection, Statement};
 use serde_json::Value;
-use serial_test::serial;
 
 use migration::{Migrator, MigratorTrait};
 
 async fn setup_db() -> DatabaseConnection {
-    let db_url =
+    let base_url =
         std::env::var("TEST_DATABASE_URL").expect("TEST_DATABASE_URL must be set for tests");
-    let db = Database::connect(&db_url)
+
+    let db_name = format!("test_{}", uuid::Uuid::new_v4().simple());
+
+    let admin_db = Database::connect(&base_url)
+        .await
+        .expect("Failed to connect to admin database");
+
+    admin_db
+        .execute(Statement::from_string(
+            admin_db.get_database_backend(),
+            format!("CREATE DATABASE \"{}\"", db_name),
+        ))
+        .await
+        .expect("Failed to create test database");
+
+    let mut test_db_url = url::Url::parse(&base_url).expect("Invalid database URL");
+    test_db_url.set_path(&db_name);
+
+    let test_db = Database::connect(test_db_url.as_str())
         .await
         .expect("Failed to connect to test database");
-    Migrator::refresh(&db)
+
+    Migrator::up(&test_db, None)
         .await
         .expect("Failed to run migrations");
-    db
+
+    test_db
 }
 
 fn create_test_server(db: DatabaseConnection) -> TestServer {
@@ -45,7 +64,6 @@ async fn insert_user(db: &DatabaseConnection, username: &str, display_name: &str
 }
 
 #[tokio::test]
-#[serial]
 async fn test_webfinger_returns_correct_content_type() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
@@ -61,7 +79,6 @@ async fn test_webfinger_returns_correct_content_type() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_webfinger_returns_valid_jrd() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
@@ -87,7 +104,6 @@ async fn test_webfinger_returns_valid_jrd() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_webfinger_requires_acct_prefix() {
     let db = setup_db().await;
     let server = create_test_server(db);
@@ -101,7 +117,6 @@ async fn test_webfinger_requires_acct_prefix() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_webfinger_returns_404_for_unknown_user() {
     let db = setup_db().await;
     let server = create_test_server(db);
@@ -115,7 +130,6 @@ async fn test_webfinger_returns_404_for_unknown_user() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_webfinger_returns_404_for_wrong_domain() {
     let db = setup_db().await;
     let server = create_test_server(db);
@@ -129,7 +143,6 @@ async fn test_webfinger_returns_404_for_wrong_domain() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_actor_returns_correct_content_type() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
@@ -142,7 +155,6 @@ async fn test_actor_returns_correct_content_type() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_actor_returns_valid_person_object() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
@@ -169,7 +181,6 @@ async fn test_actor_returns_valid_person_object() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_actor_inbox_and_outbox_are_strings_not_objects() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
@@ -186,7 +197,6 @@ async fn test_actor_inbox_and_outbox_are_strings_not_objects() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_actor_returns_404_for_unknown_user() {
     let db = setup_db().await;
     let server = create_test_server(db);
@@ -197,7 +207,6 @@ async fn test_actor_returns_404_for_unknown_user() {
 }
 
 #[tokio::test]
-#[serial]
 async fn test_multiple_users_have_different_actors() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
