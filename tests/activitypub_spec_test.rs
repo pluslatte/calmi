@@ -1,18 +1,55 @@
 use axum_test::TestServer;
+use sea_orm::{ActiveModelTrait, Database, DatabaseConnection};
 use serde_json::Value;
+use serial_test::serial;
 
-fn create_test_server() -> TestServer {
+use migration::{Migrator, MigratorTrait};
+
+async fn setup_db() -> DatabaseConnection {
+    let db_url =
+        std::env::var("TEST_DATABASE_URL").expect("TEST_DATABASE_URL must be set for tests");
+    let db = Database::connect(&db_url)
+        .await
+        .expect("Failed to connect to test database");
+    Migrator::refresh(&db)
+        .await
+        .expect("Failed to run migrations");
+    db
+}
+
+fn create_test_server(db: DatabaseConnection) -> TestServer {
     let config = calmi::config::Config::default();
-    let storage = calmi::storage::memory::MemoryStorage::new();
+    let storage = calmi::storage::postgres::PostgresStorage::new(db);
     let state = calmi::app_state::AppState::new(config, storage);
     let app = calmi::app::router::create_router(state);
 
     TestServer::new(app).unwrap()
 }
 
+async fn insert_user(db: &DatabaseConnection, username: &str, display_name: &str) {
+    use calmi::domain::entities::user;
+    let user = user::ActiveModel {
+        id: sea_orm::ActiveValue::Set(format!("https://example.com/users/{}", username)),
+        display_name: sea_orm::ActiveValue::Set(display_name.to_string()),
+        username: sea_orm::ActiveValue::Set(username.to_string()),
+        inbox_url: sea_orm::ActiveValue::Set(format!(
+            "https://example.com/users/{}/inbox",
+            username
+        )),
+        outbox_url: sea_orm::ActiveValue::Set(format!(
+            "https://example.com/users/{}/outbox",
+            username
+        )),
+    };
+    user.insert(db).await.expect("Failed to insert user");
+}
+
 #[tokio::test]
+#[serial]
 async fn test_webfinger_returns_correct_content_type() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    insert_user(&db, "alice", "Alice").await;
+    let server = create_test_server(db);
 
     let response = server
         .get("/.well-known/webfinger")
@@ -24,8 +61,11 @@ async fn test_webfinger_returns_correct_content_type() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_webfinger_returns_valid_jrd() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    insert_user(&db, "alice", "Alice").await;
+    let server = create_test_server(db);
 
     let response = server
         .get("/.well-known/webfinger")
@@ -47,8 +87,10 @@ async fn test_webfinger_returns_valid_jrd() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_webfinger_requires_acct_prefix() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    let server = create_test_server(db);
 
     let response = server
         .get("/.well-known/webfinger")
@@ -59,8 +101,10 @@ async fn test_webfinger_requires_acct_prefix() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_webfinger_returns_404_for_unknown_user() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    let server = create_test_server(db);
 
     let response = server
         .get("/.well-known/webfinger")
@@ -71,8 +115,10 @@ async fn test_webfinger_returns_404_for_unknown_user() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_webfinger_returns_404_for_wrong_domain() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    let server = create_test_server(db);
 
     let response = server
         .get("/.well-known/webfinger")
@@ -83,8 +129,11 @@ async fn test_webfinger_returns_404_for_wrong_domain() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_actor_returns_correct_content_type() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    insert_user(&db, "alice", "Alice").await;
+    let server = create_test_server(db);
 
     let response = server.get("/users/alice").await;
 
@@ -93,8 +142,11 @@ async fn test_actor_returns_correct_content_type() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_actor_returns_valid_person_object() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    insert_user(&db, "alice", "Alice").await;
+    let server = create_test_server(db);
 
     let response = server.get("/users/alice").await;
 
@@ -117,8 +169,11 @@ async fn test_actor_returns_valid_person_object() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_actor_inbox_and_outbox_are_strings_not_objects() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    insert_user(&db, "alice", "Alice").await;
+    let server = create_test_server(db);
 
     let response = server.get("/users/alice").await;
 
@@ -131,8 +186,10 @@ async fn test_actor_inbox_and_outbox_are_strings_not_objects() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_actor_returns_404_for_unknown_user() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    let server = create_test_server(db);
 
     let response = server.get("/users/unknown").await;
 
@@ -140,8 +197,12 @@ async fn test_actor_returns_404_for_unknown_user() {
 }
 
 #[tokio::test]
+#[serial]
 async fn test_multiple_users_have_different_actors() {
-    let server = create_test_server();
+    let db = setup_db().await;
+    insert_user(&db, "alice", "Alice").await;
+    insert_user(&db, "bob", "Bob").await;
+    let server = create_test_server(db);
 
     let alice_response = server.get("/users/alice").await;
     alice_response.assert_status_ok();

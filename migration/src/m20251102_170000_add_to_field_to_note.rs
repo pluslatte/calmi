@@ -1,4 +1,4 @@
-use sea_orm_migration::prelude::*;
+use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -10,12 +10,7 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Note::Table)
-                    .add_column(
-                        ColumnDef::new(Note::To)
-                            .array(ColumnType::Text)
-                            .not_null()
-                            .default("'{}'"),
-                    )
+                    .add_column(array(Note::To, ColumnType::Text).not_null().default("{}"))
                     .to_owned(),
             )
             .await

@@ -19,3 +19,5 @@ async-trait = "0.1.89"
 
 [dev-dependencies]
 axum-test = "18.2.1"
+migration = { path = "migration" }
+serial_test = "3.2.0"
