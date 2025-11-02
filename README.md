@@ -21,3 +21,12 @@ sea-orm-cli migrate generate <migration_name>
 sea-orm-cli migrate up # this will apply pending migrations
 sea-orm-cli generate entity -o src/domain/entities # this will generate src/domain/entities/*
 ```
+
+### Testing
+Tests use isolated databases (each test creates a temporary `test_*` database). To clean up accumulated test databases:
+```bash
+docker compose stop postgres-test
+docker compose rm -v postgres-test
+docker volume rm calmi_postgres_test_data
+docker compose up -d postgres-test
+```
