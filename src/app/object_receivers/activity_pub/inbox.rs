@@ -7,10 +7,12 @@ pub fn endpoint_uri_template() -> &'static str {
     "/users/{username}/inbox"
 }
 
-#[derive(Debug)]
-pub enum ActivityHandlerError {
-    InvalidActivity(String),
-    StorageError(String),
+use std::fmt;
+pub struct ActivityHandlerError(pub String);
+impl fmt::Display for ActivityHandlerError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
 }
 
 pub struct FollowActivityData {
@@ -35,7 +37,7 @@ pub async fn handle_follow(
 ) -> Result<FollowActivityData, ActivityHandlerError> {
     let actor = follow
         .actor
-        .ok_or_else(|| ActivityHandlerError::InvalidActivity("Missing actor".to_string()))?;
+        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?;
 
     let actor_id = extract_actor_id(&actor)?;
 
@@ -51,7 +53,7 @@ pub async fn handle_undo(
 ) -> Result<UndoFollowActivityData, ActivityHandlerError> {
     let actor = undo
         .actor
-        .ok_or_else(|| ActivityHandlerError::InvalidActivity("Missing actor".to_string()))?;
+        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?;
 
     let actor_id = extract_actor_id(&actor)?;
 
@@ -67,13 +69,13 @@ pub async fn handle_create(
 ) -> Result<CreateActivityData, ActivityHandlerError> {
     let actor = create
         .actor
-        .ok_or_else(|| ActivityHandlerError::InvalidActivity("Missing actor".to_string()))?;
+        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?;
 
     let actor_id = extract_actor_id(&actor)?;
 
-    let object = create.object.ok_or_else(|| {
-        ActivityHandlerError::InvalidActivity("Missing object in Create activity".to_string())
-    })?;
+    let object = create
+        .object
+        .ok_or_else(|| ActivityHandlerError("Missing object in Create activity".to_string()))?;
 
     let (object_type, object_id) = extract_object_info(&object)?;
 
@@ -100,20 +102,20 @@ fn extract_actor_id(
         SingleOrMultiple::Single(obj_or_link) => match obj_or_link {
             ObjectOrLinkOrStringUrl::Str(id) => Ok(id.clone()),
             ObjectOrLinkOrStringUrl::Object(obj) => match obj {
-                calmi_activity_streams::types::enums::ObjectBased::Person(person) => {
-                    person.id.clone().ok_or_else(|| {
-                        ActivityHandlerError::InvalidActivity("Person has no id".to_string())
-                    })
-                }
-                _ => Err(ActivityHandlerError::InvalidActivity(
+                calmi_activity_streams::types::enums::ObjectBased::Person(person) => person
+                    .id
+                    .clone()
+                    .ok_or_else(|| ActivityHandlerError("Person has no id".to_string())),
+                _ => Err(ActivityHandlerError(
                     "Unsupported actor object type".to_string(),
                 )),
             },
-            ObjectOrLinkOrStringUrl::Link(link) => link.href.clone().ok_or_else(|| {
-                ActivityHandlerError::InvalidActivity("Link has no href".to_string())
-            }),
+            ObjectOrLinkOrStringUrl::Link(link) => link
+                .href
+                .clone()
+                .ok_or_else(|| ActivityHandlerError("Link has no href".to_string())),
         },
-        SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError::InvalidActivity(
+        SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError(
             "Multiple actors not supported".to_string(),
         )),
     }
@@ -139,7 +141,7 @@ fn extract_object_info(
             },
             ObjectOrLinkOrStringUrl::Link(_link) => Ok(("Link".to_string(), None)),
         },
-        SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError::InvalidActivity(
+        SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError(
             "Multiple objects not supported".to_string(),
         )),
     }

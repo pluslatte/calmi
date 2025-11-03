@@ -37,7 +37,7 @@ pub async fn post(
                     Ok(StatusCode::ACCEPTED)
                 }
                 Err(e) => {
-                    eprintln!("Failed to handle Follow activity: {:?}", e);
+                    eprintln!("Failed to handle Follow activity: {}", e);
                     Err(StatusCode::BAD_REQUEST)
                 }
             }
@@ -52,7 +52,7 @@ pub async fn post(
                     Ok(StatusCode::ACCEPTED)
                 }
                 Err(e) => {
-                    eprintln!("Failed to handle Undo activity: {:?}", e);
+                    eprintln!("Failed to handle Undo activity: {}", e);
                     Err(StatusCode::BAD_REQUEST)
                 }
             }
@@ -67,7 +67,7 @@ pub async fn post(
                     Ok(StatusCode::ACCEPTED)
                 }
                 Err(e) => {
-                    eprintln!("Failed to handle Create activity: {:?}", e);
+                    eprintln!("Failed to handle Create activity: {}", e);
                     Err(StatusCode::BAD_REQUEST)
                 }
             }
@@ -79,7 +79,7 @@ pub async fn post(
                     Ok(StatusCode::ACCEPTED)
                 }
                 Err(e) => {
-                    eprintln!("Failed to handle Accept activity: {:?}", e);
+                    eprintln!("Failed to handle Accept activity: {}", e);
                     Err(StatusCode::BAD_REQUEST)
                 }
             }
