@@ -5,7 +5,7 @@ use axum::{
 };
 use calmi_activity_streams::types::object::note::Note;
 
-use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
+use crate::domain::repositories::note::NoteRepository;
 use crate::{activity_pub::mapper::note::build_note, app::state::AppState};
 
 pub async fn get(
