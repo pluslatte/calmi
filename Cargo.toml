@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "migration", "activity_streams", "webfinger" ]
+members = [".", "migration", "calmi_activity_streams", "calmi_webfinger" ]
 
 [package]
 name = "calmi"
@@ -7,8 +7,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-calmi_activity_streams = { path = "activity_streams" }
-calmi_webfinger = { path = "webfinger" }
+calmi_activity_streams = { path = "calmi_activity_streams" }
+calmi_webfinger = { path = "calmi_webfinger" }
 
 axum = "0.8.6"
 chrono = "0.4.42"
