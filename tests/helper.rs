@@ -37,7 +37,7 @@ pub async fn setup_db() -> DatabaseConnection {
 pub fn create_test_server(db: DatabaseConnection) -> TestServer {
     let config = calmi::config::Config::default();
     let storage = calmi::storage::postgres::PostgresStorage::new(db);
-    let state = calmi::app_state::AppState::new(config, storage);
+    let state = calmi::app::state::AppState::new(config, storage);
     let app = calmi::app::router::create_router(state);
 
     TestServer::new(app).unwrap()

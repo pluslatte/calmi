@@ -5,8 +5,8 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::activity_streams_mapper::build_person;
-use crate::app_state::AppState;
+use crate::activity_pub::mapper::build_person;
+use crate::app::state::AppState;
 use crate::domain::repositories::user::UserRepository;
 
 pub async fn get(

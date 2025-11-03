@@ -1,5 +1,5 @@
 use calmi::app;
-use calmi::app_state;
+use calmi::app::state as app_state;
 use calmi::config;
 use calmi::storage;
 use sea_orm::ConnectionTrait;

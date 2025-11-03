@@ -5,9 +5,9 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::app_state::AppState;
+use crate::activity_pub::webfinger::{WebFingerQuery, build_webfinger_response};
+use crate::app::state::AppState;
 use crate::domain::repositories::user::UserRepository;
-use crate::webfinger::{WebFingerQuery, build_webfinger_response};
 
 pub async fn get(
     Query(query): Query<WebFingerQuery>,

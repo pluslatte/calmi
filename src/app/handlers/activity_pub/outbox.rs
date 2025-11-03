@@ -4,8 +4,8 @@ use axum::{
     http::StatusCode,
 };
 
-use crate::activity_streams_mapper::build_outbox_collection;
-use crate::app_state::AppState;
+use crate::activity_pub::mapper::build_outbox_collection;
+use crate::app::state::AppState;
 use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
 use calmi_activity_streams::types::object::ordered_collection::OrderedCollection;
 

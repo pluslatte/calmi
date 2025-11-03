@@ -4,8 +4,8 @@ use axum::{
     http::StatusCode,
 };
 
+use crate::app::state::AppState;
 use crate::app::types::InboxActivity;
-use crate::app_state::AppState;
 use crate::domain::repositories::user::UserRepository;
 
 pub async fn post(

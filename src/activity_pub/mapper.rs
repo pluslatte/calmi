@@ -1,5 +1,5 @@
-use crate::config::config::Config;
-use crate::domain::domain::entities;
+use crate::config::Config;
+use crate::domain::entities;
 use calmi_activity_streams::types::{
     enums::{ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple},
     object::person::Person,

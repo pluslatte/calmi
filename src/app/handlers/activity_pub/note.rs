@@ -6,7 +6,7 @@ use axum::{
 use calmi_activity_streams::types::object::note::Note;
 
 use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
-use crate::{activity_streams_mapper::build_note, app_state::AppState};
+use crate::{activity_pub::mapper::build_note, app::state::AppState};
 
 pub async fn get(
     Path((username, id)): Path<(String, String)>,
