@@ -5,9 +5,9 @@ use calmi_activity_streams::types::{
     object::create::Create,
 };
 
-pub fn build_create_activity(post: &entities::note::Model) -> Create {
-    let note = note::build_note(post);
-    let activity_id = format!("{}/activity", post.id);
+pub fn build_create_activity(note: &entities::note::Model) -> Create {
+    let note_object = note::build_note(note);
+    let activity_id = format!("{}/activity", note.id);
 
     Create {
         context: Some(SingleOrMultiple::Multiple(vec![
@@ -16,10 +16,10 @@ pub fn build_create_activity(post: &entities::note::Model) -> Create {
         id: Some(activity_id),
         r#type: Some("Create".to_string()),
         actor: Some(Box::new(SingleOrMultiple::Single(
-            ObjectOrLinkOrStringUrl::Str(post.author_id.clone()),
+            ObjectOrLinkOrStringUrl::Str(note.author_id.clone()),
         ))),
         object: Some(Box::new(SingleOrMultiple::Single(
-            ObjectOrLinkOrStringUrl::Object(ObjectBased::Note(note)),
+            ObjectOrLinkOrStringUrl::Object(ObjectBased::Note(note_object)),
         ))),
     }
 }
