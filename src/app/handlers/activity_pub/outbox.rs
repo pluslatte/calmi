@@ -4,9 +4,9 @@ use axum::{
     http::StatusCode,
 };
 
+use crate::app::object_builders::activity_pub::outbox::build_outbox;
 use crate::app::state::AppState;
 use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
-use crate::app::object_builder::activity_pub::outbox::build_outbox;
 use calmi_activity_streams::types::object::ordered_collection::OrderedCollection;
 
 pub async fn get(

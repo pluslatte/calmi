@@ -5,7 +5,7 @@ use axum::{
     response::Response,
 };
 
-use crate::app::object_builder::activity_pub::person::build_person;
+use crate::app::object_builders::activity_pub::person::build_person;
 use crate::app::state::AppState;
 use crate::domain::repositories::user::UserRepository;
 
