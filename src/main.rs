@@ -8,6 +8,7 @@ use sea_orm::DbBackend;
 #[tokio::main]
 async fn main() {
     let database_url = std::env::var("DATABASE_URL").expect("env DATABASE_URL must be set");
+    let domain = std::env::var("DOMAIN").expect("env DOMAIN must be set");
 
     let db = Database::connect(database_url)
         .await
@@ -18,7 +19,7 @@ async fn main() {
         panic!("Unsupported database backend. Only Postgres is supported.");
     };
 
-    let config = config::Config::default();
+    let config = config::Config::new(domain);
     let storage = storage::postgres::PostgresStorage::new(db);
     let state = app::state::AppState::new(config, storage);
 
