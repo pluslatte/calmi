@@ -5,10 +5,7 @@ use axum::{Router, routing::get, routing::post};
 
 pub fn routes() -> Router<AppState> {
     Router::new()
-        .route(
-            "/.well-known/webfinger",
-            get(handlers::activity_pub::webfinger::get),
-        )
+        .route("/.well-known/webfinger", get(handlers::webfinger::get))
         .route(
             object_builders::activity_pub::person::endpoint_uri_template(),
             get(handlers::activity_pub::person::get),
