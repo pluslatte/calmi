@@ -5,6 +5,7 @@ use axum::{
 };
 use calmi_activity_streams::types::object::note::Note;
 
+use crate::app::routes::activity_pub::note_uri;
 use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
 use crate::{activity_pub::mapper::note::build_note, app::state::AppState};
 
@@ -19,10 +20,7 @@ pub async fn get(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    let note_id = format!(
-        "{}/users/{}/statuses/{}",
-        state.config.base_url, &user.username, id
-    );
+    let note_id = note_uri(&state.config.base_url, &user.username, &id);
 
     let note_repository: &dyn NoteRepository = &state.storage;
     let note = note_repository
