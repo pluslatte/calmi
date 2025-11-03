@@ -5,9 +5,9 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::activity_pub::webfinger::{WebFingerQuery, build_webfinger_response};
 use crate::app::state::AppState;
 use crate::domain::repositories::user::UserRepository;
+use crate::webfinger::{WebFingerQuery, WebFingerResponse};
 
 pub async fn get(
     Query(query): Query<WebFingerQuery>,
@@ -44,7 +44,7 @@ pub async fn get(
         return Err(StatusCode::NOT_FOUND);
     }
 
-    let response = build_webfinger_response(&state.config, username);
+    let response = WebFingerResponse::new(&state.config, username);
     Ok((
         [(header::CONTENT_TYPE, "application/jrd+json")],
         Json(response),
