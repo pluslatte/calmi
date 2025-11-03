@@ -1,4 +1,5 @@
 use axum_test::TestServer;
+use chrono::Utc;
 use migration::{Migrator, MigratorTrait};
 use sea_orm::{ActiveModelTrait, ConnectionTrait, Database, DatabaseConnection, Statement};
 
@@ -59,4 +60,22 @@ pub async fn insert_user(db: &DatabaseConnection, username: &str, display_name: 
         )),
     };
     user.insert(db).await.expect("Failed to insert user");
+}
+
+pub async fn insert_note(
+    db: &DatabaseConnection,
+    id: &str,
+    content: &str,
+    author_id: &str,
+    to: Vec<String>,
+) {
+    use calmi::domain::entities::note;
+    let note = note::ActiveModel {
+        id: sea_orm::ActiveValue::Set(id.to_string()),
+        content: sea_orm::ActiveValue::Set(content.to_string()),
+        author_id: sea_orm::ActiveValue::Set(author_id.to_string()),
+        created_at: sea_orm::ActiveValue::Set(Utc::now().naive_utc()),
+        to: sea_orm::ActiveValue::Set(to),
+    };
+    note.insert(db).await.expect("Failed to insert note");
 }

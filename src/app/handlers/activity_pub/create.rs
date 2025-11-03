@@ -11,7 +11,7 @@ use crate::{
 };
 
 pub async fn get(
-    Path(id): Path<String>,
+    Path((_, id)): Path<(String, String)>,
     State(state): State<AppState>,
 ) -> Result<Json<Create>, StatusCode> {
     let note_repository: &dyn NoteRepository = &state.storage;
