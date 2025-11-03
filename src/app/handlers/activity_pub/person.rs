@@ -20,10 +20,10 @@ pub async fn person_handler(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    let actor = build_person(&state.config, &user);
+    let person = build_person(&state.config, &user);
     Ok((
         [(header::CONTENT_TYPE, "application/activity+json")],
-        Json(actor),
+        Json(person),
     )
         .into_response())
 }

@@ -32,6 +32,5 @@ pub async fn note_handler(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let note = build_note(&post);
-
     Ok(Json(note))
 }

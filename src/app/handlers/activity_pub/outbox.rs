@@ -30,8 +30,8 @@ pub async fn outbox_handler(
         .find_by_author_id(&user.id, 20, 0)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    let outbox = build_outbox_collection(&state.config, &username, &posts);
 
+    let outbox = build_outbox_collection(&state.config, &username, &posts);
     Ok(Json(outbox))
 }
 
