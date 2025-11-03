@@ -19,18 +19,18 @@ pub async fn get(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    let post_id = format!(
+    let note_id = format!(
         "{}/users/{}/statuses/{}",
         state.config.base_url, &user.username, id
     );
 
     let note_repository: &dyn NoteRepository = &state.storage;
-    let post = note_repository
-        .find_by_id(&post_id)
+    let note = note_repository
+        .find_by_id(&note_id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    let note = build_note(&post);
+    let note = build_note(&note);
     Ok(Json(note))
 }

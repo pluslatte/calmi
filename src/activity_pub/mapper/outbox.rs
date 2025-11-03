@@ -6,7 +6,10 @@ use calmi_activity_streams::types::{
     object::{create::Create, ordered_collection::OrderedCollection},
 };
 
-pub fn build_outbox_collection(
+/// **Outbox** is an OrderedCollection.
+/// https://www.w3.org/TR/activitypub/#outbox
+/// This server implementation uses Create activities as the items in the outbox.
+pub fn build_outbox(
     config: &Config,
     username: &str,
     notes: &[entities::note::Model],

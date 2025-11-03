@@ -1,4 +1,4 @@
 pub mod create;
 pub mod note;
-pub mod ordered_collection;
+pub mod outbox;
 pub mod person;

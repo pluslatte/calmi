@@ -4,7 +4,7 @@ use axum::{
     http::StatusCode,
 };
 
-use crate::activity_pub::mapper::ordered_collection::build_outbox_collection;
+use crate::activity_pub::mapper::outbox::build_outbox;
 use crate::app::state::AppState;
 use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
 use calmi_activity_streams::types::object::ordered_collection::OrderedCollection;
@@ -21,11 +21,11 @@ pub async fn get(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let note_repository: &dyn NoteRepository = &state.storage;
-    let posts = note_repository
+    let notes = note_repository
         .find_by_author_id(&user.id, 20, 0)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let outbox = build_outbox_collection(&state.config, &username, &posts);
+    let outbox = build_outbox(&state.config, &username, &notes);
     Ok(Json(outbox))
 }
