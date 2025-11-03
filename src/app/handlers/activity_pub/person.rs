@@ -5,9 +5,9 @@ use axum::{
     response::Response,
 };
 
+use crate::app::object_builder::activity_pub::person::build_person;
 use crate::app::state::AppState;
 use crate::domain::repositories::user::UserRepository;
-use crate::object_builder::activity_pub::person::build_person;
 
 pub async fn get(
     Path(username): Path<String>,

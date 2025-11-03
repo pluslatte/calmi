@@ -6,7 +6,7 @@ use axum::{
 };
 
 use crate::{
-    object_builder::activity_pub::create::build_create_activity, app::state::AppState,
+    app::object_builder::activity_pub::create::build_create_activity, app::state::AppState,
     domain::repositories::note::NoteRepository, domain::repositories::user::UserRepository,
 };
 
