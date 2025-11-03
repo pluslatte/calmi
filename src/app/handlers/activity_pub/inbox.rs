@@ -8,7 +8,7 @@ use crate::app::types::InboxActivity;
 use crate::app_state::AppState;
 use crate::domain::repositories::user::UserRepository;
 
-pub async fn inbox_handler(
+pub async fn post(
     Path(username): Path<String>,
     State(state): State<AppState>,
     Json(activity): Json<InboxActivity>,

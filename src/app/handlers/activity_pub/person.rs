@@ -9,7 +9,7 @@ use crate::activity_streams_mapper::build_person;
 use crate::app_state::AppState;
 use crate::domain::repositories::user::UserRepository;
 
-pub async fn person_handler(
+pub async fn get(
     Path(username): Path<String>,
     State(state): State<AppState>,
 ) -> Result<Response, StatusCode> {

@@ -9,7 +9,7 @@ use crate::app_state::AppState;
 use crate::domain::repositories::user::UserRepository;
 use crate::webfinger::{WebFingerQuery, build_webfinger_response};
 
-pub async fn webfinger(
+pub async fn get(
     Query(query): Query<WebFingerQuery>,
     State(state): State<AppState>,
 ) -> Result<Response, StatusCode> {
