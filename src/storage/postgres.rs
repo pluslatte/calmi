@@ -21,7 +21,7 @@ impl PostgresStorage {
 
 #[async_trait]
 impl UserRepository for PostgresStorage {
-    async fn find_by_id(&self, id: i32) -> Result<Option<user::Model>, DbErr> {
+    async fn find_by_id(&self, id: i64) -> Result<Option<user::Model>, DbErr> {
         user::Entity::find_by_id(id).one(&self.db).await
     }
 
@@ -45,7 +45,7 @@ impl UserRepository for PostgresStorage {
         user.update(&self.db).await
     }
 
-    async fn delete(&self, id: i32) -> Result<(), DbErr> {
+    async fn delete(&self, id: i64) -> Result<(), DbErr> {
         user::Entity::delete_by_id(id).exec(&self.db).await?;
         Ok(())
     }
@@ -61,13 +61,13 @@ impl UserRepository for PostgresStorage {
 
 #[async_trait]
 impl NoteRepository for PostgresStorage {
-    async fn find_by_id(&self, id: i32) -> Result<Option<note::Model>, DbErr> {
+    async fn find_by_id(&self, id: i64) -> Result<Option<note::Model>, DbErr> {
         note::Entity::find_by_id(id).one(&self.db).await
     }
 
     async fn find_by_author_id(
         &self,
-        author_id: i32,
+        author_id: i64,
         limit: u64,
         offset: u64,
     ) -> Result<Vec<note::Model>, DbErr> {
@@ -83,7 +83,7 @@ impl NoteRepository for PostgresStorage {
     async fn create(
         &self,
         content: &str,
-        author_id: i32,
+        author_id: i64,
         to: Vec<String>,
     ) -> Result<note::Model, DbErr> {
         let note = note::ActiveModel {
@@ -100,7 +100,7 @@ impl NoteRepository for PostgresStorage {
         note.update(&self.db).await
     }
 
-    async fn delete(&self, id: i32) -> Result<(), DbErr> {
+    async fn delete(&self, id: i64) -> Result<(), DbErr> {
         note::Entity::delete_by_id(id).exec(&self.db).await?;
         Ok(())
     }

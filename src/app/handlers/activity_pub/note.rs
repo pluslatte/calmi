@@ -10,7 +10,7 @@ use crate::domain::repositories::user::UserRepository;
 use crate::{activity_pub::mapper::note::build_note, app::state::AppState};
 
 pub async fn get(
-    Path((_, id)): Path<(String, i32)>,
+    Path((_, id)): Path<(String, i64)>,
     State(state): State<AppState>,
 ) -> Result<Response, StatusCode> {
     let note_repository: &dyn NoteRepository = &state.storage;

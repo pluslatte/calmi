@@ -11,7 +11,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(User::Table)
                     .if_not_exists()
-                    .col(pk_auto(User::Id))
+                    .col(big_integer(User::Id).auto_increment().primary_key())
                     .col(string_len(User::Username, 255).unique_key())
                     .col(string_len(User::DisplayName, 255))
                     .to_owned(),

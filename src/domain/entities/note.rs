@@ -6,10 +6,10 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(table_name = "note")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub id: i32,
+    pub id: i64,
     #[sea_orm(column_type = "Text")]
     pub content: String,
-    pub author_id: i32,
+    pub author_id: i64,
     pub created_at: DateTime,
     pub to: Vec<String>,
 }
