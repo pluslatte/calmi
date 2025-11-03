@@ -1,5 +1,6 @@
 use crate::app::handlers;
 use crate::app::object_builders;
+use crate::app::object_receivers;
 use crate::app::state::AppState;
 use axum::{Router, routing::get, routing::post};
 
@@ -11,7 +12,7 @@ pub fn routes() -> Router<AppState> {
             get(handlers::activity_pub::person::get),
         )
         .route(
-            object_builders::activity_pub::inbox::endpoint_uri_template(),
+            object_receivers::activity_pub::inbox::endpoint_uri_template(),
             post(handlers::activity_pub::inbox::post),
         )
         .route(
