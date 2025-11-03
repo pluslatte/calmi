@@ -26,6 +26,6 @@ pub async fn get(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let outbox = build_outbox(&state.config, &username, &user, &notes);
+    let outbox = build_outbox(&state.config, &user, &notes);
     Ok(Json(outbox))
 }

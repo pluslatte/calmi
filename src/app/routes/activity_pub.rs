@@ -15,11 +15,11 @@ pub fn routes() -> Router<AppState> {
             get(handlers::activity_pub::person::get),
         )
         .route(
-            "/users/{username}/inbox",
+            activity_pub::mapper::inbox::endpoint_uri_template(),
             post(handlers::activity_pub::inbox::post),
         )
         .route(
-            "/users/{username}/outbox",
+            activity_pub::mapper::outbox::endpoint_uri_template(),
             get(handlers::activity_pub::outbox::get),
         )
         .route(
