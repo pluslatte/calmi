@@ -1,5 +1,6 @@
 use axum::{Router, routing::get, routing::post};
 
+use crate::activity_pub;
 use crate::app::handlers;
 use crate::app::state::AppState;
 
@@ -21,13 +22,8 @@ pub fn routes() -> Router<AppState> {
             "/users/{username}/outbox",
             get(handlers::activity_pub::outbox::get),
         )
-        .route(note_endpoint(), get(handlers::activity_pub::note::get))
-}
-
-pub fn note_endpoint() -> &'static str {
-    "/users/{username}/statuses/{id}"
-}
-
-pub fn note_uri(base_url: &str, username: &str, id: &str) -> String {
-    format!("{}/users/{}/statuses/{}", base_url, username, id)
+        .route(
+            activity_pub::mapper::note::endpoint_uri_template(),
+            get(handlers::activity_pub::note::get),
+        )
 }

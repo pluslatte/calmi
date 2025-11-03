@@ -5,8 +5,8 @@ use calmi_activity_streams::types::{
     object::create::Create,
 };
 
-pub fn build_create_activity(note: &entities::note::Model) -> Create {
-    let note_object = note::build_note(note);
+pub fn build_create_activity(base_url: &str, note: &entities::note::Model) -> Create {
+    let note_object = note::build_note(base_url, note);
     let activity_id = format!("{}/activity", note.id);
 
     Create {

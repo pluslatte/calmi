@@ -14,7 +14,10 @@ pub fn build_outbox(
     username: &str,
     notes: &[entities::note::Model],
 ) -> OrderedCollection {
-    let activities: Vec<Create> = notes.iter().map(create::build_create_activity).collect();
+    let activities: Vec<Create> = notes
+        .iter()
+        .map(|note| create::build_create_activity(&config.base_url, note))
+        .collect();
 
     OrderedCollection {
         context: Some(SingleOrMultiple::Multiple(vec![
