@@ -5,11 +5,11 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "note")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub id: String,
+    #[sea_orm(primary_key)]
+    pub id: i32,
     #[sea_orm(column_type = "Text")]
     pub content: String,
-    pub author_id: String,
+    pub author_id: i32,
     pub created_at: DateTime,
     pub to: Vec<String>,
 }

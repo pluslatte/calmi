@@ -12,11 +12,12 @@ use calmi_activity_streams::types::{
 pub fn build_outbox(
     config: &Config,
     username: &str,
+    author: &entities::user::Model,
     notes: &[entities::note::Model],
 ) -> OrderedCollection {
     let activities: Vec<Create> = notes
         .iter()
-        .map(|note| create::build_create_activity(&config.base_url, note))
+        .map(|note| create::build_create_activity(&config.base_url, note, author))
         .collect();
 
     OrderedCollection {

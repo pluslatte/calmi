@@ -1,7 +1,6 @@
 use axum_test::TestServer;
-use chrono::Utc;
 use migration::{Migrator, MigratorTrait};
-use sea_orm::{ActiveModelTrait, ConnectionTrait, Database, DatabaseConnection, Statement};
+use sea_orm::{ConnectionTrait, Database, DatabaseConnection, Statement};
 
 pub async fn setup_db() -> DatabaseConnection {
     let base_url =
@@ -44,38 +43,28 @@ pub fn create_test_server(db: DatabaseConnection) -> TestServer {
     TestServer::new(app).unwrap()
 }
 
-pub async fn insert_user(db: &DatabaseConnection, username: &str, display_name: &str) {
-    use calmi::domain::entities::user;
-    let user = user::ActiveModel {
-        id: sea_orm::ActiveValue::Set(username.to_string()),
-        display_name: sea_orm::ActiveValue::Set(display_name.to_string()),
-        username: sea_orm::ActiveValue::Set(username.to_string()),
-        inbox_url: sea_orm::ActiveValue::Set(format!(
-            "https://example.com/users/{}/inbox",
-            username
-        )),
-        outbox_url: sea_orm::ActiveValue::Set(format!(
-            "https://example.com/users/{}/outbox",
-            username
-        )),
-    };
-    user.insert(db).await.expect("Failed to insert user");
+pub async fn insert_user(db: &DatabaseConnection, username: &str, display_name: &str) -> i32 {
+    use calmi::domain::repositories::UserRepository;
+    let storage = calmi::storage::postgres::PostgresStorage::new(db.clone());
+    let user = storage
+        .create(username, display_name)
+        .await
+        .expect("Failed to insert user");
+    user.id
 }
 
+#[allow(dead_code)]
 pub async fn insert_note(
     db: &DatabaseConnection,
-    id: &str,
     content: &str,
-    author_id: &str,
+    author_id: i32,
     to: Vec<String>,
-) {
-    use calmi::domain::entities::note;
-    let note = note::ActiveModel {
-        id: sea_orm::ActiveValue::Set(id.to_string()),
-        content: sea_orm::ActiveValue::Set(content.to_string()),
-        author_id: sea_orm::ActiveValue::Set(author_id.to_string()),
-        created_at: sea_orm::ActiveValue::Set(Utc::now().naive_utc()),
-        to: sea_orm::ActiveValue::Set(to),
-    };
-    note.insert(db).await.expect("Failed to insert note");
+) -> i32 {
+    use calmi::domain::repositories::NoteRepository;
+    let storage = calmi::storage::postgres::PostgresStorage::new(db.clone());
+    let note = storage
+        .create(content, author_id, to)
+        .await
+        .expect("Failed to insert note");
+    note.id
 }

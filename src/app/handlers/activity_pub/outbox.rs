@@ -22,10 +22,10 @@ pub async fn get(
 
     let note_repository: &dyn NoteRepository = &state.storage;
     let notes = note_repository
-        .find_by_author_id(&user.id, 20, 0)
+        .find_by_author_id(user.id, 20, 0)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let outbox = build_outbox(&state.config, &username, &notes);
+    let outbox = build_outbox(&state.config, &username, &user, &notes);
     Ok(Json(outbox))
 }

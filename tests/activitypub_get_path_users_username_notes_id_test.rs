@@ -9,12 +9,12 @@ async fn returns_ok_if_note_exists() {
     let db = setup_db().await;
     let author_username = "alice";
     let author_display_name = "Alice";
-    insert_user(&db, author_username, author_display_name).await;
-    insert_note(&db, "note1", "Hello world", author_username, vec![]).await;
+    let author_id = insert_user(&db, author_username, author_display_name).await;
+    let note_id = insert_note(&db, "Hello world", author_id, vec![]).await;
     let server = create_test_server(db);
 
     let response = server
-        .get(&format!("/users/{}/notes/note1", author_username))
+        .get(&format!("/users/{}/notes/{}", author_username, note_id))
         .await;
 
     response.assert_status_ok();
@@ -27,19 +27,18 @@ async fn returns_note_as_a_valid_note_object() {
     let db = setup_db().await;
     let author_username = "alice";
     let author_display_name = "Alice";
-    insert_user(&db, author_username, author_display_name).await;
-    insert_note(
+    let author_id = insert_user(&db, author_username, author_display_name).await;
+    let note_id = insert_note(
         &db,
-        "note1",
         "Hello world",
-        author_username,
+        author_id,
         vec!["https://example.com/users/bob".to_string()],
     )
     .await;
     let server = create_test_server(db);
 
     let response = server
-        .get(&format!("/users/{}/notes/note1", author_username))
+        .get(&format!("/users/{}/notes/{}", author_username, note_id))
         .await;
 
     response.assert_status_ok();
@@ -80,25 +79,31 @@ async fn multiple_notes_have_different_objects() {
     let db = setup_db().await;
     let author_username = "alice";
     let author_display_name = "Alice";
-    insert_user(&db, author_username, author_display_name).await;
-    insert_note(&db, "note1", "First note", author_username, vec![]).await;
-    insert_note(&db, "note2", "Second note", author_username, vec![]).await;
+    let author_id = insert_user(&db, author_username, author_display_name).await;
+    let note1_id = insert_note(&db, "First note", author_id, vec![]).await;
+    let note2_id = insert_note(&db, "Second note", author_id, vec![]).await;
     let server = create_test_server(db);
 
     let response1 = server
-        .get(&format!("/users/{}/notes/note1", author_username))
+        .get(&format!("/users/{}/notes/{}", author_username, note1_id))
         .await;
     response1.assert_status_ok();
     let json1: Value = response1.json();
 
     let response2 = server
-        .get(&format!("/users/{}/notes/note2", author_username))
+        .get(&format!("/users/{}/notes/{}", author_username, note2_id))
         .await;
     response2.assert_status_ok();
     let json2: Value = response2.json();
 
-    assert_eq!(json1["id"], "https://example.com/users/alice/notes/note1");
-    assert_eq!(json2["id"], "https://example.com/users/alice/notes/note2");
+    assert_eq!(
+        json1["id"],
+        format!("https://example.com/users/alice/notes/{}", note1_id)
+    );
+    assert_eq!(
+        json2["id"],
+        format!("https://example.com/users/alice/notes/{}", note2_id)
+    );
     assert_eq!(json1["content"], "First note");
     assert_eq!(json2["content"], "Second note");
 }
