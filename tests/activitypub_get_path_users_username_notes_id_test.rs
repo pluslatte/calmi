@@ -51,9 +51,15 @@ async fn returns_note_as_a_valid_note_object() {
         "https://www.w3.org/ns/activitystreams".to_string()
     )));
 
-    assert_eq!(json["id"], "https://example.com/users/alice/notes/note1");
+    assert_eq!(
+        json["id"],
+        format!("https://example.com/users/alice/notes/{}", note_id)
+    );
     assert_eq!(json["type"], "Note");
-    assert_eq!(json["attributedTo"], author_username);
+    assert_eq!(
+        json["attributedTo"],
+        format!("https://example.com/users/{}", author_username)
+    );
     assert_eq!(json["content"], "Hello world");
     assert!(json["published"].is_string());
     assert!(json["to"].is_array());
@@ -68,7 +74,7 @@ async fn returns_404_for_unknown_note() {
     let db = setup_db().await;
     let server = create_test_server(db);
 
-    let response = server.get("/users/alice/notes/unknown").await;
+    let response = server.get("/users/alice/notes/1234567890").await;
 
     response.assert_status_not_found();
 }

@@ -56,15 +56,21 @@ async fn returns_create_activity_as_a_valid_create_object() {
 
     assert_eq!(
         json["id"],
-        "https://example.com/users/alice/notes/note1/activity"
+        format!("https://example.com/users/alice/notes/{}/activity", note_id)
     );
     assert_eq!(json["type"], "Create");
-    assert_eq!(json["actor"], author_username);
+    assert_eq!(
+        json["actor"],
+        format!("https://example.com/users/{}", author_username)
+    );
     assert!(json["object"].is_object());
     let object = json["object"].as_object().unwrap();
     assert_eq!(object["type"], "Note");
     assert_eq!(object["content"], "Hello world");
-    assert_eq!(object["attributedTo"], author_username);
+    assert_eq!(
+        object["attributedTo"],
+        format!("https://example.com/users/{}", author_username)
+    );
 }
 
 #[tokio::test]
@@ -73,7 +79,7 @@ async fn returns_404_for_unknown_note() {
     let db = setup_db().await;
     let server = create_test_server(db);
 
-    let response = server.get("/users/alice/notes/unknown/activity").await;
+    let response = server.get("/users/alice/notes/1234567890/activity").await;
 
     response.assert_status_not_found();
 }
