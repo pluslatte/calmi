@@ -6,8 +6,8 @@ use axum::{
 };
 use calmi_webfinger::types::WebFingerQuery;
 
+use crate::app::{object_builders::webfinger::build_webfinger_response, state::AppState};
 use crate::domain::repositories::user::UserRepository;
-use crate::{app::object_builders::webfinger::build_webfinger_response, app::state::AppState};
 
 pub async fn get(
     Query(query): Query<WebFingerQuery>,
