@@ -11,9 +11,9 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Note::Table)
                     .if_not_exists()
-                    .col(string_len(Note::Id, 2048).primary_key())
+                    .col(big_integer(Note::Id).auto_increment().primary_key())
                     .col(text(Note::Content))
-                    .col(string_len(Note::AuthorId, 2048))
+                    .col(big_integer(Note::AuthorId))
                     .col(date_time(Note::CreatedAt))
                     .col(
                         ColumnDef::new(Note::To)

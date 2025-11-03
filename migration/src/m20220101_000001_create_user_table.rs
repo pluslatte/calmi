@@ -11,11 +11,9 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(User::Table)
                     .if_not_exists()
-                    .col(string_len(User::Id, 2048).primary_key())
-                    .col(string_len(User::DisplayName, 255))
+                    .col(big_integer(User::Id).auto_increment().primary_key())
                     .col(string_len(User::Username, 255).unique_key())
-                    .col(string_len(User::InboxUrl, 2048))
-                    .col(string_len(User::OutboxUrl, 2048))
+                    .col(string_len(User::DisplayName, 255))
                     .to_owned(),
             )
             .await
@@ -32,8 +30,6 @@ impl MigrationTrait for Migration {
 enum User {
     Table,
     Id,
-    DisplayName,
     Username,
-    InboxUrl,
-    OutboxUrl,
+    DisplayName,
 }

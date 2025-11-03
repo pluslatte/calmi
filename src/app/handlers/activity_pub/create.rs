@@ -1,7 +1,5 @@
-use crate::app::object_builders::activity_pub::note::build_note;
-use crate::app::state::AppState;
-use crate::domain::repositories::note::NoteRepository;
-use crate::domain::repositories::user::UserRepository;
+use crate::app::{object_builders::activity_pub::create::build_create_activity, state::AppState};
+use crate::domain::{repositories::note::NoteRepository, repositories::user::UserRepository};
 use axum::{
     body::Body,
     extract::{Path, State},
@@ -29,8 +27,8 @@ pub async fn get(
 
     let base_url = &state.config.base_url;
 
-    let note = build_note(base_url, &note, &author);
-    let json = serde_json::to_string(&note).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let create = build_create_activity(base_url, &note, &author);
+    let json = serde_json::to_string(&create).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     let response = Response::builder()
         .header(header::CONTENT_TYPE, "application/activity+json")
         .body(Body::from(json))

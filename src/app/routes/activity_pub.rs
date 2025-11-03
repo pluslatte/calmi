@@ -1,7 +1,7 @@
-use axum::{Router, routing::get, routing::post};
-
 use crate::app::handlers;
+use crate::app::object_builders;
 use crate::app::state::AppState;
+use axum::{Router, routing::get, routing::post};
 
 pub fn routes() -> Router<AppState> {
     Router::new()
@@ -10,24 +10,23 @@ pub fn routes() -> Router<AppState> {
             get(handlers::activity_pub::webfinger::get),
         )
         .route(
-            "/users/{username}",
+            object_builders::activity_pub::person::endpoint_uri_template(),
             get(handlers::activity_pub::person::get),
         )
         .route(
-            "/users/{username}/inbox",
+            object_builders::activity_pub::inbox::endpoint_uri_template(),
             post(handlers::activity_pub::inbox::post),
         )
         .route(
-            "/users/{username}/outbox",
+            object_builders::activity_pub::outbox::endpoint_uri_template(),
             get(handlers::activity_pub::outbox::get),
         )
-        .route(note_endpoint(), get(handlers::activity_pub::note::get))
-}
-
-pub fn note_endpoint() -> &'static str {
-    "/users/{username}/statuses/{id}"
-}
-
-pub fn note_uri(base_url: &str, username: &str, id: &str) -> String {
-    format!("{}/users/{}/statuses/{}", base_url, username, id)
+        .route(
+            object_builders::activity_pub::note::endpoint_uri_template(),
+            get(handlers::activity_pub::note::get),
+        )
+        .route(
+            object_builders::activity_pub::create::endpoint_uri_template(),
+            get(handlers::activity_pub::create::get),
+        )
 }

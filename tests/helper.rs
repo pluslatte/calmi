@@ -1,6 +1,6 @@
 use axum_test::TestServer;
 use migration::{Migrator, MigratorTrait};
-use sea_orm::{ActiveModelTrait, ConnectionTrait, Database, DatabaseConnection, Statement};
+use sea_orm::{ConnectionTrait, Database, DatabaseConnection, Statement};
 
 pub async fn setup_db() -> DatabaseConnection {
     let base_url =
@@ -43,20 +43,28 @@ pub fn create_test_server(db: DatabaseConnection) -> TestServer {
     TestServer::new(app).unwrap()
 }
 
-pub async fn insert_user(db: &DatabaseConnection, username: &str, display_name: &str) {
-    use calmi::domain::entities::user;
-    let user = user::ActiveModel {
-        id: sea_orm::ActiveValue::Set(format!("https://example.com/users/{}", username)),
-        display_name: sea_orm::ActiveValue::Set(display_name.to_string()),
-        username: sea_orm::ActiveValue::Set(username.to_string()),
-        inbox_url: sea_orm::ActiveValue::Set(format!(
-            "https://example.com/users/{}/inbox",
-            username
-        )),
-        outbox_url: sea_orm::ActiveValue::Set(format!(
-            "https://example.com/users/{}/outbox",
-            username
-        )),
-    };
-    user.insert(db).await.expect("Failed to insert user");
+pub async fn insert_user(db: &DatabaseConnection, username: &str, display_name: &str) -> i64 {
+    use calmi::domain::repositories::UserRepository;
+    let storage = calmi::storage::postgres::PostgresStorage::new(db.clone());
+    let user = storage
+        .create(username, display_name)
+        .await
+        .expect("Failed to insert user");
+    user.id
+}
+
+#[allow(dead_code)]
+pub async fn insert_note(
+    db: &DatabaseConnection,
+    content: &str,
+    author_id: i64,
+    to: Vec<String>,
+) -> i64 {
+    use calmi::domain::repositories::NoteRepository;
+    let storage = calmi::storage::postgres::PostgresStorage::new(db.clone());
+    let note = storage
+        .create(content, author_id, to)
+        .await
+        .expect("Failed to insert note");
+    note.id
 }

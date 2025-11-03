@@ -11,16 +11,19 @@ use calmi_activity_streams::types::{
 /// This server implementation uses Create activities as the items in the outbox.
 pub fn build_outbox(
     config: &Config,
-    username: &str,
+    author: &entities::user::Model,
     notes: &[entities::note::Model],
 ) -> OrderedCollection {
-    let activities: Vec<Create> = notes.iter().map(create::build_create_activity).collect();
+    let activities: Vec<Create> = notes
+        .iter()
+        .map(|note| create::build_create_activity(&config.base_url, note, author))
+        .collect();
 
     OrderedCollection {
         context: Some(SingleOrMultiple::Multiple(vec![
             "https://www.w3.org/ns/activitystreams".to_string(),
         ])),
-        id: Some(format!("{}/users/{}/outbox", config.base_url, username)),
+        id: Some(endpoint_uri(&config.base_url, author)),
         r#type: Some("OrderedCollection".to_string()),
         total_items: Some(notes.len()),
         ordered_items: Some(
@@ -32,4 +35,12 @@ pub fn build_outbox(
                 .collect(),
         ),
     }
+}
+
+pub fn endpoint_uri_template() -> &'static str {
+    "/users/{username}/outbox"
+}
+
+fn endpoint_uri(base_url: &str, author: &entities::user::Model) -> String {
+    format!("{}/users/{}/outbox", base_url, author.username)
 }

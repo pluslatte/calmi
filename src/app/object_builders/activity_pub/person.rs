@@ -11,7 +11,7 @@ pub fn build_person(config: &Config, user: &entities::user::Model) -> Person {
             "https://www.w3.org/ns/activitystreams".to_string(),
             "https://w3id.org/security/v1".to_string(),
         ])),
-        id: Some(format!("{}/users/{}", config.base_url, user.username)),
+        id: Some(endpoint_uri(&config.base_url, user)),
         r#type: Some("Person".to_string()),
         name: Some(user.display_name.clone()),
         inbox: Some(Box::new(ObjectOrLinkOrStringUrl::Str(format!(
@@ -23,4 +23,12 @@ pub fn build_person(config: &Config, user: &entities::user::Model) -> Person {
             config.base_url, user.username
         )))),
     }
+}
+
+pub fn endpoint_uri_template() -> &'static str {
+    "/users/{username}"
+}
+
+fn endpoint_uri(base_url: &str, user: &entities::user::Model) -> String {
+    format!("{}/users/{}", base_url, user.username)
 }

@@ -1,12 +1,11 @@
+use crate::app::object_builders::activity_pub::outbox::build_outbox;
+use crate::app::state::AppState;
+use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
 use axum::{
     Json,
     extract::{Path, State},
     http::StatusCode,
 };
-
-use crate::activity_pub::mapper::outbox::build_outbox;
-use crate::app::state::AppState;
-use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
 use calmi_activity_streams::types::object::ordered_collection::OrderedCollection;
 
 pub async fn get(
@@ -22,10 +21,10 @@ pub async fn get(
 
     let note_repository: &dyn NoteRepository = &state.storage;
     let notes = note_repository
-        .find_by_author_id(&user.id, 20, 0)
+        .find_by_author_id(user.id, 20, 0)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let outbox = build_outbox(&state.config, &username, &notes);
+    let outbox = build_outbox(&state.config, &user, &notes);
     Ok(Json(outbox))
 }

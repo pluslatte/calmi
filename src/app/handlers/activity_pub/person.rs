@@ -1,13 +1,12 @@
-use axum::{
-    Json,
-    extract::{Path, State},
-    http::{StatusCode, header},
-    response::{IntoResponse, Response},
-};
-
-use crate::activity_pub::mapper::person::build_person;
+use crate::app::object_builders::activity_pub::person::build_person;
 use crate::app::state::AppState;
 use crate::domain::repositories::user::UserRepository;
+use axum::{
+    body::Body,
+    extract::{Path, State},
+    http::{StatusCode, header},
+    response::Response,
+};
 
 pub async fn get(
     Path(username): Path<String>,
@@ -21,9 +20,10 @@ pub async fn get(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let person = build_person(&state.config, &user);
-    Ok((
-        [(header::CONTENT_TYPE, "application/activity+json")],
-        Json(person),
-    )
-        .into_response())
+    let json = serde_json::to_string(&person).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let response = Response::builder()
+        .header(header::CONTENT_TYPE, "application/activity+json")
+        .body(Body::from(json))
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    Ok(response)
 }
