@@ -5,7 +5,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::activity_streams_mapper::build_person;
+use crate::activity_streams::mapper::person::build_person;
 use crate::app::state::AppState;
 use crate::domain::repositories::user::UserRepository;
 
