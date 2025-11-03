@@ -1,8 +1,8 @@
 use axum::{
-    Json,
+    body::Body,
     extract::{Path, State},
     http::{StatusCode, header},
-    response::{IntoResponse, Response},
+    response::Response,
 };
 
 use crate::activity_pub::mapper::person::build_person;
@@ -21,9 +21,10 @@ pub async fn get(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let person = build_person(&state.config, &user);
-    Ok((
-        [(header::CONTENT_TYPE, "application/activity+json")],
-        Json(person),
-    )
-        .into_response())
+    let json = serde_json::to_string(&person).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let response = Response::builder()
+        .header(header::CONTENT_TYPE, "application/activity+json")
+        .body(Body::from(json))
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    Ok(response)
 }

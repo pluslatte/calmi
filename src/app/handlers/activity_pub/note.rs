@@ -1,9 +1,9 @@
 use axum::{
-    Json,
+    body::Body,
     extract::{Path, State},
-    http::StatusCode,
+    http::{StatusCode, header},
+    response::Response,
 };
-use calmi_activity_streams::types::object::note::Note;
 
 use crate::domain::repositories::note::NoteRepository;
 use crate::{activity_pub::mapper::note::build_note, app::state::AppState};
@@ -11,7 +11,7 @@ use crate::{activity_pub::mapper::note::build_note, app::state::AppState};
 pub async fn get(
     Path((_, id)): Path<(String, String)>,
     State(state): State<AppState>,
-) -> Result<Json<Note>, StatusCode> {
+) -> Result<Response, StatusCode> {
     let note_repository: &dyn NoteRepository = &state.storage;
     let note = note_repository
         .find_by_id(&id)
@@ -22,5 +22,10 @@ pub async fn get(
     let base_url = &state.config.base_url;
 
     let note = build_note(base_url, &note);
-    Ok(Json(note))
+    let json = serde_json::to_string(&note).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let response = Response::builder()
+        .header(header::CONTENT_TYPE, "application/activity+json")
+        .body(Body::from(json))
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    Ok(response)
 }
