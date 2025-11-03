@@ -47,7 +47,7 @@ pub fn create_test_server(db: DatabaseConnection) -> TestServer {
 pub async fn insert_user(db: &DatabaseConnection, username: &str, display_name: &str) {
     use calmi::domain::entities::user;
     let user = user::ActiveModel {
-        id: sea_orm::ActiveValue::Set(format!("https://example.com/users/{}", username)),
+        id: sea_orm::ActiveValue::Set(username.to_string()),
         display_name: sea_orm::ActiveValue::Set(display_name.to_string()),
         username: sea_orm::ActiveValue::Set(username.to_string()),
         inbox_url: sea_orm::ActiveValue::Set(format!(

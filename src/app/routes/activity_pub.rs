@@ -11,7 +11,7 @@ pub fn routes() -> Router<AppState> {
             get(handlers::activity_pub::webfinger::get),
         )
         .route(
-            "/users/{username}",
+            activity_pub::mapper::person::endpoint_uri_template(),
             get(handlers::activity_pub::person::get),
         )
         .route(
