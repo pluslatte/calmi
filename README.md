@@ -1,4 +1,6 @@
 # calmi
+Small federated social networking server.  
+Focuses on connecting small clusters of communities with each other.
 ## Development
 ### Launch dev database
 ```bash
