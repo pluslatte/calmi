@@ -7,6 +7,6 @@ pub mod types;
 
 pub fn create_app(state: state::AppState) -> axum::Router {
     axum::Router::new()
-        .merge(routes::activity_pub::routes())
+        .merge(routes::routes())
         .with_state(state)
 }
