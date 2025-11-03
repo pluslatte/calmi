@@ -1,12 +1,11 @@
+use crate::domain::entities::{note, user};
+use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
 use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::{
     ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, DbErr, EntityTrait,
     QueryFilter, QueryOrder, QuerySelect,
 };
-
-use crate::domain::entities::{note, user};
-use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
 
 #[derive(Clone)]
 pub struct PostgresStorage {

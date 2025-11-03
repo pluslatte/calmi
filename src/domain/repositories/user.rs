@@ -1,7 +1,6 @@
+use crate::domain::entities::user;
 use async_trait::async_trait;
 use sea_orm::DbErr;
-
-use crate::domain::entities::user;
 
 #[async_trait]
 pub trait UserRepository: Send + Sync {

@@ -1,8 +1,7 @@
-use axum::{Router, routing::get, routing::post};
-
 use crate::app::handlers;
 use crate::app::object_builders;
 use crate::app::state::AppState;
+use axum::{Router, routing::get, routing::post};
 
 pub fn routes() -> Router<AppState> {
     Router::new()

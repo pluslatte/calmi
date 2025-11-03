@@ -1,13 +1,10 @@
+use crate::app::{object_builders::activity_pub::create::build_create_activity, state::AppState};
+use crate::domain::{repositories::note::NoteRepository, repositories::user::UserRepository};
 use axum::{
     body::Body,
     extract::{Path, State},
     http::{StatusCode, header},
     response::Response,
-};
-
-use crate::{
-    app::object_builders::activity_pub::create::build_create_activity, app::state::AppState,
-    domain::repositories::note::NoteRepository, domain::repositories::user::UserRepository,
 };
 
 pub async fn get(

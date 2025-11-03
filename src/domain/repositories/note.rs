@@ -1,7 +1,6 @@
+use crate::domain::entities::note;
 use async_trait::async_trait;
 use sea_orm::DbErr;
-
-use crate::domain::entities::note;
 
 #[async_trait]
 pub trait NoteRepository: Send + Sync {

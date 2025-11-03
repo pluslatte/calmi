@@ -1,3 +1,5 @@
+use crate::app::{object_builders::webfinger::build_webfinger_response, state::AppState};
+use crate::domain::repositories::user::UserRepository;
 use axum::{
     Json,
     extract::{Query, State},
@@ -5,9 +7,6 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use calmi_webfinger::types::WebFingerQuery;
-
-use crate::app::{object_builders::webfinger::build_webfinger_response, state::AppState};
-use crate::domain::repositories::user::UserRepository;
 
 pub async fn get(
     Query(query): Query<WebFingerQuery>,

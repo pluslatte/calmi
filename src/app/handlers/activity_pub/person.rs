@@ -1,13 +1,12 @@
+use crate::app::object_builders::activity_pub::person::build_person;
+use crate::app::state::AppState;
+use crate::domain::repositories::user::UserRepository;
 use axum::{
     body::Body,
     extract::{Path, State},
     http::{StatusCode, header},
     response::Response,
 };
-
-use crate::app::object_builders::activity_pub::person::build_person;
-use crate::app::state::AppState;
-use crate::domain::repositories::user::UserRepository;
 
 pub async fn get(
     Path(username): Path<String>,
