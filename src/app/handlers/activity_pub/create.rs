@@ -3,15 +3,17 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
 };
-use calmi_activity_streams::types::object::note::Note;
+use calmi_activity_streams::types::object::create::Create;
 
-use crate::domain::repositories::note::NoteRepository;
-use crate::{activity_pub::mapper::note::build_note, app::state::AppState};
+use crate::{
+    activity_pub::mapper::create::build_create_activity, app::state::AppState,
+    domain::repositories::note::NoteRepository,
+};
 
 pub async fn get(
     Path(id): Path<String>,
     State(state): State<AppState>,
-) -> Result<Json<Note>, StatusCode> {
+) -> Result<Json<Create>, StatusCode> {
     let note_repository: &dyn NoteRepository = &state.storage;
     let note = note_repository
         .find_by_id(&id)
@@ -21,6 +23,6 @@ pub async fn get(
 
     let base_url = &state.config.base_url;
 
-    let note = build_note(base_url, &note);
-    Ok(Json(note))
+    let create = build_create_activity(base_url, &note);
+    Ok(Json(create))
 }

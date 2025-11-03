@@ -7,7 +7,7 @@ use calmi_activity_streams::types::{
 
 pub fn build_create_activity(base_url: &str, note: &entities::note::Model) -> Create {
     let note_object = note::build_note(base_url, note);
-    let activity_id = format!("{}/activity", note.id);
+    let activity_id = endpoint_uri(base_url, note);
 
     Create {
         context: Some(SingleOrMultiple::Multiple(vec![
@@ -22,4 +22,15 @@ pub fn build_create_activity(base_url: &str, note: &entities::note::Model) -> Cr
             ObjectOrLinkOrStringUrl::Object(ObjectBased::Note(note_object)),
         ))),
     }
+}
+
+pub fn endpoint_uri_template() -> &'static str {
+    "/users/{username}/notes/{id}/activity"
+}
+
+fn endpoint_uri(base_url: &str, note: &entities::note::Model) -> String {
+    format!(
+        "{}/users/{}/notes/{}/activity",
+        base_url, note.author_id, note.id
+    )
 }

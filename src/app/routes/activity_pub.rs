@@ -26,4 +26,8 @@ pub fn routes() -> Router<AppState> {
             activity_pub::mapper::note::endpoint_uri_template(),
             get(handlers::activity_pub::note::get),
         )
+        .route(
+            activity_pub::mapper::create::endpoint_uri_template(),
+            get(handlers::activity_pub::create::get),
+        )
 }
