@@ -4,7 +4,7 @@ use helper::{create_test_server, insert_user, setup_db};
 use serde_json::Value;
 
 #[tokio::test]
-async fn test_get_users_username_returns_ok_if_user_exists() {
+async fn rname_returns_ok_if_user_exists() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
     let server = create_test_server(db);
@@ -16,7 +16,7 @@ async fn test_get_users_username_returns_ok_if_user_exists() {
 }
 
 #[tokio::test]
-async fn test_get_users_username_returns_actor_as_a_valid_person_object() {
+async fn returns_actor_as_a_valid_person_object() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
     let server = create_test_server(db);
@@ -42,7 +42,7 @@ async fn test_get_users_username_returns_actor_as_a_valid_person_object() {
 }
 
 #[tokio::test]
-async fn test_inbox_and_outbox_returned_with_person_are_strings_not_objects() {
+async fn inbox_and_outbox_returned_with_person_are_strings_not_objects() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
     let server = create_test_server(db);
@@ -58,7 +58,7 @@ async fn test_inbox_and_outbox_returned_with_person_are_strings_not_objects() {
 }
 
 #[tokio::test]
-async fn test_get_users_username_returns_404_for_unknown_user() {
+async fn returns_404_for_unknown_user() {
     let db = setup_db().await;
     let server = create_test_server(db);
 
@@ -68,7 +68,7 @@ async fn test_get_users_username_returns_404_for_unknown_user() {
 }
 
 #[tokio::test]
-async fn test_multiple_users_have_different_actors() {
+async fn multiple_users_have_different_actors() {
     let db = setup_db().await;
     insert_user(&db, "alice", "Alice").await;
     insert_user(&db, "bob", "Bob").await;
