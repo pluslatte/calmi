@@ -1,20 +1,25 @@
 # calmi
-Small federated social networking server.  
-Focuses on connecting small clusters of communities with each other.
+A small federated social networking server.  
+Focuses on connecting small clusters of communities with each other, assuming it is hosted by individuals who are core members of their community.
+
 ## Development
+
 ### Launch dev database
 ```bash
 docker compose up -d
 ```
+
 ### DB
-Requires postgres.
-- Install `sea-orm-cli`, if not already:
+Requires PostgreSQL.
+
+- Install `sea-orm-cli`, if not already installed:
 ```bash
 cargo install sea-orm-cli
 ```
+
 #### Migrations
-- Located in the `migrations/src/`.
-- To add new migration:
+- Located in `migrations/src/`.
+- To add a new migration:
 ```bash
 sea-orm-cli migrate generate <migration_name>
 ```
