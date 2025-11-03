@@ -1,4 +1,3 @@
-use crate::config::Config;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
@@ -20,17 +19,4 @@ pub struct WebFingerLink {
     pub r#type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub href: Option<String>,
-}
-
-impl WebFingerResponse {
-    pub fn new(config: &Config, username: &str) -> Self {
-        Self {
-            subject: format!("acct:{}@{}", username, config.domain),
-            links: Some(vec![WebFingerLink {
-                rel: "self".to_string(),
-                r#type: Some("application/activity+json".to_string()),
-                href: Some(format!("{}/users/{}", config.base_url, username)),
-            }]),
-        }
-    }
 }

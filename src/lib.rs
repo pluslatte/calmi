@@ -1,6 +1,5 @@
-pub mod activity_pub;
 pub mod app;
 pub mod config;
 pub mod domain;
+pub mod object_builder;
 pub mod storage;
-pub mod webfinger;

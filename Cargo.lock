@@ -511,6 +511,7 @@ dependencies = [
  "axum",
  "axum-test",
  "calmi_activity_streams",
+ "calmi_webfinger",
  "chrono",
  "migration",
  "sea-orm",
@@ -537,6 +538,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.108",
+]
+
+[[package]]
+name = "calmi_webfinger"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

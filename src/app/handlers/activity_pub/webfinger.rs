@@ -4,10 +4,10 @@ use axum::{
     http::{StatusCode, header},
     response::{IntoResponse, Response},
 };
+use calmi_webfinger::types::WebFingerQuery;
 
-use crate::app::state::AppState;
 use crate::domain::repositories::user::UserRepository;
-use crate::webfinger::{WebFingerQuery, WebFingerResponse};
+use crate::{app::state::AppState, object_builder::webfinger::build_webfinger_response};
 
 pub async fn get(
     Query(query): Query<WebFingerQuery>,
@@ -44,7 +44,7 @@ pub async fn get(
         return Err(StatusCode::NOT_FOUND);
     }
 
-    let response = WebFingerResponse::new(&state.config, username);
+    let response = build_webfinger_response(&state.config, username);
     Ok((
         [(header::CONTENT_TYPE, "application/jrd+json")],
         Json(response),

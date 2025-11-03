@@ -7,7 +7,7 @@ use axum::{
 
 use crate::domain::repositories::note::NoteRepository;
 use crate::domain::repositories::user::UserRepository;
-use crate::{activity_pub::mapper::note::build_note, app::state::AppState};
+use crate::{app::state::AppState, object_builder::activity_pub::note::build_note};
 
 pub async fn get(
     Path((_, id)): Path<(String, i64)>,
