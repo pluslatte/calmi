@@ -487,11 +487,11 @@ fn parse_undo_object(
                         activity_id: follow.id,
                     }))
                 }
-                ObjectBased::Like(mut like) => {
-                    let object_prop = like.object.take().ok_or_else(|| {
+                ObjectBased::Like(like) => {
+                    let object_prop = like.object.as_ref().ok_or_else(|| {
                         ActivityHandlerError("Undo Like missing object".to_string())
                     })?;
-                    let target = extract_note_reference(object_prop.as_ref(), base_url)?;
+                    let target = extract_note_reference(object_prop, base_url)?;
                     Ok(UndoActivityData::Like(UndoLikeActivityData {
                         actor_id,
                         target,
