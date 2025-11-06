@@ -4,9 +4,7 @@ use crate::storage::postgres::PostgresStorage;
 use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, DbErr, EntityTrait, QueryFilter, QueryOrder,
-};
+use sea_orm::{ActiveValue, ColumnTrait, DbErr, EntityTrait, QueryFilter, QueryOrder};
 
 #[async_trait]
 impl FollowRepository for PostgresStorage {
