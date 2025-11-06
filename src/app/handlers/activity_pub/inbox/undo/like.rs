@@ -30,25 +30,20 @@ pub async fn handle(
             return Err(StatusCode::BAD_REQUEST);
         }
 
-        // Use the shared fallback removal helper
-        fallback_remove(
-            async {
-                if let Some(activity_id) = like_data.activity_id.as_deref() {
-                    like_repository
-                        .remove_like_by_activity_id(activity_id)
-                        .await
-                        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
-                } else {
-                    Ok(0)
-                }
-            },
-            async {
-                like_repository
-                    .remove_like(note.id, &like_data.actor_id)
-                    .await
-                    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
-            },
-        ).await?;
+        let mut removed = 0;
+        if let Some(activity_id) = like_data.activity_id.as_deref() {
+            removed = like_repository
+                .remove_like_by_activity_id(activity_id)
+                .await
+                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        }
+
+        if removed == 0 {
+            like_repository
+                .remove_like(note.id, &like_data.actor_id)
+                .await
+                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        }
     } else {
         eprintln!(
             "Undo Like references unknown note {}",
