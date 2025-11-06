@@ -16,6 +16,10 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(has_many = "super::note_announce::Entity")]
+    NoteAnnounce,
+    #[sea_orm(has_many = "super::note_like::Entity")]
+    NoteLike,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::AuthorId",
@@ -24,6 +28,18 @@ pub enum Relation {
         on_delete = "NoAction"
     )]
     User,
+}
+
+impl Related<super::note_announce::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::NoteAnnounce.def()
+    }
+}
+
+impl Related<super::note_like::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::NoteLike.def()
+    }
 }
 
 impl Related<super::user::Entity> for Entity {
