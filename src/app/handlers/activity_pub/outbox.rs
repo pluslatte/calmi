@@ -14,14 +14,14 @@ pub async fn get(
 ) -> Result<Json<OrderedCollection>, StatusCode> {
     let user_repository: &dyn UserRepository = &state.storage;
     let user = user_repository
-        .find_by_username(&username)
+        .find_user_by_username(&username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
     let note_repository: &dyn NoteRepository = &state.storage;
     let notes = note_repository
-        .find_by_author_id(user.id, 20, 0)
+        .find_note_by_author_id(user.id, 20, 0)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

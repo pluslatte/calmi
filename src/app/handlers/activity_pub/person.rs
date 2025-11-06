@@ -14,7 +14,7 @@ pub async fn get(
 ) -> Result<Response, StatusCode> {
     let user = state
         .storage
-        .find_by_username(&username)
+        .find_user_by_username(&username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;

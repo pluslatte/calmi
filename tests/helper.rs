@@ -47,7 +47,7 @@ pub async fn insert_user(db: &DatabaseConnection, username: &str, display_name: 
     use calmi::domain::repositories::UserRepository;
     let storage = calmi::storage::postgres::PostgresStorage::new(db.clone());
     let user = storage
-        .create(username, display_name)
+        .add_user(username, display_name)
         .await
         .expect("Failed to insert user");
     user.id
@@ -63,7 +63,7 @@ pub async fn insert_note(
     use calmi::domain::repositories::NoteRepository;
     let storage = calmi::storage::postgres::PostgresStorage::new(db.clone());
     let note = storage
-        .create(content, author_id, to)
+        .add_note(content, author_id, to)
         .await
         .expect("Failed to insert note");
     note.id

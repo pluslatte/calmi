@@ -34,7 +34,7 @@ pub async fn get(
 
     let user_exists = state
         .storage
-        .find_by_username(username)
+        .find_user_by_username(username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .is_some();

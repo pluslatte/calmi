@@ -10,11 +10,11 @@ use sea_orm::{
 
 #[async_trait]
 impl NoteRepository for PostgresStorage {
-    async fn find_by_id(&self, id: i64) -> Result<Option<note::Model>, DbErr> {
+    async fn find_note_by_id(&self, id: i64) -> Result<Option<note::Model>, DbErr> {
         note::Entity::find_by_id(id).one(&self.db).await
     }
 
-    async fn find_by_author_id(
+    async fn find_note_by_author_id(
         &self,
         author_id: i64,
         limit: u64,
@@ -29,7 +29,7 @@ impl NoteRepository for PostgresStorage {
             .await
     }
 
-    async fn create(
+    async fn add_note(
         &self,
         content: &str,
         author_id: i64,
@@ -45,16 +45,16 @@ impl NoteRepository for PostgresStorage {
         note.insert(&self.db).await
     }
 
-    async fn update(&self, note: note::ActiveModel) -> Result<note::Model, DbErr> {
+    async fn update_note(&self, note: note::ActiveModel) -> Result<note::Model, DbErr> {
         note.update(&self.db).await
     }
 
-    async fn delete(&self, id: i64) -> Result<(), DbErr> {
+    async fn delete_note(&self, id: i64) -> Result<(), DbErr> {
         note::Entity::delete_by_id(id).exec(&self.db).await?;
         Ok(())
     }
 
-    async fn list(&self, limit: u64, offset: u64) -> Result<Vec<note::Model>, DbErr> {
+    async fn list_note(&self, limit: u64, offset: u64) -> Result<Vec<note::Model>, DbErr> {
         note::Entity::find()
             .order_by_desc(note::Column::CreatedAt)
             .limit(limit)

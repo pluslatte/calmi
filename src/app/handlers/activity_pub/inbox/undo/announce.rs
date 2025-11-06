@@ -18,7 +18,7 @@ pub async fn handle(
     }
 
     if let Some(note) = note_repository
-        .find_by_id(announce_data.target.note_id)
+        .find_note_by_id(announce_data.target.note_id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
     {

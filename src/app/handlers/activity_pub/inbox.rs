@@ -30,7 +30,7 @@ pub async fn post(
     let announce_repository: &dyn NoteAnnounceRepository = storage;
 
     let inbox_owner = user_repository
-        .find_by_username(&username)
+        .find_user_by_username(&username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;

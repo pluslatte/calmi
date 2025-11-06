@@ -8,18 +8,18 @@ use sea_orm::{
 
 #[async_trait]
 impl UserRepository for PostgresStorage {
-    async fn find_by_id(&self, id: i64) -> Result<Option<user::Model>, DbErr> {
+    async fn find_user_by_id(&self, id: i64) -> Result<Option<user::Model>, DbErr> {
         user::Entity::find_by_id(id).one(&self.db).await
     }
 
-    async fn find_by_username(&self, username: &str) -> Result<Option<user::Model>, DbErr> {
+    async fn find_user_by_username(&self, username: &str) -> Result<Option<user::Model>, DbErr> {
         user::Entity::find()
             .filter(user::Column::Username.eq(username))
             .one(&self.db)
             .await
     }
 
-    async fn create(&self, username: &str, display_name: &str) -> Result<user::Model, DbErr> {
+    async fn add_user(&self, username: &str, display_name: &str) -> Result<user::Model, DbErr> {
         let user = user::ActiveModel {
             id: ActiveValue::NotSet,
             username: ActiveValue::Set(username.to_string()),
@@ -28,16 +28,16 @@ impl UserRepository for PostgresStorage {
         user.insert(&self.db).await
     }
 
-    async fn update(&self, user: user::ActiveModel) -> Result<user::Model, DbErr> {
+    async fn update_user(&self, user: user::ActiveModel) -> Result<user::Model, DbErr> {
         user.update(&self.db).await
     }
 
-    async fn delete(&self, id: i64) -> Result<(), DbErr> {
+    async fn delete_user(&self, id: i64) -> Result<(), DbErr> {
         user::Entity::delete_by_id(id).exec(&self.db).await?;
         Ok(())
     }
 
-    async fn list(&self, limit: u64, offset: u64) -> Result<Vec<user::Model>, DbErr> {
+    async fn list_user(&self, limit: u64, offset: u64) -> Result<Vec<user::Model>, DbErr> {
         user::Entity::find()
             .limit(limit)
             .offset(offset)
