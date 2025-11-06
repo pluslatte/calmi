@@ -8,17 +8,12 @@ use sea_orm::{ActiveValue, ColumnTrait, DbErr, EntityTrait, QueryFilter, QueryOr
 
 #[async_trait]
 impl FollowRepository for PostgresStorage {
-    async fn add_follow(
-        &self,
-        user_id: i64,
-        actor: &str,
-        activity_id: Option<&str>,
-    ) -> Result<(), DbErr> {
+    async fn add_follow(&self, user_id: i64, actor: &str, activity_id: &str) -> Result<(), DbErr> {
         let model = follow::ActiveModel {
             id: ActiveValue::NotSet,
             user_id: ActiveValue::Set(user_id),
             actor: ActiveValue::Set(actor.to_string()),
-            activity_id: ActiveValue::Set(activity_id.map(|id| id.to_string())),
+            activity_id: ActiveValue::Set(activity_id.to_string()),
             created_at: ActiveValue::Set(Utc::now().naive_utc()),
         };
 

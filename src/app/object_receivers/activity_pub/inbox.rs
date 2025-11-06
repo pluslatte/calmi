@@ -20,7 +20,7 @@ impl fmt::Display for ActivityHandlerError {
 pub struct FollowActivityData {
     pub follower_id: String,
     pub followee_username: String,
-    pub activity_id: Option<String>,
+    pub activity_id: String,
 }
 
 pub struct UndoFollowActivityData {
@@ -83,17 +83,21 @@ pub async fn handle_follow(
     let actor = follow
         .actor
         .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
-        .as_ref();
+        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?;
 
     let actor_id = extract_actor_id(actor)?;
     let followee_username = extract_follow_target_username(&follow, base_url, target_username)?;
-
-    Ok(FollowActivityData {
-        follower_id: actor_id,
-        followee_username,
-        activity_id: follow.id,
-    })
+    if let Some(activity_id) = follow.id {
+        Ok(FollowActivityData {
+            follower_id: actor_id,
+            followee_username,
+            activity_id,
+        })
+    } else {
+        Err(ActivityHandlerError(
+            "Follow activity missing id".to_string(),
+        ))
+    }
 }
 
 pub async fn handle_undo(

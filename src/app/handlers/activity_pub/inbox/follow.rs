@@ -22,11 +22,7 @@ pub async fn handle(
             }
 
             if let Err(err) = follow_repository
-                .add_follow(
-                    inbox_owner.id,
-                    &data.follower_id,
-                    data.activity_id.as_deref(),
-                )
+                .add_follow(inbox_owner.id, &data.follower_id, &data.activity_id)
                 .await
             {
                 eprintln!("Failed to persist follow: {}", err);

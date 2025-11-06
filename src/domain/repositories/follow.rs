@@ -4,12 +4,7 @@ use sea_orm::DbErr;
 
 #[async_trait]
 pub trait FollowRepository: Send + Sync {
-    async fn add_follow(
-        &self,
-        user_id: i64,
-        actor: &str,
-        activity_id: Option<&str>,
-    ) -> Result<(), DbErr>;
+    async fn add_follow(&self, user_id: i64, actor: &str, activity_id: &str) -> Result<(), DbErr>;
 
     async fn remove_follow_by_activity_id(&self, activity_id: &str) -> Result<u64, DbErr>;
 
