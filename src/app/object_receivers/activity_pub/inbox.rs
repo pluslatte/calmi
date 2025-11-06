@@ -498,11 +498,11 @@ fn parse_undo_object(
                         activity_id: like.id,
                     }))
                 }
-                ObjectBased::Announce(mut announce) => {
-                    let object_prop = announce.object.take().ok_or_else(|| {
+                ObjectBased::Announce(announce) => {
+                    let object_prop = announce.object.as_ref().ok_or_else(|| {
                         ActivityHandlerError("Undo Announce missing object".to_string())
                     })?;
-                    let target = extract_note_reference(object_prop.as_ref(), base_url)?;
+                    let target = extract_note_reference(object_prop, base_url)?;
                     Ok(UndoActivityData::Announce(UndoAnnounceActivityData {
                         actor_id,
                         target,
