@@ -50,7 +50,7 @@ pub struct LikeActivityData {
 pub struct AnnounceActivityData {
     pub actor_id: String,
     pub target: NoteReference,
-    pub activity_id: Option<String>,
+    pub activity_id: String,
 }
 
 pub struct UndoLikeActivityData {
@@ -83,7 +83,8 @@ pub async fn handle_follow(
     let actor = follow
         .actor
         .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?;
+        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
+        .as_ref();
 
     let actor_id = extract_actor_id(actor)?;
     let followee_username = extract_follow_target_username(&follow, base_url, target_username)?;
@@ -186,8 +187,6 @@ pub async fn handle_announce(
     announce: Announce,
     base_url: &str,
 ) -> Result<AnnounceActivityData, ActivityHandlerError> {
-    let activity_id = announce.id.clone();
-
     let actor = announce
         .actor
         .as_ref()
@@ -202,11 +201,17 @@ pub async fn handle_announce(
 
     let target = extract_note_reference(object.as_ref(), base_url)?;
 
-    Ok(AnnounceActivityData {
-        actor_id,
-        target,
-        activity_id,
-    })
+    if let Some(activity_id) = announce.id {
+        Ok(AnnounceActivityData {
+            actor_id,
+            target,
+            activity_id,
+        })
+    } else {
+        Err(ActivityHandlerError(
+            "Announce activity missing id".to_string(),
+        ))
+    }
 }
 
 fn extract_actor_id(

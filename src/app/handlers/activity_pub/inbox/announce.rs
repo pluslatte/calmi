@@ -46,7 +46,7 @@ pub async fn handle(
             }
 
             if let Err(err) = announce_repository
-                .add_announce(note.id, &data.actor_id, data.activity_id.as_deref())
+                .add_announce(note.id, &data.actor_id, &data.activity_id)
                 .await
             {
                 eprintln!("Failed to persist announce: {}", err);

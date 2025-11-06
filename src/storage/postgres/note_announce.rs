@@ -12,13 +12,13 @@ impl NoteAnnounceRepository for PostgresStorage {
         &self,
         note_id: i64,
         actor: &str,
-        activity_id: Option<&str>,
+        activity_id: &str,
     ) -> Result<(), DbErr> {
         let model = note_announce::ActiveModel {
             id: ActiveValue::NotSet,
             note_id: ActiveValue::Set(note_id),
             actor: ActiveValue::Set(actor.to_string()),
-            activity_id: ActiveValue::Set(activity_id.map(|id| id.to_string())),
+            activity_id: ActiveValue::Set(activity_id.to_string()),
             created_at: ActiveValue::Set(Utc::now().naive_utc()),
         };
 
