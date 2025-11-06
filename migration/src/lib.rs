@@ -2,6 +2,7 @@ pub use sea_orm_migration::prelude::*;
 
 mod m20220101_000001_create_user_table;
 mod m20251102_073848_create_note_table;
+mod m20251106_000001_create_interactions_tables;
 
 pub struct Migrator;
 
@@ -11,6 +12,7 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(m20220101_000001_create_user_table::Migration),
             Box::new(m20251102_073848_create_note_table::Migration),
+            Box::new(m20251106_000001_create_interactions_tables::Migration),
         ]
     }
 }

@@ -1,6 +1,9 @@
 use sea_orm::DatabaseConnection;
 
+pub mod follow;
 pub mod note;
+pub mod note_announce;
+pub mod note_like;
 pub mod user;
 
 #[derive(Clone)]
