@@ -38,8 +38,8 @@ async fn test_inbox_follow_is_persisted_and_undo_removes_it() {
     assert_eq!(followers.len(), 1);
     assert_eq!(followers[0].actor, "https://remote.example/users/bob");
     assert_eq!(
-        followers[0].activity_id.as_deref(),
-        Some("https://remote.example/follow/123")
+        followers[0].activity_id,
+        "https://remote.example/follow/123"
     );
 
     let undo_activity = json!({
@@ -95,10 +95,7 @@ async fn test_inbox_like_and_undo_remove_reaction() {
         .expect("Failed to list likes");
     assert_eq!(likes.len(), 1);
     assert_eq!(likes[0].actor, "https://remote.example/users/bob");
-    assert_eq!(
-        likes[0].activity_id.as_deref(),
-        Some("https://remote.example/like/1")
-    );
+    assert_eq!(likes[0].activity_id, "https://remote.example/like/1");
 
     let undo_like = json!({
         "@context": "https://www.w3.org/ns/activitystreams",
@@ -156,8 +153,8 @@ async fn test_inbox_announce_is_persisted() {
     assert_eq!(announces.len(), 1);
     assert_eq!(announces[0].actor, "https://remote.example/users/bob");
     assert_eq!(
-        announces[0].activity_id.as_deref(),
-        Some("https://remote.example/announce/1")
+        announces[0].activity_id,
+        "https://remote.example/announce/1"
     );
 }
 

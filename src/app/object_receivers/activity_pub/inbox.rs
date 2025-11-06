@@ -44,7 +44,7 @@ pub struct NoteReference {
 pub struct LikeActivityData {
     pub actor_id: String,
     pub target: NoteReference,
-    pub activity_id: Option<String>,
+    pub activity_id: String,
 }
 
 pub struct AnnounceActivityData {
@@ -160,8 +160,6 @@ pub async fn handle_like(
     like: Like,
     base_url: &str,
 ) -> Result<LikeActivityData, ActivityHandlerError> {
-    let activity_id = like.id.clone();
-
     let actor = like
         .actor
         .as_ref()
@@ -176,11 +174,15 @@ pub async fn handle_like(
 
     let target = extract_note_reference(object.as_ref(), base_url)?;
 
-    Ok(LikeActivityData {
-        actor_id,
-        target,
-        activity_id,
-    })
+    if let Some(activity_id) = like.id {
+        Ok(LikeActivityData {
+            actor_id,
+            target,
+            activity_id,
+        })
+    } else {
+        Err(ActivityHandlerError("Like activity missing id".to_string()))
+    }
 }
 
 pub async fn handle_announce(

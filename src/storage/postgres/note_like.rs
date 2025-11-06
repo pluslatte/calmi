@@ -4,23 +4,16 @@ use crate::storage::postgres::PostgresStorage;
 use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{
-    ActiveValue, ColumnTrait, DbErr, EntityTrait, QueryFilter, QueryOrder,
-};
+use sea_orm::{ActiveValue, ColumnTrait, DbErr, EntityTrait, QueryFilter, QueryOrder};
 
 #[async_trait]
 impl NoteLikeRepository for PostgresStorage {
-    async fn add_like(
-        &self,
-        note_id: i64,
-        actor: &str,
-        activity_id: Option<&str>,
-    ) -> Result<(), DbErr> {
+    async fn add_like(&self, note_id: i64, actor: &str, activity_id: &str) -> Result<(), DbErr> {
         let model = note_like::ActiveModel {
             id: ActiveValue::NotSet,
             note_id: ActiveValue::Set(note_id),
             actor: ActiveValue::Set(actor.to_string()),
-            activity_id: ActiveValue::Set(activity_id.map(|id| id.to_string())),
+            activity_id: ActiveValue::Set(activity_id.to_string()),
             created_at: ActiveValue::Set(Utc::now().naive_utc()),
         };
 

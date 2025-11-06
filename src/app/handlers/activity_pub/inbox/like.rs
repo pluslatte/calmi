@@ -43,7 +43,7 @@ pub async fn handle(
             }
 
             if let Err(err) = like_repository
-                .add_like(note.id, &data.actor_id, data.activity_id.as_deref())
+                .add_like(note.id, &data.actor_id, &data.activity_id)
                 .await
             {
                 eprintln!("Failed to persist like: {}", err);
