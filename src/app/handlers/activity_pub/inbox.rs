@@ -1,9 +1,9 @@
-pub mod accept;
-pub mod announce;
-pub mod create;
-pub mod follow;
-pub mod like;
-pub mod undo;
+mod accept;
+mod announce;
+mod create;
+mod follow;
+mod like;
+mod undo;
 
 use crate::app::object_receivers;
 use crate::app::state::AppState;
