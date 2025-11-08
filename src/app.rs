@@ -1,6 +1,5 @@
 mod handlers;
 mod object_builders;
-mod object_receivers;
 mod routes;
 pub mod state;
 pub mod types;

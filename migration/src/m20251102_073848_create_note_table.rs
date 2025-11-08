@@ -9,23 +9,23 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Note::Table)
+                    .table(Notes::Table)
                     .if_not_exists()
-                    .col(big_integer(Note::Id).auto_increment().primary_key())
-                    .col(text(Note::Content))
-                    .col(big_integer(Note::AuthorId))
-                    .col(date_time(Note::CreatedAt))
+                    .col(big_integer(Notes::Id).auto_increment().primary_key())
+                    .col(text(Notes::Content))
+                    .col(big_integer(Notes::AuthorId))
+                    .col(date_time(Notes::CreatedAt))
                     .col(
-                        ColumnDef::new(Note::To)
+                        ColumnDef::new(Notes::To)
                             .array(ColumnType::String(StringLen::N(2048)))
                             .not_null()
                             .default("{}"),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk_note_author_id")
-                            .from(Note::Table, Note::AuthorId)
-                            .to(User::Table, User::Id),
+                            .name("fk_notes_author_id")
+                            .from(Notes::Table, Notes::AuthorId)
+                            .to(Users::Table, Users::Id),
                     )
                     .to_owned(),
             )
@@ -34,13 +34,13 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Note::Table).to_owned())
+            .drop_table(Table::drop().table(Notes::Table).to_owned())
             .await
     }
 }
 
 #[derive(DeriveIden)]
-enum Note {
+enum Notes {
     Table,
     Id,
     Content,
@@ -50,7 +50,7 @@ enum Note {
 }
 
 #[derive(DeriveIden)]
-enum User {
+enum Users {
     Table,
     Id,
 }

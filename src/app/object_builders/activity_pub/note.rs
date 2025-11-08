@@ -6,8 +6,8 @@ use calmi_activity_streams::types::{
 
 pub fn build_note(
     base_url: &str,
-    note: &entities::note::Model,
-    author: &entities::user::Model,
+    note: &entities::notes::Model,
+    author: &entities::users::Model,
 ) -> Note {
     Note {
         context: SingleOrMultiple::Multiple(vec![
@@ -40,8 +40,8 @@ pub fn endpoint_uri_template() -> &'static str {
 
 fn endpoint_uri(
     base_url: &str,
-    note: &entities::note::Model,
-    author: &entities::user::Model,
+    note: &entities::notes::Model,
+    author: &entities::users::Model,
 ) -> String {
     format!("{}/users/{}/notes/{}", base_url, author.username, note.id)
 }

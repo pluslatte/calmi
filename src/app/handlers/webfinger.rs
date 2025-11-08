@@ -1,5 +1,5 @@
 use crate::app::{object_builders::webfinger::build_webfinger_response, state::AppState};
-use crate::domain::repositories::user::UserRepository;
+use crate::domain::repositories::users::UsersRepository;
 use axum::{
     Json,
     extract::{Query, State},
@@ -34,7 +34,7 @@ pub async fn get(
 
     let user_exists = state
         .storage
-        .find_by_username(username)
+        .find_user_by_username(username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .is_some();

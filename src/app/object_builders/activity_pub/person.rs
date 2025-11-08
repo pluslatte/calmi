@@ -5,7 +5,7 @@ use calmi_activity_streams::types::{
     object::person::Person,
 };
 
-pub fn build_person(config: &Config, user: &entities::user::Model) -> Person {
+pub fn build_person(config: &Config, user: &entities::users::Model) -> Person {
     Person {
         context: Some(SingleOrMultiple::Multiple(vec![
             "https://www.w3.org/ns/activitystreams".to_string(),
@@ -29,6 +29,6 @@ pub fn endpoint_uri_template() -> &'static str {
     "/users/{username}"
 }
 
-fn endpoint_uri(base_url: &str, user: &entities::user::Model) -> String {
+fn endpoint_uri(base_url: &str, user: &entities::users::Model) -> String {
     format!("{}/users/{}", base_url, user.username)
 }

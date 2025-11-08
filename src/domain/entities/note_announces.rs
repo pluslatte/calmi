@@ -3,32 +3,33 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "note")]
+#[sea_orm(table_name = "note_announces")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
+    pub note_id: i64,
     #[sea_orm(column_type = "Text")]
-    pub content: String,
-    pub author_id: i64,
+    pub actor: String,
+    #[sea_orm(unique)]
+    pub activity_id: String,
     pub created_at: DateTime,
-    pub to: Vec<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::AuthorId",
-        to = "super::user::Column::Id",
+        belongs_to = "super::notes::Entity",
+        from = "Column::NoteId",
+        to = "super::notes::Column::Id",
         on_update = "NoAction",
-        on_delete = "NoAction"
+        on_delete = "Cascade"
     )]
-    User,
+    Notes,
 }
 
-impl Related<super::user::Entity> for Entity {
+impl Related<super::notes::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::User.def()
+        Relation::Notes.def()
     }
 }
 

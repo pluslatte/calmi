@@ -1,8 +1,10 @@
 pub mod accept;
 pub mod activity;
+pub mod announce;
 pub mod collection;
 pub mod create;
 pub mod follow;
+pub mod like;
 pub mod note;
 pub mod ordered_collection;
 pub mod person;

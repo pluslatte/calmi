@@ -9,11 +9,11 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(User::Table)
+                    .table(Users::Table)
                     .if_not_exists()
-                    .col(big_integer(User::Id).auto_increment().primary_key())
-                    .col(string_len(User::Username, 255).unique_key())
-                    .col(string_len(User::DisplayName, 255))
+                    .col(big_integer(Users::Id).auto_increment().primary_key())
+                    .col(string_len(Users::Username, 255).unique_key())
+                    .col(string_len(Users::DisplayName, 255))
                     .to_owned(),
             )
             .await
@@ -21,13 +21,13 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(User::Table).to_owned())
+            .drop_table(Table::drop().table(Users::Table).to_owned())
             .await
     }
 }
 
 #[derive(DeriveIden)]
-enum User {
+enum Users {
     Table,
     Id,
     Username,

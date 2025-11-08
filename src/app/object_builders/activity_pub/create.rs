@@ -7,8 +7,8 @@ use calmi_activity_streams::types::{
 
 pub fn build_create_activity(
     base_url: &str,
-    note: &entities::note::Model,
-    author: &entities::user::Model,
+    note: &entities::notes::Model,
+    author: &entities::users::Model,
 ) -> Create {
     let note_object = note::build_note(base_url, note, author);
     let activity_id = endpoint_uri(base_url, note, author);
@@ -34,8 +34,8 @@ pub fn endpoint_uri_template() -> &'static str {
 
 fn endpoint_uri(
     base_url: &str,
-    note: &entities::note::Model,
-    author: &entities::user::Model,
+    note: &entities::notes::Model,
+    author: &entities::users::Model,
 ) -> String {
     format!(
         "{}/users/{}/notes/{}/activity",

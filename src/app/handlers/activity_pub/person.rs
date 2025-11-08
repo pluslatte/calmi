@@ -1,6 +1,6 @@
 use crate::app::object_builders::activity_pub::person::build_person;
 use crate::app::state::AppState;
-use crate::domain::repositories::user::UserRepository;
+use crate::domain::repositories::users::UsersRepository;
 use axum::{
     body::Body,
     extract::{Path, State},
@@ -14,7 +14,7 @@ pub async fn get(
 ) -> Result<Response, StatusCode> {
     let user = state
         .storage
-        .find_by_username(&username)
+        .find_user_by_username(&username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;

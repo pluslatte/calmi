@@ -2,5 +2,8 @@
 
 pub mod prelude;
 
-pub mod note;
-pub mod user;
+pub mod follows;
+pub mod note_announces;
+pub mod note_likes;
+pub mod notes;
+pub mod users;

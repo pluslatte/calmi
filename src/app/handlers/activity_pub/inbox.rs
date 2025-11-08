@@ -1,88 +1,76 @@
-use crate::app::object_receivers;
+mod accept;
+mod announce;
+mod create;
+mod follow;
+mod like;
+mod undo;
+
 use crate::app::state::AppState;
 use crate::app::types::InboxActivity;
-use crate::domain::repositories::user::UserRepository;
+use crate::domain::repositories::UsersRepository;
 use axum::{
     Json,
     extract::{Path, State},
     http::StatusCode,
 };
 
+pub fn endpoint_uri_template() -> &'static str {
+    "/users/{username}/inbox"
+}
+
 pub async fn post(
     Path(username): Path<String>,
     State(state): State<AppState>,
     Json(activity): Json<InboxActivity>,
 ) -> Result<StatusCode, StatusCode> {
-    let user_exists = state
-        .storage
-        .find_by_username(&username)
+    let storage = &state.storage;
+
+    let inbox_owner = UsersRepository::find_user_by_username(storage, &username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .is_some();
-
-    if !user_exists {
-        return Err(StatusCode::NOT_FOUND);
-    }
+        .ok_or(StatusCode::NOT_FOUND)?;
 
     println!("Received activity for {}: {:?}", username, activity);
 
+    let base_url = state.config.base_url.clone();
+
     match activity {
         InboxActivity::Follow(follow) => {
-            match object_receivers::activity_pub::inbox::handle_follow(follow, &username).await {
-                Ok(data) => {
-                    println!(
-                        "Follow request: {} wants to follow {}",
-                        data.follower_id, data.followee_username
-                    );
-                    Ok(StatusCode::ACCEPTED)
-                }
-                Err(e) => {
-                    eprintln!("Failed to handle Follow activity: {}", e);
-                    Err(StatusCode::BAD_REQUEST)
+            follow::handle(follow, &base_url, &username, &inbox_owner, storage).await
+        }
+        InboxActivity::Like(like) => {
+            like::handle(like, &base_url, &username, &inbox_owner, storage).await
+        }
+        InboxActivity::Announce(announce) => {
+            announce::handle(announce, &base_url, &username, &inbox_owner, storage).await
+        }
+        InboxActivity::Undo(undo) => match undo::parse_undo(undo, &base_url, &username) {
+            Ok(data) => {
+                use undo::UndoActivityData;
+
+                match data {
+                    UndoActivityData::Follow(follow_data) => {
+                        undo::follow::handle(follow_data, &username, &inbox_owner, storage).await
+                    }
+                    UndoActivityData::Like(like_data) => {
+                        undo::like::handle(like_data, &username, &inbox_owner, storage).await
+                    }
+                    UndoActivityData::Announce(announce_data) => {
+                        undo::announce::handle(announce_data, &username, &inbox_owner, storage)
+                            .await
+                    }
+                    UndoActivityData::ActivityIdOnly {
+                        actor_id,
+                        activity_id,
+                    } => undo::activity_id_only::handle(actor_id, activity_id, storage).await,
                 }
             }
-        }
-        InboxActivity::Undo(undo) => {
-            match object_receivers::activity_pub::inbox::handle_undo(undo, &username).await {
-                Ok(data) => {
-                    println!(
-                        "Undo request: {} unfollows {}",
-                        data.follower_id, data.followee_username
-                    );
-                    Ok(StatusCode::ACCEPTED)
-                }
-                Err(e) => {
-                    eprintln!("Failed to handle Undo activity: {}", e);
-                    Err(StatusCode::BAD_REQUEST)
-                }
+            Err(err) => {
+                eprintln!("Failed to handle Undo activity: {}", err);
+                Err(StatusCode::BAD_REQUEST)
             }
-        }
-        InboxActivity::Create(create) => {
-            match object_receivers::activity_pub::inbox::handle_create(create, &username).await {
-                Ok(data) => {
-                    println!(
-                        "Create activity: actor={}, object_type={}, object_id={:?}",
-                        data.actor_id, data.object_type, data.object_id
-                    );
-                    Ok(StatusCode::ACCEPTED)
-                }
-                Err(e) => {
-                    eprintln!("Failed to handle Create activity: {}", e);
-                    Err(StatusCode::BAD_REQUEST)
-                }
-            }
-        }
-        InboxActivity::Accept(accept) => {
-            match object_receivers::activity_pub::inbox::handle_accept(accept, &username).await {
-                Ok(_) => {
-                    println!("Accept activity processed");
-                    Ok(StatusCode::ACCEPTED)
-                }
-                Err(e) => {
-                    eprintln!("Failed to handle Accept activity: {}", e);
-                    Err(StatusCode::BAD_REQUEST)
-                }
-            }
-        }
+        },
+        InboxActivity::Create(create) => create::handle(create, &username).await,
+        InboxActivity::Accept(accept) => accept::handle(accept, &username).await,
     }
 }
