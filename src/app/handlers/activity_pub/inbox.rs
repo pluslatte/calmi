@@ -45,7 +45,7 @@ pub async fn post(
                 .await
             {
                 Ok(data) => {
-                    use object_receivers::activity_pub::inbox::UndoActivityData;
+                    use object_receivers::activity_pub::inbox::types::UndoActivityData;
 
                     match data {
                         UndoActivityData::Follow(follow_data) => {

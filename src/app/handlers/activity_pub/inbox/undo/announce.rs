@@ -3,7 +3,7 @@ use crate::domain::repositories::{NoteAnnounceRepository, NoteRepository};
 use axum::http::StatusCode;
 
 pub async fn handle<T: NoteRepository + NoteAnnounceRepository>(
-    announce_data: crate::app::object_receivers::activity_pub::inbox::UndoAnnounceActivityData,
+    announce_data: crate::app::object_receivers::activity_pub::inbox::types::UndoAnnounceActivityData,
     username: &str,
     inbox_owner: &User,
     storage: &T,
