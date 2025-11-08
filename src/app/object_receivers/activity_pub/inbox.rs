@@ -1,188 +1,19 @@
+pub mod accept;
+pub mod announce;
+pub mod create;
+pub mod follow;
+pub mod like;
 pub mod types;
+pub mod undo;
 
 use crate::app::object_receivers::activity_pub::inbox::types::{
-    ActivityHandlerError, AnnounceActivityData, CreateActivityData, FollowActivityData,
-    LikeActivityData, NoteReference, UndoActivityData, UndoAnnounceActivityData,
+    ActivityHandlerError, NoteReference, UndoActivityData, UndoAnnounceActivityData,
     UndoFollowActivityData, UndoLikeActivityData,
 };
-use calmi_activity_streams::types::object::accept::Accept;
-use calmi_activity_streams::types::object::announce::Announce;
-use calmi_activity_streams::types::object::create::Create;
 use calmi_activity_streams::types::object::follow::Follow;
-use calmi_activity_streams::types::object::like::Like;
-use calmi_activity_streams::types::object::undo::Undo;
 
 pub fn endpoint_uri_template() -> &'static str {
     "/users/{username}/inbox"
-}
-
-pub async fn handle_follow(
-    follow: Follow,
-    base_url: &str,
-    target_username: &str,
-) -> Result<FollowActivityData, ActivityHandlerError> {
-    let actor = follow
-        .actor
-        .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
-        .as_ref();
-
-    let actor_id = extract_actor_id(actor)?;
-    let followee_username = extract_follow_target_username(&follow, base_url, target_username)?;
-    if let Some(activity_id) = follow.id {
-        Ok(FollowActivityData {
-            follower_id: actor_id,
-            followee_username,
-            activity_id,
-        })
-    } else {
-        Err(ActivityHandlerError(
-            "Follow activity missing id".to_string(),
-        ))
-    }
-}
-
-pub async fn handle_undo(
-    undo: Undo,
-    base_url: &str,
-    target_username: &str,
-) -> Result<UndoActivityData, ActivityHandlerError> {
-    let actor = undo
-        .actor
-        .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
-        .as_ref();
-
-    let actor_id = extract_actor_id(actor)?;
-
-    let object = undo
-        .object
-        .ok_or_else(|| ActivityHandlerError("Missing object in Undo activity".to_string()))?;
-
-    parse_undo_object(*object, base_url, target_username, actor_id)
-}
-
-pub async fn handle_create(
-    create: Create,
-    _target_username: &str,
-) -> Result<CreateActivityData, ActivityHandlerError> {
-    let actor = create
-        .actor
-        .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
-        .as_ref();
-
-    let actor_id = extract_actor_id(actor)?;
-
-    let object = create
-        .object
-        .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing object in Create activity".to_string()))?;
-
-    let (object_type, object_id) = extract_object_info(object.as_ref())?;
-    let activity_id = create.id.clone();
-
-    Ok(CreateActivityData {
-        actor_id,
-        object_type,
-        object_id,
-        activity_id,
-    })
-}
-
-pub async fn handle_accept(
-    _accept: Accept,
-    _target_username: &str,
-) -> Result<(), ActivityHandlerError> {
-    Ok(())
-}
-
-pub async fn handle_like(
-    like: Like,
-    base_url: &str,
-) -> Result<LikeActivityData, ActivityHandlerError> {
-    let actor = like
-        .actor
-        .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
-        .as_ref();
-    let actor_id = extract_actor_id(actor)?;
-
-    let object = like
-        .object
-        .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing object in Like activity".to_string()))?;
-
-    let target = extract_note_reference(object.as_ref(), base_url)?;
-
-    if let Some(activity_id) = like.id {
-        Ok(LikeActivityData {
-            actor_id,
-            target,
-            activity_id,
-        })
-    } else {
-        Err(ActivityHandlerError("Like activity missing id".to_string()))
-    }
-}
-
-pub async fn handle_announce(
-    announce: Announce,
-    base_url: &str,
-) -> Result<AnnounceActivityData, ActivityHandlerError> {
-    let actor = announce
-        .actor
-        .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
-        .as_ref();
-    let actor_id = extract_actor_id(actor)?;
-
-    let object = announce
-        .object
-        .as_ref()
-        .ok_or_else(|| ActivityHandlerError("Missing object in Announce activity".to_string()))?;
-
-    let target = extract_note_reference(object.as_ref(), base_url)?;
-
-    if let Some(activity_id) = announce.id {
-        Ok(AnnounceActivityData {
-            actor_id,
-            target,
-            activity_id,
-        })
-    } else {
-        Err(ActivityHandlerError(
-            "Announce activity missing id".to_string(),
-        ))
-    }
-}
-
-fn extract_actor_id(
-    actor: &calmi_activity_streams::types::properties::Actor,
-) -> Result<String, ActivityHandlerError> {
-    use calmi_activity_streams::types::enums::{ObjectOrLinkOrStringUrl, SingleOrMultiple};
-
-    match actor {
-        SingleOrMultiple::Single(obj_or_link) => match obj_or_link {
-            ObjectOrLinkOrStringUrl::Str(id) => Ok(id.clone()),
-            ObjectOrLinkOrStringUrl::Object(obj) => match obj {
-                calmi_activity_streams::types::enums::ObjectBased::Person(person) => person
-                    .id
-                    .clone()
-                    .ok_or_else(|| ActivityHandlerError("Person has no id".to_string())),
-                _ => Err(ActivityHandlerError(
-                    "Unsupported actor object type".to_string(),
-                )),
-            },
-            ObjectOrLinkOrStringUrl::Link(link) => link
-                .href
-                .clone()
-                .ok_or_else(|| ActivityHandlerError("Link has no href".to_string())),
-        },
-        SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError(
-            "Multiple actors not supported".to_string(),
-        )),
-    }
 }
 
 fn extract_object_info(
@@ -208,18 +39,6 @@ fn extract_object_info(
         SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError(
             "Multiple objects not supported".to_string(),
         )),
-    }
-}
-
-fn extract_follow_target_username(
-    follow: &Follow,
-    base_url: &str,
-    fallback_username: &str,
-) -> Result<String, ActivityHandlerError> {
-    if let Some(object) = follow.object.as_deref() {
-        resolve_username_from_object_property(object, base_url, fallback_username)
-    } else {
-        Ok(fallback_username.to_string())
     }
 }
 
@@ -368,6 +187,18 @@ fn extract_note_reference(
     };
 
     parse_note_url(&url, base_url)
+}
+
+fn extract_follow_target_username(
+    follow: &Follow,
+    base_url: &str,
+    fallback_username: &str,
+) -> Result<String, ActivityHandlerError> {
+    if let Some(object) = follow.object.as_deref() {
+        resolve_username_from_object_property(object, base_url, fallback_username)
+    } else {
+        Ok(fallback_username.to_string())
+    }
 }
 
 fn parse_note_url(url: &str, base_url: &str) -> Result<NoteReference, ActivityHandlerError> {

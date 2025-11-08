@@ -11,7 +11,9 @@ pub async fn handle<T: FollowRepository>(
     inbox_owner: &User,
     storage: &T,
 ) -> Result<StatusCode, StatusCode> {
-    match object_receivers::activity_pub::inbox::handle_follow(follow, base_url, username).await {
+    match object_receivers::activity_pub::inbox::follow::handle_follow(follow, base_url, username)
+        .await
+    {
         Ok(data) => {
             if data.followee_username != username {
                 eprintln!(

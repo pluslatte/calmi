@@ -11,7 +11,7 @@ pub async fn handle<T: NoteRepository + NoteLikeRepository>(
     inbox_owner: &User,
     storage: &T,
 ) -> Result<StatusCode, StatusCode> {
-    match object_receivers::activity_pub::inbox::handle_like(like, base_url).await {
+    match object_receivers::activity_pub::inbox::like::handle_like(like, base_url).await {
         Ok(data) => {
             if data.target.author_username != username {
                 eprintln!(

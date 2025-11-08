@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use calmi_activity_streams::types::object::create::Create;
 
 pub async fn handle(create: Create, username: &str) -> Result<StatusCode, StatusCode> {
-    match object_receivers::activity_pub::inbox::handle_create(create, username).await {
+    match object_receivers::activity_pub::inbox::create::handle_create(create, username).await {
         Ok(data) => {
             println!(
                 "Create activity: actor={}, object_type={}, object_id={:?}, activity_id={:?}",

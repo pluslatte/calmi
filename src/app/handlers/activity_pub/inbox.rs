@@ -41,8 +41,10 @@ pub async fn post(
             announce::handle(announce, &base_url, &username, &inbox_owner, storage).await
         }
         InboxActivity::Undo(undo) => {
-            match object_receivers::activity_pub::inbox::handle_undo(undo, &base_url, &username)
-                .await
+            match object_receivers::activity_pub::inbox::undo::handle_undo(
+                undo, &base_url, &username,
+            )
+            .await
             {
                 Ok(data) => {
                     use object_receivers::activity_pub::inbox::types::UndoActivityData;
