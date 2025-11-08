@@ -1,9 +1,10 @@
+use super::UndoFollowActivityData;
 use crate::domain::entities::user::Model as User;
 use crate::domain::repositories::FollowRepository;
 use axum::http::StatusCode;
 
 pub async fn handle<T: FollowRepository>(
-    follow_data: crate::app::object_receivers::activity_pub::inbox::types::UndoFollowActivityData,
+    follow_data: UndoFollowActivityData,
     username: &str,
     inbox_owner: &User,
     storage: &T,

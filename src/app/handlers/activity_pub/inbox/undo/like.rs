@@ -1,9 +1,10 @@
+use super::UndoLikeActivityData;
 use crate::domain::entities::user::Model as User;
 use crate::domain::repositories::{NoteLikeRepository, NoteRepository};
 use axum::http::StatusCode;
 
 pub async fn handle<T: NoteRepository + NoteLikeRepository>(
-    like_data: crate::app::object_receivers::activity_pub::inbox::types::UndoLikeActivityData,
+    like_data: UndoLikeActivityData,
     username: &str,
     inbox_owner: &User,
     storage: &T,

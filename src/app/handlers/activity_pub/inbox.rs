@@ -7,12 +7,16 @@ mod undo;
 
 use crate::app::state::AppState;
 use crate::app::types::InboxActivity;
-use crate::{app::object_receivers, domain::repositories::UserRepository};
+use crate::domain::repositories::UserRepository;
 use axum::{
     Json,
     extract::{Path, State},
     http::StatusCode,
 };
+
+pub fn endpoint_uri_template() -> &'static str {
+    "/users/{username}/inbox"
+}
 
 pub async fn post(
     Path(username): Path<String>,
@@ -40,39 +44,32 @@ pub async fn post(
         InboxActivity::Announce(announce) => {
             announce::handle(announce, &base_url, &username, &inbox_owner, storage).await
         }
-        InboxActivity::Undo(undo) => {
-            match object_receivers::activity_pub::inbox::undo::handle_undo(
-                undo, &base_url, &username,
-            )
-            .await
-            {
-                Ok(data) => {
-                    use object_receivers::activity_pub::inbox::types::UndoActivityData;
+        InboxActivity::Undo(undo) => match undo::parse_undo(undo, &base_url, &username) {
+            Ok(data) => {
+                use undo::UndoActivityData;
 
-                    match data {
-                        UndoActivityData::Follow(follow_data) => {
-                            undo::follow::handle(follow_data, &username, &inbox_owner, storage)
-                                .await
-                        }
-                        UndoActivityData::Like(like_data) => {
-                            undo::like::handle(like_data, &username, &inbox_owner, storage).await
-                        }
-                        UndoActivityData::Announce(announce_data) => {
-                            undo::announce::handle(announce_data, &username, &inbox_owner, storage)
-                                .await
-                        }
-                        UndoActivityData::ActivityIdOnly {
-                            actor_id,
-                            activity_id,
-                        } => undo::activity_id_only::handle(actor_id, activity_id, storage).await,
+                match data {
+                    UndoActivityData::Follow(follow_data) => {
+                        undo::follow::handle(follow_data, &username, &inbox_owner, storage).await
                     }
-                }
-                Err(e) => {
-                    eprintln!("Failed to handle Undo activity: {}", e);
-                    Err(StatusCode::BAD_REQUEST)
+                    UndoActivityData::Like(like_data) => {
+                        undo::like::handle(like_data, &username, &inbox_owner, storage).await
+                    }
+                    UndoActivityData::Announce(announce_data) => {
+                        undo::announce::handle(announce_data, &username, &inbox_owner, storage)
+                            .await
+                    }
+                    UndoActivityData::ActivityIdOnly {
+                        actor_id,
+                        activity_id,
+                    } => undo::activity_id_only::handle(actor_id, activity_id, storage).await,
                 }
             }
-        }
+            Err(err) => {
+                eprintln!("Failed to handle Undo activity: {}", err);
+                Err(StatusCode::BAD_REQUEST)
+            }
+        },
         InboxActivity::Create(create) => create::handle(create, &username).await,
         InboxActivity::Accept(accept) => accept::handle(accept, &username).await,
     }
