@@ -1,28 +1,26 @@
 use crate::domain::repositories::{FollowRepository, NoteAnnounceRepository, NoteLikeRepository};
 use axum::http::StatusCode;
 
-pub async fn handle(
+pub async fn handle<T: FollowRepository + NoteLikeRepository + NoteAnnounceRepository>(
     actor_id: String,
     activity_id: String,
-    follow_repository: &dyn FollowRepository,
-    like_repository: &dyn NoteLikeRepository,
-    announce_repository: &dyn NoteAnnounceRepository,
+    storage: &T,
 ) -> Result<StatusCode, StatusCode> {
-    let removed = follow_repository
+    let removed = storage
         .remove_follow_by_activity_id(&activity_id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if removed > 0 {
         return Ok(StatusCode::ACCEPTED);
     }
-    let removed = like_repository
+    let removed = storage
         .remove_like_by_activity_id(&activity_id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     if removed > 0 {
         return Ok(StatusCode::ACCEPTED);
     }
-    let removed = announce_repository
+    let removed = storage
         .remove_announce_by_activity_id(&activity_id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;

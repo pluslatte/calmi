@@ -4,13 +4,12 @@ use crate::domain::repositories::{NoteLikeRepository, NoteRepository};
 use axum::http::StatusCode;
 use calmi_activity_streams::types::object::like::Like;
 
-pub async fn handle(
+pub async fn handle<T: NoteRepository + NoteLikeRepository>(
     like: Like,
     base_url: &str,
     username: &str,
     inbox_owner: &User,
-    note_repository: &dyn NoteRepository,
-    like_repository: &dyn NoteLikeRepository,
+    storage: &T,
 ) -> Result<StatusCode, StatusCode> {
     match object_receivers::activity_pub::inbox::handle_like(like, base_url).await {
         Ok(data) => {
@@ -22,7 +21,7 @@ pub async fn handle(
                 return Err(StatusCode::BAD_REQUEST);
             }
 
-            let note = match note_repository
+            let note = match storage
                 .find_note_by_id(data.target.note_id)
                 .await
                 .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
@@ -42,7 +41,7 @@ pub async fn handle(
                 return Err(StatusCode::BAD_REQUEST);
             }
 
-            if let Err(err) = like_repository
+            if let Err(err) = storage
                 .add_like(note.id, &data.actor_id, &data.activity_id)
                 .await
             {

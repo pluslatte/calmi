@@ -5,12 +5,9 @@ mod follow;
 mod like;
 mod undo;
 
-use crate::app::object_receivers;
 use crate::app::state::AppState;
 use crate::app::types::InboxActivity;
-use crate::domain::repositories::{
-    FollowRepository, NoteAnnounceRepository, NoteLikeRepository, NoteRepository, UserRepository,
-};
+use crate::{app::object_receivers, domain::repositories::UserRepository};
 use axum::{
     Json,
     extract::{Path, State},
@@ -23,14 +20,8 @@ pub async fn post(
     Json(activity): Json<InboxActivity>,
 ) -> Result<StatusCode, StatusCode> {
     let storage = &state.storage;
-    let user_repository: &dyn UserRepository = storage;
-    let note_repository: &dyn NoteRepository = storage;
-    let follow_repository: &dyn FollowRepository = storage;
-    let like_repository: &dyn NoteLikeRepository = storage;
-    let announce_repository: &dyn NoteAnnounceRepository = storage;
 
-    let inbox_owner = user_repository
-        .find_user_by_username(&username)
+    let inbox_owner = UserRepository::find_user_by_username(storage, &username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
@@ -41,36 +32,13 @@ pub async fn post(
 
     match activity {
         InboxActivity::Follow(follow) => {
-            follow::handle(
-                follow,
-                &base_url,
-                &username,
-                &inbox_owner,
-                follow_repository,
-            )
-            .await
+            follow::handle(follow, &base_url, &username, &inbox_owner, storage).await
         }
         InboxActivity::Like(like) => {
-            like::handle(
-                like,
-                &base_url,
-                &username,
-                &inbox_owner,
-                note_repository,
-                like_repository,
-            )
-            .await
+            like::handle(like, &base_url, &username, &inbox_owner, storage).await
         }
         InboxActivity::Announce(announce) => {
-            announce::handle(
-                announce,
-                &base_url,
-                &username,
-                &inbox_owner,
-                note_repository,
-                announce_repository,
-            )
-            .await
+            announce::handle(announce, &base_url, &username, &inbox_owner, storage).await
         }
         InboxActivity::Undo(undo) => {
             match object_receivers::activity_pub::inbox::handle_undo(undo, &base_url, &username)
@@ -81,47 +49,20 @@ pub async fn post(
 
                     match data {
                         UndoActivityData::Follow(follow_data) => {
-                            undo::follow::handle(
-                                follow_data,
-                                &username,
-                                &inbox_owner,
-                                follow_repository,
-                            )
-                            .await
+                            undo::follow::handle(follow_data, &username, &inbox_owner, storage)
+                                .await
                         }
                         UndoActivityData::Like(like_data) => {
-                            undo::like::handle(
-                                like_data,
-                                &username,
-                                &inbox_owner,
-                                note_repository,
-                                like_repository,
-                            )
-                            .await
+                            undo::like::handle(like_data, &username, &inbox_owner, storage).await
                         }
                         UndoActivityData::Announce(announce_data) => {
-                            undo::announce::handle(
-                                announce_data,
-                                &username,
-                                &inbox_owner,
-                                note_repository,
-                                announce_repository,
-                            )
-                            .await
+                            undo::announce::handle(announce_data, &username, &inbox_owner, storage)
+                                .await
                         }
                         UndoActivityData::ActivityIdOnly {
                             actor_id,
                             activity_id,
-                        } => {
-                            undo::activity_id_only::handle(
-                                actor_id,
-                                activity_id,
-                                follow_repository,
-                                like_repository,
-                                announce_repository,
-                            )
-                            .await
-                        }
+                        } => undo::activity_id_only::handle(actor_id, activity_id, storage).await,
                     }
                 }
                 Err(e) => {

@@ -28,10 +28,8 @@ async fn test_inbox_follow_is_persisted_and_undo_removes_it() {
     follow_response.assert_status(StatusCode::ACCEPTED);
 
     let storage = PostgresStorage::new(db.clone());
-    let follow_repo: &dyn FollowRepository = &storage;
 
-    let followers = follow_repo
-        .list_followers(user_id)
+    let followers = FollowRepository::list_followers(&storage, user_id)
         .await
         .expect("Failed to list followers");
 
@@ -58,8 +56,7 @@ async fn test_inbox_follow_is_persisted_and_undo_removes_it() {
     let undo_response = server.post("/users/alice/inbox").json(&undo_activity).await;
     undo_response.assert_status(StatusCode::ACCEPTED);
 
-    let followers_after = follow_repo
-        .list_followers(user_id)
+    let followers_after = FollowRepository::list_followers(&storage, user_id)
         .await
         .expect("Failed to list followers");
 
@@ -87,10 +84,8 @@ async fn test_inbox_like_and_undo_remove_reaction() {
     like_response.assert_status(StatusCode::ACCEPTED);
 
     let storage = PostgresStorage::new(db.clone());
-    let like_repo: &dyn NoteLikeRepository = &storage;
 
-    let likes = like_repo
-        .list_likes(note_id)
+    let likes = NoteLikeRepository::list_likes(&storage, note_id)
         .await
         .expect("Failed to list likes");
     assert_eq!(likes.len(), 1);
@@ -113,8 +108,7 @@ async fn test_inbox_like_and_undo_remove_reaction() {
     let undo_like_response = server.post("/users/alice/inbox").json(&undo_like).await;
     undo_like_response.assert_status(StatusCode::ACCEPTED);
 
-    let likes_after = like_repo
-        .list_likes(note_id)
+    let likes_after = NoteLikeRepository::list_likes(&storage, note_id)
         .await
         .expect("Failed to list likes after undo");
     assert!(likes_after.is_empty());
@@ -143,10 +137,8 @@ async fn test_inbox_announce_is_persisted() {
     announce_response.assert_status(StatusCode::ACCEPTED);
 
     let storage = PostgresStorage::new(db.clone());
-    let announce_repo: &dyn NoteAnnounceRepository = &storage;
 
-    let announces = announce_repo
-        .list_announces(note_id)
+    let announces = NoteAnnounceRepository::list_announces(&storage, note_id)
         .await
         .expect("Failed to list announces");
 
@@ -196,10 +188,8 @@ async fn test_inbox_undo_activity_id_only_removes_like() {
         .assert_status(StatusCode::ACCEPTED);
 
     let storage = PostgresStorage::new(db.clone());
-    let like_repo: &dyn NoteLikeRepository = &storage;
 
-    let likes = like_repo
-        .list_likes(note_id)
+    let likes = NoteLikeRepository::list_likes(&storage, note_id)
         .await
         .expect("Failed to list likes");
     assert!(likes.is_empty());

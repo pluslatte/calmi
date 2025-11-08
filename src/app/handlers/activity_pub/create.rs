@@ -11,16 +11,12 @@ pub async fn get(
     Path((_, id)): Path<(String, i64)>,
     State(state): State<AppState>,
 ) -> Result<Response, StatusCode> {
-    let note_repository: &dyn NoteRepository = &state.storage;
-    let note = note_repository
-        .find_note_by_id(id)
+    let note = NoteRepository::find_note_by_id(&state.storage, id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
-    let user_repository: &dyn UserRepository = &state.storage;
-    let author = user_repository
-        .find_user_by_id(note.author_id)
+    let author = UserRepository::find_user_by_id(&state.storage, note.author_id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;

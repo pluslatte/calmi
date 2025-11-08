@@ -4,12 +4,12 @@ use crate::domain::repositories::FollowRepository;
 use axum::http::StatusCode;
 use calmi_activity_streams::types::object::follow::Follow;
 
-pub async fn handle(
+pub async fn handle<T: FollowRepository>(
     follow: Follow,
     base_url: &str,
     username: &str,
     inbox_owner: &User,
-    follow_repository: &dyn FollowRepository,
+    storage: &T,
 ) -> Result<StatusCode, StatusCode> {
     match object_receivers::activity_pub::inbox::handle_follow(follow, base_url, username).await {
         Ok(data) => {
@@ -21,7 +21,7 @@ pub async fn handle(
                 return Err(StatusCode::BAD_REQUEST);
             }
 
-            if let Err(err) = follow_repository
+            if let Err(err) = storage
                 .add_follow(inbox_owner.id, &data.follower_id, &data.activity_id)
                 .await
             {

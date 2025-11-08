@@ -2,12 +2,11 @@ use crate::domain::entities::user::Model as User;
 use crate::domain::repositories::{NoteLikeRepository, NoteRepository};
 use axum::http::StatusCode;
 
-pub async fn handle(
+pub async fn handle<T: NoteRepository + NoteLikeRepository>(
     like_data: crate::app::object_receivers::activity_pub::inbox::UndoLikeActivityData,
     username: &str,
     inbox_owner: &User,
-    note_repository: &dyn NoteRepository,
-    like_repository: &dyn NoteLikeRepository,
+    storage: &T,
 ) -> Result<StatusCode, StatusCode> {
     if like_data.target.author_username != username {
         eprintln!(
@@ -17,7 +16,7 @@ pub async fn handle(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    if let Some(note) = note_repository
+    if let Some(note) = storage
         .find_note_by_id(like_data.target.note_id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
@@ -32,14 +31,14 @@ pub async fn handle(
 
         let mut removed = 0;
         if let Some(activity_id) = like_data.activity_id.as_deref() {
-            removed = like_repository
+            removed = storage
                 .remove_like_by_activity_id(activity_id)
                 .await
                 .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
         }
 
         if removed == 0 {
-            like_repository
+            storage
                 .remove_like(note.id, &like_data.actor_id)
                 .await
                 .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
