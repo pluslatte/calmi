@@ -16,6 +16,34 @@ pub fn endpoint_uri_template() -> &'static str {
     "/users/{username}/inbox"
 }
 
+fn extract_actor_id(
+    actor: &calmi_activity_streams::types::properties::Actor,
+) -> Result<String, ActivityHandlerError> {
+    use calmi_activity_streams::types::enums::{ObjectOrLinkOrStringUrl, SingleOrMultiple};
+
+    match actor {
+        SingleOrMultiple::Single(obj_or_link) => match obj_or_link {
+            ObjectOrLinkOrStringUrl::Str(id) => Ok(id.clone()),
+            ObjectOrLinkOrStringUrl::Object(obj) => match obj {
+                calmi_activity_streams::types::enums::ObjectBased::Person(person) => person
+                    .id
+                    .clone()
+                    .ok_or_else(|| ActivityHandlerError("Person has no id".to_string())),
+                _ => Err(ActivityHandlerError(
+                    "Unsupported actor object type".to_string(),
+                )),
+            },
+            ObjectOrLinkOrStringUrl::Link(link) => link
+                .href
+                .clone()
+                .ok_or_else(|| ActivityHandlerError("Link has no href".to_string())),
+        },
+        SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError(
+            "Multiple actors not supported".to_string(),
+        )),
+    }
+}
+
 fn extract_object_info(
     object: &calmi_activity_streams::types::properties::ObjectProperty,
 ) -> Result<(String, Option<String>), ActivityHandlerError> {

@@ -1,7 +1,7 @@
 use calmi_activity_streams::types::object::announce::Announce;
 
 use crate::app::object_receivers::activity_pub::inbox::{
-    extract_note_reference,
+    extract_actor_id, extract_note_reference,
     types::{ActivityHandlerError, AnnounceActivityData},
 };
 
@@ -14,9 +14,7 @@ pub async fn handle_announce(
         .as_ref()
         .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
         .as_ref();
-    let actor_id = actor.extract_id().map_err(|e| {
-        ActivityHandlerError(format!("Failed to extract actor id in Announce: {}", e))
-    })?;
+    let actor_id = extract_actor_id(actor)?;
 
     let object = announce
         .object

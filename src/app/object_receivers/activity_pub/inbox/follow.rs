@@ -1,7 +1,7 @@
 use calmi_activity_streams::types::object::follow::Follow;
 
 use crate::app::object_receivers::activity_pub::inbox::{
-    extract_follow_target_username,
+    extract_actor_id, extract_follow_target_username,
     types::{ActivityHandlerError, FollowActivityData},
 };
 
@@ -16,9 +16,7 @@ pub async fn handle_follow(
         .ok_or_else(|| ActivityHandlerError("Missing actor".to_string()))?
         .as_ref();
 
-    let actor_id = actor.extract_id().map_err(|e| {
-        ActivityHandlerError(format!("Failed to extract actor id in Follow: {}", e))
-    })?;
+    let actor_id = extract_actor_id(actor)?;
 
     let followee_username = extract_follow_target_username(&follow, base_url, target_username)?;
     if let Some(activity_id) = follow.id {
