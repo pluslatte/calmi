@@ -1,5 +1,5 @@
-use crate::domain::entities::user::Model as User;
-use crate::domain::repositories::{NoteLikeRepository, NoteRepository};
+use crate::domain::entities::users::Model as User;
+use crate::domain::repositories::{NoteLikesRepository, NotesRepository};
 use axum::http::StatusCode;
 use calmi_activity_streams::types::enums::{
     ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple,
@@ -7,7 +7,7 @@ use calmi_activity_streams::types::enums::{
 use calmi_activity_streams::types::object::like::Like;
 use calmi_activity_streams::types::properties::{Actor, ObjectProperty};
 
-pub async fn handle<T: NoteRepository + NoteLikeRepository>(
+pub async fn handle<T: NotesRepository + NoteLikesRepository>(
     like: Like,
     base_url: &str,
     username: &str,

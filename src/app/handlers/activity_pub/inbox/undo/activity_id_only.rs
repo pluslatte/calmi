@@ -1,7 +1,9 @@
-use crate::domain::repositories::{FollowRepository, NoteAnnounceRepository, NoteLikeRepository};
+use crate::domain::repositories::{
+    FollowsRepository, NoteAnnouncesRepository, NoteLikesRepository,
+};
 use axum::http::StatusCode;
 
-pub async fn handle<T: FollowRepository + NoteLikeRepository + NoteAnnounceRepository>(
+pub async fn handle<T: FollowsRepository + NoteLikesRepository + NoteAnnouncesRepository>(
     actor_id: String,
     activity_id: String,
     storage: &T,

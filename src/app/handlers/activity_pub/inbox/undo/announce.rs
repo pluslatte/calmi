@@ -1,9 +1,9 @@
 use super::UndoAnnounceActivityData;
-use crate::domain::entities::user::Model as User;
-use crate::domain::repositories::{NoteAnnounceRepository, NoteRepository};
+use crate::domain::entities::users::Model as User;
+use crate::domain::repositories::{NoteAnnouncesRepository, NotesRepository};
 use axum::http::StatusCode;
 
-pub async fn handle<T: NoteRepository + NoteAnnounceRepository>(
+pub async fn handle<T: NotesRepository + NoteAnnouncesRepository>(
     announce_data: UndoAnnounceActivityData,
     username: &str,
     inbox_owner: &User,

@@ -3,7 +3,7 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "note_announce")]
+#[sea_orm(table_name = "note_likes")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
@@ -18,18 +18,18 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::note::Entity",
+        belongs_to = "super::notes::Entity",
         from = "Column::NoteId",
-        to = "super::note::Column::Id",
+        to = "super::notes::Column::Id",
         on_update = "NoAction",
         on_delete = "Cascade"
     )]
-    Note,
+    Notes,
 }
 
-impl Related<super::note::Entity> for Entity {
+impl Related<super::notes::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Note.def()
+        Relation::Notes.def()
     }
 }
 

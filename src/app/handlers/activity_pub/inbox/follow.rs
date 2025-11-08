@@ -1,5 +1,5 @@
-use crate::domain::entities::user::Model as User;
-use crate::domain::repositories::FollowRepository;
+use crate::domain::entities::users::Model as User;
+use crate::domain::repositories::FollowsRepository;
 use axum::http::StatusCode;
 use calmi_activity_streams::types::enums::{
     ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple,
@@ -7,7 +7,7 @@ use calmi_activity_streams::types::enums::{
 use calmi_activity_streams::types::object::follow::Follow;
 use calmi_activity_streams::types::properties::{Actor, ObjectProperty};
 
-pub async fn handle<T: FollowRepository>(
+pub async fn handle<T: FollowsRepository>(
     follow: Follow,
     base_url: &str,
     username: &str,

@@ -1,5 +1,5 @@
 use crate::app::{object_builders::webfinger::build_webfinger_response, state::AppState};
-use crate::domain::repositories::user::UserRepository;
+use crate::domain::repositories::users::UsersRepository;
 use axum::{
     Json,
     extract::{Query, State},

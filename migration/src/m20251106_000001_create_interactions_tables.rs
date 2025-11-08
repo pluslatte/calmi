@@ -9,22 +9,22 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Follow::Table)
+                    .table(Follows::Table)
                     .if_not_exists()
-                    .col(big_integer(Follow::Id).auto_increment().primary_key())
-                    .col(big_integer(Follow::UserId).not_null())
-                    .col(text(Follow::Actor).not_null())
-                    .col(string_len(Follow::ActivityId, 2048))
+                    .col(big_integer(Follows::Id).auto_increment().primary_key())
+                    .col(big_integer(Follows::UserId).not_null())
+                    .col(text(Follows::Actor).not_null())
+                    .col(string_len(Follows::ActivityId, 2048))
                     .col(
-                        date_time(Follow::CreatedAt)
+                        date_time(Follows::CreatedAt)
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk_follow_user_id")
-                            .from(Follow::Table, Follow::UserId)
-                            .to(User::Table, User::Id)
+                            .name("fk_follows_user_id")
+                            .from(Follows::Table, Follows::UserId)
+                            .to(Users::Table, Users::Id)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
@@ -34,10 +34,10 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("idx_follow_user_actor")
-                    .table(Follow::Table)
-                    .col(Follow::UserId)
-                    .col(Follow::Actor)
+                    .name("idx_follows_user_actor")
+                    .table(Follows::Table)
+                    .col(Follows::UserId)
+                    .col(Follows::Actor)
                     .unique()
                     .to_owned(),
             )
@@ -46,22 +46,22 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(NoteLike::Table)
+                    .table(NoteLikes::Table)
                     .if_not_exists()
-                    .col(big_integer(NoteLike::Id).auto_increment().primary_key())
-                    .col(big_integer(NoteLike::NoteId).not_null())
-                    .col(text(NoteLike::Actor).not_null())
-                    .col(string_len(NoteLike::ActivityId, 2048))
+                    .col(big_integer(NoteLikes::Id).auto_increment().primary_key())
+                    .col(big_integer(NoteLikes::NoteId).not_null())
+                    .col(text(NoteLikes::Actor).not_null())
+                    .col(string_len(NoteLikes::ActivityId, 2048))
                     .col(
-                        date_time(NoteLike::CreatedAt)
+                        date_time(NoteLikes::CreatedAt)
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk_note_like_note_id")
-                            .from(NoteLike::Table, NoteLike::NoteId)
-                            .to(Note::Table, Note::Id)
+                            .name("fk_note_likes_note_id")
+                            .from(NoteLikes::Table, NoteLikes::NoteId)
+                            .to(Notes::Table, Notes::Id)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
@@ -71,10 +71,10 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("idx_note_like_note_actor")
-                    .table(NoteLike::Table)
-                    .col(NoteLike::NoteId)
-                    .col(NoteLike::Actor)
+                    .name("idx_note_likes_note_actor")
+                    .table(NoteLikes::Table)
+                    .col(NoteLikes::NoteId)
+                    .col(NoteLikes::Actor)
                     .unique()
                     .to_owned(),
             )
@@ -83,22 +83,26 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(NoteAnnounce::Table)
+                    .table(NoteAnnounces::Table)
                     .if_not_exists()
-                    .col(big_integer(NoteAnnounce::Id).auto_increment().primary_key())
-                    .col(big_integer(NoteAnnounce::NoteId).not_null())
-                    .col(text(NoteAnnounce::Actor).not_null())
-                    .col(string_len(NoteAnnounce::ActivityId, 2048))
                     .col(
-                        date_time(NoteAnnounce::CreatedAt)
+                        big_integer(NoteAnnounces::Id)
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(big_integer(NoteAnnounces::NoteId).not_null())
+                    .col(text(NoteAnnounces::Actor).not_null())
+                    .col(string_len(NoteAnnounces::ActivityId, 2048))
+                    .col(
+                        date_time(NoteAnnounces::CreatedAt)
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk_note_announce_note_id")
-                            .from(NoteAnnounce::Table, NoteAnnounce::NoteId)
-                            .to(Note::Table, Note::Id)
+                            .name("fk_note_announces_note_id")
+                            .from(NoteAnnounces::Table, NoteAnnounces::NoteId)
+                            .to(Notes::Table, Notes::Id)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
@@ -108,10 +112,10 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("idx_note_announce_note_actor")
-                    .table(NoteAnnounce::Table)
-                    .col(NoteAnnounce::NoteId)
-                    .col(NoteAnnounce::Actor)
+                    .name("idx_note_announces_note_actor")
+                    .table(NoteAnnounces::Table)
+                    .col(NoteAnnounces::NoteId)
+                    .col(NoteAnnounces::Actor)
                     .unique()
                     .to_owned(),
             )
@@ -120,9 +124,9 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("idx_follow_activity_id")
-                    .table(Follow::Table)
-                    .col(Follow::ActivityId)
+                    .name("idx_follows_activity_id")
+                    .table(Follows::Table)
+                    .col(Follows::ActivityId)
                     .unique()
                     .to_owned(),
             )
@@ -131,9 +135,9 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("idx_note_like_activity_id")
-                    .table(NoteLike::Table)
-                    .col(NoteLike::ActivityId)
+                    .name("idx_note_likes_activity_id")
+                    .table(NoteLikes::Table)
+                    .col(NoteLikes::ActivityId)
                     .unique()
                     .to_owned(),
             )
@@ -142,9 +146,9 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("idx_note_announce_activity_id")
-                    .table(NoteAnnounce::Table)
-                    .col(NoteAnnounce::ActivityId)
+                    .name("idx_note_announces_activity_id")
+                    .table(NoteAnnounces::Table)
+                    .col(NoteAnnounces::ActivityId)
                     .unique()
                     .to_owned(),
             )
@@ -153,19 +157,19 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(NoteAnnounce::Table).to_owned())
+            .drop_table(Table::drop().table(NoteAnnounces::Table).to_owned())
             .await?;
         manager
-            .drop_table(Table::drop().table(NoteLike::Table).to_owned())
+            .drop_table(Table::drop().table(NoteLikes::Table).to_owned())
             .await?;
         manager
-            .drop_table(Table::drop().table(Follow::Table).to_owned())
+            .drop_table(Table::drop().table(Follows::Table).to_owned())
             .await
     }
 }
 
 #[derive(DeriveIden)]
-enum Follow {
+enum Follows {
     Table,
     Id,
     UserId,
@@ -175,7 +179,7 @@ enum Follow {
 }
 
 #[derive(DeriveIden)]
-enum NoteLike {
+enum NoteLikes {
     Table,
     Id,
     NoteId,
@@ -185,7 +189,7 @@ enum NoteLike {
 }
 
 #[derive(DeriveIden)]
-enum NoteAnnounce {
+enum NoteAnnounces {
     Table,
     Id,
     NoteId,
@@ -195,13 +199,13 @@ enum NoteAnnounce {
 }
 
 #[derive(DeriveIden)]
-enum User {
+enum Users {
     Table,
     Id,
 }
 
 #[derive(DeriveIden)]
-enum Note {
+enum Notes {
     Table,
     Id,
 }

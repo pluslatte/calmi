@@ -1,5 +1,5 @@
-use crate::domain::entities::user::Model as User;
-use crate::domain::repositories::{NoteAnnounceRepository, NoteRepository};
+use crate::domain::entities::users::Model as User;
+use crate::domain::repositories::{NoteAnnouncesRepository, NotesRepository};
 use axum::http::StatusCode;
 use calmi_activity_streams::types::enums::{
     ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple,
@@ -7,7 +7,7 @@ use calmi_activity_streams::types::enums::{
 use calmi_activity_streams::types::object::announce::Announce;
 use calmi_activity_streams::types::properties::{Actor, ObjectProperty};
 
-pub async fn handle<T: NoteRepository + NoteAnnounceRepository>(
+pub async fn handle<T: NotesRepository + NoteAnnouncesRepository>(
     announce: Announce,
     base_url: &str,
     username: &str,

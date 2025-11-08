@@ -1,6 +1,6 @@
 use crate::app::object_builders::activity_pub::person::build_person;
 use crate::app::state::AppState;
-use crate::domain::repositories::user::UserRepository;
+use crate::domain::repositories::users::UsersRepository;
 use axum::{
     body::Body,
     extract::{Path, State},

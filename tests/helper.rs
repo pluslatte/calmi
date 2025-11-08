@@ -44,7 +44,7 @@ pub fn create_test_server(db: DatabaseConnection) -> TestServer {
 }
 
 pub async fn insert_user(db: &DatabaseConnection, username: &str, display_name: &str) -> i64 {
-    use calmi::domain::repositories::UserRepository;
+    use calmi::domain::repositories::UsersRepository;
     let storage = calmi::storage::postgres::PostgresStorage::new(db.clone());
     let user = storage
         .add_user(username, display_name)
@@ -60,7 +60,7 @@ pub async fn insert_note(
     author_id: i64,
     to: Vec<String>,
 ) -> i64 {
-    use calmi::domain::repositories::NoteRepository;
+    use calmi::domain::repositories::NotesRepository;
     let storage = calmi::storage::postgres::PostgresStorage::new(db.clone());
     let note = storage
         .add_note(content, author_id, to)

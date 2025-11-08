@@ -1,6 +1,6 @@
 use crate::app::object_builders::activity_pub::outbox::build_outbox;
 use crate::app::state::AppState;
-use crate::domain::repositories::{note::NoteRepository, user::UserRepository};
+use crate::domain::repositories::{notes::NotesRepository, users::UsersRepository};
 use axum::{
     Json,
     extract::{Path, State},
@@ -14,11 +14,11 @@ pub async fn get(
 ) -> Result<Json<OrderedCollection>, StatusCode> {
     let storage = &state.storage;
 
-    let user = UserRepository::find_user_by_username(storage, &username)
+    let user = UsersRepository::find_user_by_username(storage, &username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
-    let notes = NoteRepository::find_note_by_author_id(storage, user.id, 20, 0)
+    let notes = NotesRepository::find_note_by_author_id(storage, user.id, 20, 0)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

@@ -11,8 +11,8 @@ use calmi_activity_streams::types::{
 /// This server implementation uses Create activities as the items in the outbox.
 pub fn build_outbox(
     config: &Config,
-    author: &entities::user::Model,
-    notes: &[entities::note::Model],
+    author: &entities::users::Model,
+    notes: &[entities::notes::Model],
 ) -> OrderedCollection {
     let activities: Vec<Create> = notes
         .iter()
@@ -41,6 +41,6 @@ pub fn endpoint_uri_template() -> &'static str {
     "/users/{username}/outbox"
 }
 
-fn endpoint_uri(base_url: &str, author: &entities::user::Model) -> String {
+fn endpoint_uri(base_url: &str, author: &entities::users::Model) -> String {
     format!("{}/users/{}/outbox", base_url, author.username)
 }

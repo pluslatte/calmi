@@ -1,11 +1,11 @@
-pub mod follow;
-pub mod note;
-pub mod note_announce;
-pub mod note_like;
-pub mod user;
+pub mod follows;
+pub mod note_announces;
+pub mod note_likes;
+pub mod notes;
+pub mod users;
 
-pub use follow::FollowRepository;
-pub use note::NoteRepository;
-pub use note_announce::NoteAnnounceRepository;
-pub use note_like::NoteLikeRepository;
-pub use user::UserRepository;
+pub use follows::FollowsRepository;
+pub use note_announces::NoteAnnouncesRepository;
+pub use note_likes::NoteLikesRepository;
+pub use notes::NotesRepository;
+pub use users::UsersRepository;

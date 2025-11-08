@@ -1,9 +1,9 @@
 use super::UndoLikeActivityData;
-use crate::domain::entities::user::Model as User;
-use crate::domain::repositories::{NoteLikeRepository, NoteRepository};
+use crate::domain::entities::users::Model as User;
+use crate::domain::repositories::{NoteLikesRepository, NotesRepository};
 use axum::http::StatusCode;
 
-pub async fn handle<T: NoteRepository + NoteLikeRepository>(
+pub async fn handle<T: NotesRepository + NoteLikesRepository>(
     like_data: UndoLikeActivityData,
     username: &str,
     inbox_owner: &User,

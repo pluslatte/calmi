@@ -7,7 +7,7 @@ mod undo;
 
 use crate::app::state::AppState;
 use crate::app::types::InboxActivity;
-use crate::domain::repositories::UserRepository;
+use crate::domain::repositories::UsersRepository;
 use axum::{
     Json,
     extract::{Path, State},
@@ -25,7 +25,7 @@ pub async fn post(
 ) -> Result<StatusCode, StatusCode> {
     let storage = &state.storage;
 
-    let inbox_owner = UserRepository::find_user_by_username(storage, &username)
+    let inbox_owner = UsersRepository::find_user_by_username(storage, &username)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;

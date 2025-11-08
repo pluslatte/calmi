@@ -1,7 +1,7 @@
 mod helper;
 
 use axum::http::StatusCode;
-use calmi::domain::repositories::{FollowRepository, NoteAnnounceRepository, NoteLikeRepository};
+use calmi::domain::repositories::{FollowsRepository, NoteAnnouncesRepository, NoteLikesRepository};
 use calmi::storage::postgres::PostgresStorage;
 use helper::{create_test_server, insert_note, insert_user, setup_db};
 use serde_json::json;
@@ -29,7 +29,7 @@ async fn test_inbox_follow_is_persisted_and_undo_removes_it() {
 
     let storage = PostgresStorage::new(db.clone());
 
-    let followers = FollowRepository::list_followers(&storage, user_id)
+    let followers = FollowsRepository::list_followers(&storage, user_id)
         .await
         .expect("Failed to list followers");
 
@@ -56,7 +56,7 @@ async fn test_inbox_follow_is_persisted_and_undo_removes_it() {
     let undo_response = server.post("/users/alice/inbox").json(&undo_activity).await;
     undo_response.assert_status(StatusCode::ACCEPTED);
 
-    let followers_after = FollowRepository::list_followers(&storage, user_id)
+    let followers_after = FollowsRepository::list_followers(&storage, user_id)
         .await
         .expect("Failed to list followers");
 
@@ -85,7 +85,7 @@ async fn test_inbox_like_and_undo_remove_reaction() {
 
     let storage = PostgresStorage::new(db.clone());
 
-    let likes = NoteLikeRepository::list_likes(&storage, note_id)
+    let likes = NoteLikesRepository::list_likes(&storage, note_id)
         .await
         .expect("Failed to list likes");
     assert_eq!(likes.len(), 1);
@@ -108,7 +108,7 @@ async fn test_inbox_like_and_undo_remove_reaction() {
     let undo_like_response = server.post("/users/alice/inbox").json(&undo_like).await;
     undo_like_response.assert_status(StatusCode::ACCEPTED);
 
-    let likes_after = NoteLikeRepository::list_likes(&storage, note_id)
+    let likes_after = NoteLikesRepository::list_likes(&storage, note_id)
         .await
         .expect("Failed to list likes after undo");
     assert!(likes_after.is_empty());
@@ -138,7 +138,7 @@ async fn test_inbox_announce_is_persisted() {
 
     let storage = PostgresStorage::new(db.clone());
 
-    let announces = NoteAnnounceRepository::list_announces(&storage, note_id)
+    let announces = NoteAnnouncesRepository::list_announces(&storage, note_id)
         .await
         .expect("Failed to list announces");
 
@@ -189,7 +189,7 @@ async fn test_inbox_undo_activity_id_only_removes_like() {
 
     let storage = PostgresStorage::new(db.clone());
 
-    let likes = NoteLikeRepository::list_likes(&storage, note_id)
+    let likes = NoteLikesRepository::list_likes(&storage, note_id)
         .await
         .expect("Failed to list likes");
     assert!(likes.is_empty());

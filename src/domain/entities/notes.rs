@@ -3,7 +3,7 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "note")]
+#[sea_orm(table_name = "notes")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
@@ -16,35 +16,35 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::note_announce::Entity")]
-    NoteAnnounce,
-    #[sea_orm(has_many = "super::note_like::Entity")]
-    NoteLike,
+    #[sea_orm(has_many = "super::note_announces::Entity")]
+    NoteAnnounces,
+    #[sea_orm(has_many = "super::note_likes::Entity")]
+    NoteLikes,
     #[sea_orm(
-        belongs_to = "super::user::Entity",
+        belongs_to = "super::users::Entity",
         from = "Column::AuthorId",
-        to = "super::user::Column::Id",
+        to = "super::users::Column::Id",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    User,
+    Users,
 }
 
-impl Related<super::note_announce::Entity> for Entity {
+impl Related<super::note_announces::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::NoteAnnounce.def()
+        Relation::NoteAnnounces.def()
     }
 }
 
-impl Related<super::note_like::Entity> for Entity {
+impl Related<super::note_likes::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::NoteLike.def()
+        Relation::NoteLikes.def()
     }
 }
 
-impl Related<super::user::Entity> for Entity {
+impl Related<super::users::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::User.def()
+        Relation::Users.def()
     }
 }
 
