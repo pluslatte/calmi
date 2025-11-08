@@ -7,10 +7,8 @@ pub mod types;
 pub mod undo;
 
 use crate::app::object_receivers::activity_pub::inbox::types::{
-    ActivityHandlerError, NoteReference, UndoActivityData, UndoAnnounceActivityData,
-    UndoFollowActivityData, UndoLikeActivityData,
+    ActivityHandlerError, NoteReference,
 };
-use calmi_activity_streams::types::object::follow::Follow;
 
 pub fn endpoint_uri_template() -> &'static str {
     "/users/{username}/inbox"
@@ -70,97 +68,6 @@ fn extract_object_info(
     }
 }
 
-fn resolve_username_from_object_property(
-    object: &calmi_activity_streams::types::properties::ObjectProperty,
-    base_url: &str,
-    expected_username: &str,
-) -> Result<String, ActivityHandlerError> {
-    use calmi_activity_streams::types::enums::{
-        ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple,
-    };
-
-    match object {
-        SingleOrMultiple::Single(value) => match value {
-            ObjectOrLinkOrStringUrl::Str(s) => {
-                parse_username_reference(s, base_url, expected_username)
-            }
-            ObjectOrLinkOrStringUrl::Link(link) => {
-                let href = link.href.clone().ok_or_else(|| {
-                    ActivityHandlerError("Follow object link missing href".to_string())
-                })?;
-                parse_username_reference(&href, base_url, expected_username)
-            }
-            ObjectOrLinkOrStringUrl::Object(obj) => match obj {
-                ObjectBased::Person(person) => {
-                    if let Some(id) = &person.id {
-                        parse_username_reference(id, base_url, expected_username)
-                    } else {
-                        Err(ActivityHandlerError(
-                            "Person object missing id for follow".to_string(),
-                        ))
-                    }
-                }
-                _ => Err(ActivityHandlerError(
-                    "Unsupported follow object reference".to_string(),
-                )),
-            },
-        },
-        SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError(
-            "Multiple follow targets are not supported".to_string(),
-        )),
-    }
-}
-
-fn parse_username_reference(
-    reference: &str,
-    base_url: &str,
-    expected_username: &str,
-) -> Result<String, ActivityHandlerError> {
-    if let Some(username) = parse_username_from_acct(reference) {
-        if username == expected_username {
-            return Ok(username);
-        }
-        return Err(ActivityHandlerError(format!(
-            "Follow target username mismatch: expected {}, found {}",
-            expected_username, username
-        )));
-    }
-
-    if let Some(username) = parse_username_from_user_url(reference, base_url) {
-        if username == expected_username {
-            return Ok(username);
-        }
-        return Err(ActivityHandlerError(format!(
-            "Follow target username mismatch: expected {}, found {}",
-            expected_username, username
-        )));
-    }
-
-    if reference == expected_username {
-        return Ok(reference.to_string());
-    }
-
-    Err(ActivityHandlerError(format!(
-        "Unsupported follow object reference: {}",
-        reference
-    )))
-}
-
-fn parse_username_from_acct(reference: &str) -> Option<String> {
-    reference
-        .strip_prefix("acct:")
-        .and_then(|acct| acct.split('@').next())
-        .map(|username| username.to_string())
-}
-
-fn parse_username_from_user_url(reference: &str, base_url: &str) -> Option<String> {
-    let expected_prefix = format!("{}/users/", base_url.trim_end_matches('/'));
-    if let Some(rest) = reference.strip_prefix(&expected_prefix) {
-        return rest.split('/').next().map(|username| username.to_string());
-    }
-    None
-}
-
 fn extract_note_reference(
     object: &calmi_activity_streams::types::properties::ObjectProperty,
     base_url: &str,
@@ -217,18 +124,6 @@ fn extract_note_reference(
     parse_note_url(&url, base_url)
 }
 
-fn extract_follow_target_username(
-    follow: &Follow,
-    base_url: &str,
-    fallback_username: &str,
-) -> Result<String, ActivityHandlerError> {
-    if let Some(object) = follow.object.as_deref() {
-        resolve_username_from_object_property(object, base_url, fallback_username)
-    } else {
-        Ok(fallback_username.to_string())
-    }
-}
-
 fn parse_note_url(url: &str, base_url: &str) -> Result<NoteReference, ActivityHandlerError> {
     let normalized_base = base_url.trim_end_matches('/');
     let expected_prefix = format!("{}/users/", normalized_base);
@@ -260,133 +155,4 @@ fn parse_note_url(url: &str, base_url: &str) -> Result<NoteReference, ActivityHa
         author_username: username.to_string(),
         note_id,
     })
-}
-
-fn parse_undo_object(
-    object: calmi_activity_streams::types::properties::ObjectProperty,
-    base_url: &str,
-    target_username: &str,
-    actor_id: String,
-) -> Result<UndoActivityData, ActivityHandlerError> {
-    use calmi_activity_streams::types::enums::{
-        ObjectBased, ObjectOrLinkOrStringUrl, SingleOrMultiple,
-    };
-
-    match object {
-        SingleOrMultiple::Single(value) => match value {
-            ObjectOrLinkOrStringUrl::Str(id) => Ok(UndoActivityData::ActivityIdOnly {
-                actor_id,
-                activity_id: id,
-            }),
-            ObjectOrLinkOrStringUrl::Link(link) => {
-                let id = link
-                    .href
-                    .clone()
-                    .ok_or_else(|| ActivityHandlerError("Undo link missing href".to_string()))?;
-                Ok(UndoActivityData::ActivityIdOnly {
-                    actor_id,
-                    activity_id: id,
-                })
-            }
-            ObjectOrLinkOrStringUrl::Object(obj) => match obj {
-                ObjectBased::Follow(follow) => {
-                    let followee_username =
-                        extract_follow_target_username(&follow, base_url, target_username)?;
-                    Ok(UndoActivityData::Follow(UndoFollowActivityData {
-                        follower_id: actor_id,
-                        followee_username,
-                        activity_id: follow.id,
-                    }))
-                }
-                ObjectBased::Like(like) => {
-                    let object_prop = like.object.as_ref().ok_or_else(|| {
-                        ActivityHandlerError("Undo Like missing object".to_string())
-                    })?;
-                    let target = extract_note_reference(object_prop, base_url)?;
-                    Ok(UndoActivityData::Like(UndoLikeActivityData {
-                        actor_id,
-                        target,
-                        activity_id: like.id,
-                    }))
-                }
-                ObjectBased::Announce(announce) => {
-                    let object_prop = announce.object.as_ref().ok_or_else(|| {
-                        ActivityHandlerError("Undo Announce missing object".to_string())
-                    })?;
-                    let target = extract_note_reference(object_prop, base_url)?;
-                    Ok(UndoActivityData::Announce(UndoAnnounceActivityData {
-                        actor_id,
-                        target,
-                        activity_id: announce.id,
-                    }))
-                }
-                ObjectBased::Activity(activity) => {
-                    parse_activity_based_undo(activity, base_url, target_username, actor_id)
-                }
-                ObjectBased::Object(object) => {
-                    if let Some(id) = object.id.clone() {
-                        Ok(UndoActivityData::ActivityIdOnly {
-                            actor_id,
-                            activity_id: id,
-                        })
-                    } else {
-                        Err(ActivityHandlerError(
-                            "Undo embedded object missing id".to_string(),
-                        ))
-                    }
-                }
-                _ => Err(ActivityHandlerError(
-                    "Unsupported undo embedded object".to_string(),
-                )),
-            },
-        },
-        SingleOrMultiple::Multiple(_) => Err(ActivityHandlerError(
-            "Multiple undo objects are not supported".to_string(),
-        )),
-    }
-}
-
-fn parse_activity_based_undo(
-    activity: calmi_activity_streams::types::object::activity::Activity,
-    base_url: &str,
-    target_username: &str,
-    actor_id: String,
-) -> Result<UndoActivityData, ActivityHandlerError> {
-    let activity_type = activity
-        .r#type
-        .clone()
-        .ok_or_else(|| ActivityHandlerError("Activity missing type".to_string()))?;
-    match activity_type.as_str() {
-        "Follow" => Ok(UndoActivityData::Follow(UndoFollowActivityData {
-            follower_id: actor_id,
-            followee_username: target_username.to_string(),
-            activity_id: activity.id,
-        })),
-        "Like" => {
-            let target_object = activity
-                .object
-                .ok_or_else(|| ActivityHandlerError("Undo Like missing object".to_string()))?;
-            let target = extract_note_reference(target_object.as_ref(), base_url)?;
-            Ok(UndoActivityData::Like(UndoLikeActivityData {
-                actor_id,
-                target,
-                activity_id: activity.id,
-            }))
-        }
-        "Announce" => {
-            let target_object = activity
-                .object
-                .ok_or_else(|| ActivityHandlerError("Undo Announce missing object".to_string()))?;
-            let target = extract_note_reference(target_object.as_ref(), base_url)?;
-            Ok(UndoActivityData::Announce(UndoAnnounceActivityData {
-                actor_id,
-                target,
-                activity_id: activity.id,
-            }))
-        }
-        other => Err(ActivityHandlerError(format!(
-            "Unsupported undo activity type: {}",
-            other
-        ))),
-    }
 }
